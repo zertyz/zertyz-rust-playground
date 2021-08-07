@@ -1,0 +1,19 @@
+[package]
+name = "mmap-containers"
+version = "0.1.0"
+edition = "2018"
+default-run = "mmap-containers"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "mmap-containers"
+path = "src/mmap-containers.rs"
+
+[dependencies]
+
+mmap-storage = {version = "0.10", features = ["serializer", "bincode"]}
+bincode = {}
+
+memmap = "0.7"
+rkyv = "0.7"

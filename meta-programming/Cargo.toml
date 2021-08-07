@@ -1,0 +1,17 @@
+[package]
+name = "meta-programming"
+version = "0.1.0"
+edition = "2018"
+default-run = "meta-programming"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "meta-programming"
+path = "src/meta-programming.rs"
+
+[dependencies]
+num = "0.4"
+
+[features]
+dox = []
