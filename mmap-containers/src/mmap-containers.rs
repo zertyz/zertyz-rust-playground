@@ -5,6 +5,7 @@ fn main() {
 
  //   mmap_storage_spikes();
     mmap_rkyv_spikes()
+ //   rustbrake_mmap_spikes();
 }
 
 use mmap_storage::file;
@@ -62,6 +63,7 @@ fn mmap_storage_spikes() {
     // }).expect("To modify inplace?");
 
     eprintln!("mmapped hashmap has now {} entries -- and I won't sync nor close it before quitting", data.len());
+    data.insert("5".to_string(), "changed again".to_string());
 
     eprintln!("--> Conclusion: this crate may be cool for storing json, toml or even binary files... but it does not provide on-demand mmap load/save (std) containers");
     eprintln!("    (other crates to try are 'rkyv', 'flatdata', 'Flexbuffers', 'fst', 'vmap', 'rustbrake', 'tetsy-db', 'parity-db')")
@@ -150,4 +152,35 @@ fn mmap_rkyv_spikes() {
     eprintln!("  3) The CRUD functions go for the Archived data, then for the RAM data");
     eprintln!("  4) A little optimization, demonstrated here, may include a byte field to denote if the Archived");
     eprintln!("     record is the last version or if the RAM version is that one");
+}
+
+
+extern crate rustbreak;
+use rustbreak::{MmapDatabase, deser::Bincode as RustBrakeBincodeDeser};
+use rustbreak::backend::MmapStorage;
+
+fn rustbrake_mmap_spikes() -> rustbreak::Result<()> {
+    eprintln!();
+    eprintln!("## 'rustbrake' crate with mmap:");
+    eprintln!("###############################");
+    eprintln!("# can we have an mmapped database with this one?");
+
+    let db = MmapDatabase::<HashMap<u32, String>, RustBrakeBincodeDeser>::mmap(HashMap::new())?;
+
+    println!("Writing to Database");
+    db.write(|db| {
+        db.insert(0, String::from("world"));
+        db.insert(1, String::from("bar"));
+    });
+
+    db.read(|db| {
+        // db.insert("foo".into(), String::from("bar"));
+        // The above line will not compile since we are only reading
+        println!("Hello: {:?}", db.get(&0));
+    })?;
+
+    eprintln!("# CONCLUSION: currently we can't. Rustbrake does not implement zero-copy... therefore, only anonymous mmaps");
+    eprintln!("#             are used, pretty similar to MemoryDatabase, but requiring no additional copies when realloc'ing");
+
+    Ok(())
 }

@@ -17,3 +17,5 @@ bincode = {}
 
 memmap = "0.7"
 rkyv = "0.7"
+
+rustbreak = {version = "2", features = ["mmap", "bin_enc"]}
