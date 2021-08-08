@@ -1,3 +1,5 @@
 Crates to investigate:
-	mmap: rustbreak
-	db: http://structsy.rs/
+Design Patterns to build:
+	Multi-Frontend app, follow RustBrake's nice Generics architecture
+canvas:
+	DomBalls speed comparison

@@ -11,6 +11,7 @@ members = [
     "lifetimes",
     "mmap-containers",
     "mmapped-cached-crate",
+    "embedded-databases",
     "cpp-interop",
 ]
 

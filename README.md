@@ -11,8 +11,9 @@ Contents:
         Complex Project Setup -- see the root Cargo.toml
         meta-programming -- trying to match the same power we have in C++
         lifetimes -- lerning some tricks in order (not to fight) to work along with the borrow checker
-        mmap-containers -- experiments with mmaped containers 
+        mmap-containers -- experiments with mmaped containers
+        databases -- trying some NoSQL (object) embedded database crates...
         mmapped-cached-crate -- exploring the wonderful 'cached' crate and trying it with a mmap backed cache store
-        c++-interop -- aiming at the higher efficiency possible
+        cpp-interop -- aiming at the higher efficiency possible
 
     Rust 2021:
