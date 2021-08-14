@@ -1,3 +1,6 @@
+# RELEASE BUILDING:
+# RUSTFLAGS="-C target-cpu=native -C target-feature=native" cargo build --release
+
 [package]
 name = "big-O"
 version = "0.1.0"
@@ -14,3 +17,14 @@ path = "src/big-o.rs"
 
 [dev-dependencies]
 serial_test = "0.5"
+
+# see https://deterministic.space/high-performance-rust.html
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"     # disables stack traces / stack unwiding
+#rustflags = ["-C", "target-cpu=native"]    # this seems not to work
+#overflow-checks = true     # might help debug release-only bugs
+
+#[release-dependencies]
+#jemallocator = "0.3.2"
