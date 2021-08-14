@@ -11,5 +11,8 @@ name = "embedded-databases"
 path = "src/embedded-databases.rs"
 
 [dependencies]
+
 structsy="0.3"
 structsy-derive="0.3"
+
+sled={version="0.34", features=["io_uring"]}
