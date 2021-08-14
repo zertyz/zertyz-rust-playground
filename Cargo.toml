@@ -12,6 +12,7 @@ members = [
     "mmap-containers",
     "mmapped-cached-crate",
     "embedded-databases",
+    "big-O",
     "cpp-interop",
 ]
 
