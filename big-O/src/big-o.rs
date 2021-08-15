@@ -1,6 +1,9 @@
 pub mod big_o_analysis;
+mod conditionals;
 
-use crate::big_o_analysis::{BigOAlgorithmComplexity, SetResizingAlgorithmMeasurements, ConstantSetAlgorithmMeasurements};
+use crate::big_o_analysis::{BigOAlgorithmComplexity, SetResizingAlgorithmMeasurements, ConstantSetAlgorithmMeasurements, BigOAlgorithmAnalysis};
+use crate::conditionals::OUTPUT;
+
 use std::convert::TryInto;
 use std::ops::Range;
 use std::time::SystemTime;
@@ -9,8 +12,8 @@ use std::io::Write;
 
 pub type AlgorithmFnPtr = fn(u32) -> u32;
 
-pub fn analyze_crud_algorithm<T: TryInto<u64>>(
-    crud_name: &str,
+pub fn analyze_crud_algorithm<'a, T: TryInto<u64>>(
+    crud_name: &'a str,
     reset_fn:  AlgorithmFnPtr,
     create_fn: AlgorithmFnPtr,
     read_fn:   AlgorithmFnPtr,
@@ -21,14 +24,16 @@ pub fn analyze_crud_algorithm<T: TryInto<u64>>(
     read_iterations:    u32,
     update_iterations:  u32,
     delete_iterations:  u32,
-    time_unit: &TimeUnit<T>) -> (BigOAlgorithmComplexity, BigOAlgorithmComplexity, BigOAlgorithmComplexity, BigOAlgorithmComplexity) {
+    time_unit: &TimeUnit<T>)
+    -> (BigOAlgorithmAnalysis<SetResizingAlgorithmMeasurements<'a>>,
+        BigOAlgorithmAnalysis<ConstantSetAlgorithmMeasurements<'a>>,
+        BigOAlgorithmAnalysis<ConstantSetAlgorithmMeasurements<'a>>,
+        BigOAlgorithmAnalysis<SetResizingAlgorithmMeasurements<'a>>) {
 
     /// wrap around the original 'run_pass' to output intermediate results
     fn _run_pass<T: TryInto<u64>>(result_prefix: &str, result_suffix: &str, algorithm: fn(u32) -> u32, algorithm_type: &BigOAlgorithmType, range: Range<u32>, unit: &TimeUnit<T>) -> (u64, u32) {
-        io::stdout().flush().unwrap();
         let (pass_elapsed_us, r) = run_pass(algorithm, algorithm_type, range, unit);
-        print!("{}{}{}{}", result_prefix, pass_elapsed_us, unit.unit_str, result_suffix);
-        io::stdout().flush().unwrap();
+        OUTPUT(&format!("{}{}{}{}", result_prefix, pass_elapsed_us, unit.unit_str, result_suffix));
         (pass_elapsed_us, r)
     }
 
@@ -42,12 +47,12 @@ pub fn analyze_crud_algorithm<T: TryInto<u64>>(
     // computed result to avoid any call cancellation optimizations when running in release mode
     let mut r: u32 = 0;
 
-    print!("{} CRUD Algorithm Complexity Analysis:\n  ", crud_name);
+    OUTPUT(&format!("{} CRUD Algorithm Complexity Analysis:\n\n", crud_name));
 
     for pass in 0..NUMBER_OF_PASSES {
         // warmup only on the first pass
         if pass == 0 {
-            print!("warm");
+            OUTPUT("warm");
             io::stdout().flush().unwrap();
             reset_fn(0);
             let (_warmup_elapsed, wr) = _run_pass::<T>("up: ", "; ", create_fn, &BigOAlgorithmType::SetResizing, 0..warmup_iterations, time_unit);
@@ -55,11 +60,11 @@ pub fn analyze_crud_algorithm<T: TryInto<u64>>(
             reset_fn(warmup_iterations);
         }
         // show pass number
-        print!("{} Pass (", if pass == 0 {
+        OUTPUT(&format!("{} Pass (", if pass == 0 {
             "First"
         } else {
             "); Second"
-        });
+        }));
         // execute passes
         let (create_elapsed, cr) = _run_pass::<T>("create: ", "", create_fn, &BigOAlgorithmType::SetResizing, create_iterations*pass..create_iterations*(pass+1), time_unit);
         let (read_elapsed,   rr) = _run_pass::<T>("; read: ", "", read_fn, &BigOAlgorithmType::SetResizing, read_iterations*pass..read_iterations*(pass+1), time_unit);
@@ -71,16 +76,16 @@ pub fn analyze_crud_algorithm<T: TryInto<u64>>(
 
         r += cr^rr^ur;
     }
-    println!("):\n");
+    OUTPUT("):\n\n");
 
     // analyze & output "create", "read" and "update" reports
-    let (create_analysis, create_report) = big_o_analysis::analyse_set_resizing_algorithm(&SetResizingAlgorithmMeasurements {
+    let create_analysis = big_o_analysis::analyse_set_resizing_algorithm(SetResizingAlgorithmMeasurements {
         measurement_name: "Create",
         pass_1_total_time: create_elapsed_passes[0],
         pass_2_total_time: create_elapsed_passes[1],
         delta_set_size: create_iterations
     });
-    let (read_analysis, read_report) = big_o_analysis::analyse_constant_set_algorithm(&ConstantSetAlgorithmMeasurements {
+    let read_analysis = big_o_analysis::analyse_constant_set_algorithm(ConstantSetAlgorithmMeasurements {
         measurement_name: "Read",
         pass_1_total_time: read_elapsed_passes[0],
         pass_2_total_time: read_elapsed_passes[1],
@@ -88,7 +93,7 @@ pub fn analyze_crud_algorithm<T: TryInto<u64>>(
         pass_2_set_size: create_iterations*2,
         repetitions: read_iterations,
     });
-    let (update_analysis, update_report) = big_o_analysis::analyse_constant_set_algorithm(&ConstantSetAlgorithmMeasurements {
+    let update_analysis = big_o_analysis::analyse_constant_set_algorithm(ConstantSetAlgorithmMeasurements {
         measurement_name: "Update",
         pass_1_total_time: update_elapsed_passes[0],
         pass_2_total_time: update_elapsed_passes[1],
@@ -97,18 +102,18 @@ pub fn analyze_crud_algorithm<T: TryInto<u64>>(
         repetitions: update_iterations,
     });
     if create_iterations > 0 {
-        println!("{}", create_report);
+        OUTPUT(&format!("{}\n\n", create_analysis));
     }
     if read_iterations > 0 {
-        println!("{}", read_report);
+        OUTPUT(&format!("{}\n\n", read_analysis));
     }
     if update_iterations > 0 {
-        println!("{}", update_report);
+        OUTPUT(&format!("{}\n\n", update_analysis));
     }
 
     // delete passes (note that delete passes are applied in reverse order)
     if delete_iterations > 0 {
-        print!("Delete Passes (");
+        OUTPUT("Delete Passes (");
         for pass in (0..NUMBER_OF_PASSES).rev() {
             let msg = format!("{}: ", if pass == 0 {
                 "; 1st"
@@ -121,17 +126,17 @@ pub fn analyze_crud_algorithm<T: TryInto<u64>>(
         }
     }
 
-    println!(") r={}:", r);
+    OUTPUT(&format!(") r={}:\n", r));
 
     // analyze & output "delete" report
-    let (delete_analysis, delete_report) = big_o_analysis::analyse_set_resizing_algorithm(&SetResizingAlgorithmMeasurements {
+    let delete_analysis = big_o_analysis::analyse_set_resizing_algorithm(SetResizingAlgorithmMeasurements {
         measurement_name: "Delete",
         pass_1_total_time: delete_elapsed_passes[0],
         pass_2_total_time: delete_elapsed_passes[1],
         delta_set_size: delete_iterations,
     });
     if delete_iterations > 0 {
-        println!("{}", delete_report);
+        OUTPUT(&format!("{}\n\n", delete_analysis));
     }
 
     (create_analysis, read_analysis, update_analysis, delete_analysis)
@@ -206,10 +211,14 @@ fn main() {
     //tests::lowLevelExperiments();
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 
+    use serial_test::serial;
+
     #[test]
+    #[serial(cpu)]
     fn analyze_crud_algorithm_output_check() {
         analyze_crud_algorithm("MyContainer",
             |n| (n+1)/(n+1),
