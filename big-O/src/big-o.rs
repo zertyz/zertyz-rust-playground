@@ -1,7 +1,7 @@
 pub mod big_o_analysis;
 mod conditionals;
 
-use crate::big_o_analysis::{BigOAlgorithmComplexity, SetResizingAlgorithmMeasurements, ConstantSetAlgorithmMeasurements, BigOAlgorithmAnalysis};
+use crate::big_o_analysis::{SetResizingAlgorithmMeasurements, ConstantSetAlgorithmMeasurements, BigOAlgorithmAnalysis};
 use crate::conditionals::OUTPUT;
 
 use std::convert::TryInto;
@@ -9,9 +9,6 @@ use std::ops::Range;
 use std::time::SystemTime;
 use std::io;
 use std::io::Write;
-use std::iter::Rev;
-
-pub type AlgorithmFnPtr = fn(u32) -> u32;
 
 pub fn analyze_crud_algorithm<'a,
                               _ResetClosure:  FnMut(u32) -> u32,
@@ -243,15 +240,15 @@ mod tests {
     #[serial(cpu)]
     fn analyze_crud_algorithm_output_check() {
         let iterations = 100000;
-        let mut vec = Arc::new(parking_lot::RwLock::new(Vec::<u32>::with_capacity(iterations)));
-        let mut reset_vec = Arc::clone(&vec);
-        let mut create_vec = Arc::clone(&vec);
+        let vec = Arc::new(parking_lot::RwLock::new(Vec::<u32>::with_capacity(iterations)));
+        let reset_vec = Arc::clone(&vec);
+        let create_vec = Arc::clone(&vec);
         let read_vec = Arc::clone(&vec);
-        let mut update_vec = Arc::clone(&vec);
-        let mut delete_vec = Arc::clone(&vec);
+        let update_vec = Arc::clone(&vec);
+        let delete_vec = Arc::clone(&vec);
         drop(vec);
         analyze_crud_algorithm("Push & Pop (best case) Vec with ParkingLot",
-            &mut |n| {
+            &mut |_n| {
                 let mut vec = reset_vec.write();
                 vec.clear();
                 vec.len() as u32
@@ -287,15 +284,15 @@ mod tests {
     #[serial(cpu)]
     fn vec_worse_case() {
         let iterations = 100000;
-        let mut vec = Arc::new(parking_lot::RwLock::new(Vec::<u32>::with_capacity(iterations)));
-        let mut reset_vec = Arc::clone(&vec);
-        let mut create_vec = Arc::clone(&vec);
+        let vec = Arc::new(parking_lot::RwLock::new(Vec::<u32>::with_capacity(iterations)));
+        let reset_vec = Arc::clone(&vec);
+        let create_vec = Arc::clone(&vec);
         let read_vec = Arc::clone(&vec);
-        let mut update_vec = Arc::clone(&vec);
-        let mut delete_vec = Arc::clone(&vec);
+        let update_vec = Arc::clone(&vec);
+        let delete_vec = Arc::clone(&vec);
         drop(vec);
         analyze_crud_algorithm("Insert & Remove (worse case) Vec with ParkingLot",
-                               &mut |n| {
+                               &mut |_n| {
                                    let mut vec = reset_vec.write();
                                    vec.clear();
                                    vec.len() as u32
@@ -314,7 +311,7 @@ mod tests {
                                    vec[n as usize] = n+1;
                                    vec.len() as u32
                                },
-                               &mut |n| {
+                               &mut |_n| {
                                    let mut vec = delete_vec.write();
                                    vec.remove(0);
                                    vec.len() as u32

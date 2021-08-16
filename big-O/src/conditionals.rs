@@ -2,7 +2,9 @@
 //!   - "features" definitions, client project's Cargo "[dependencies]" declarations
 //!   - Release / Debug compilations
 
-use std::io::{self,stdout,stderr,Write};
+#![warn(dead_code)]
+
+use std::io::{stdout,stderr,Write};
 
 #[cfg(debug_assertions)]
 /// busy waiting constant for debug & release compilation

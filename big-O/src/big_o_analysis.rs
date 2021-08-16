@@ -5,8 +5,6 @@
 
 use std::fmt::{Display,Formatter};
 
-use crate::conditionals::{self, OUTPUT};
-
 /// acceptable variance (or errors) when measuring times
 const PERCENT_TOLERANCE: f64 = 0.10;
 
@@ -200,11 +198,10 @@ pub fn analyse_set_resizing_algorithm(measurements: SetResizingAlgorithmMeasurem
 #[cfg(test)]
 mod tests {
 
-    use super::super::{conditionals,AlgorithmFnPtr,BigOAlgorithmType,TimeUnit,TimeUnits,run_pass};
+    use super::super::{conditionals,BigOAlgorithmType,TimeUnit,TimeUnits,run_pass};
+    use crate::conditionals::{OUTPUT};
 
     use super::*;
-    use std::io;
-    use std::io::Write;
     use std::ops::Range;
     use std::convert::TryInto;
 
@@ -354,7 +351,9 @@ mod tests {
     #[serial(cpu)]
     fn analyse_constant_set_algorithm_real_test() {
 
-        const repetitions: u32 = 1000;
+        const REPETITIONS: u32 = 1000;
+        const PASS_1_SET_SIZE: u32 = REPETITIONS;
+        const PASS_2_SET_SIZE: u32 = REPETITIONS *3;
 
         fn o_1_select(mut _n: u32) -> u32 {
             busy_loop(conditionals::BUSY_LOOP_DELAY*10)
@@ -362,10 +361,10 @@ mod tests {
 
         fn o_log_n_select(mut n: u32) -> u32 {
             let mut r: u32 = 1;
-            if n < repetitions {
-                n = repetitions;
+            if n < PASS_1_SET_SIZE {
+                n = PASS_1_SET_SIZE;
             } else {
-                n = repetitions*2;
+                n = PASS_2_SET_SIZE;
             }
             while n > 0 {
                 r += busy_loop(conditionals::BUSY_LOOP_DELAY);
@@ -376,10 +375,10 @@ mod tests {
 
         fn o_n_select(mut n: u32) -> u32 {
             let mut r: u32 = 2;
-            if (n < repetitions) {
-                n = repetitions;
+            if n < PASS_1_SET_SIZE {
+                n = PASS_1_SET_SIZE;
             } else {
-                n = repetitions*2;
+                n = PASS_2_SET_SIZE;
             }
             while n > 0 {
                 r += busy_loop(conditionals::BUSY_LOOP_DELAY/100);
@@ -389,21 +388,19 @@ mod tests {
         }
 
         let assert = |measurement_name, mut select_function: fn(u32) -> u32, expected_complexity| {
-            let pass_1_set_size = repetitions;
-            let pass_2_set_size = repetitions*2;
-            OUTPUT(&format!("Real '{}' adding {} elements on each pass ", measurement_name, repetitions));
+            OUTPUT(&format!("Real '{}' adding {} elements on each pass ", measurement_name, REPETITIONS));
 
-            let (_warmup_time,            r1) = _run_pass("(warmup: ", "", &mut select_function, &BigOAlgorithmType::ConstantSet, 0..repetitions/10, &TimeUnits::MICROSECOND);
-            let (pass_1_total_time, r2) = _run_pass("; pass1: ", "", &mut select_function, &BigOAlgorithmType::ConstantSet, 0..pass_1_set_size, &TimeUnits::MICROSECOND);
-            let (pass_2_total_time, r3) = _run_pass("; pass2: ", "): ", &mut select_function, &BigOAlgorithmType::ConstantSet, pass_2_set_size-repetitions..pass_2_set_size, &TimeUnits::MICROSECOND);
+            let (_warmup_time,            r1) = _run_pass("(warmup: ", "", &mut select_function, &BigOAlgorithmType::ConstantSet, 0..REPETITIONS /10, &TimeUnits::MICROSECOND);
+            let (pass_1_total_time, r2) = _run_pass("; pass1: ", "", &mut select_function, &BigOAlgorithmType::ConstantSet, 0..PASS_1_SET_SIZE, &TimeUnits::MICROSECOND);
+            let (pass_2_total_time, r3) = _run_pass("; pass2: ", "): ", &mut select_function, &BigOAlgorithmType::ConstantSet, PASS_2_SET_SIZE - REPETITIONS..PASS_2_SET_SIZE, &TimeUnits::MICROSECOND);
 
             let observed_analysis = analyse_constant_set_algorithm(ConstantSetAlgorithmMeasurements {
                 measurement_name,
                 pass_1_total_time,
                 pass_2_total_time,
-                pass_1_set_size,
-                pass_2_set_size,
-                repetitions,
+                pass_1_set_size: PASS_1_SET_SIZE,
+                pass_2_set_size: PASS_2_SET_SIZE,
+                repetitions: REPETITIONS,
             });
             OUTPUT(&format!("\n{} (r={})\n", observed_analysis, r1+r2+r3));
             assert_eq!(observed_analysis.complexity, expected_complexity, "Algorithm Analysis on CONSTANT SET algorithm for '{}' check failed!", measurement_name);
