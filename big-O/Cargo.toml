@@ -1,5 +1,5 @@
 # RELEASE BUILDING:
-# RUSTFLAGS="-C target-cpu=native -C target-feature=native" cargo build --release
+# RUSTFLAGS="-C target-cpu=native" cargo build --release
 
 [package]
 name = "big-O"
@@ -17,6 +17,7 @@ path = "src/big-o.rs"
 
 [dev-dependencies]
 serial_test = "0.5"
+parking_lot = "0.11"
 
 # see https://deterministic.space/high-performance-rust.html
 [profile.release]

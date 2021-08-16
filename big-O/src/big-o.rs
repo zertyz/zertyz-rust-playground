@@ -9,29 +9,37 @@ use std::ops::Range;
 use std::time::SystemTime;
 use std::io;
 use std::io::Write;
+use std::iter::Rev;
 
 pub type AlgorithmFnPtr = fn(u32) -> u32;
 
-pub fn analyze_crud_algorithm<'a, T: TryInto<u64>>(
-    crud_name: &'a str,
-    reset_fn:  AlgorithmFnPtr,
-    create_fn: AlgorithmFnPtr,
-    read_fn:   AlgorithmFnPtr,
-    update_fn: AlgorithmFnPtr,
-    delete_fn: AlgorithmFnPtr,
-    warmup_iterations:  u32,
-    create_iterations:  u32,
-    read_iterations:    u32,
-    update_iterations:  u32,
-    delete_iterations:  u32,
-    time_unit: &TimeUnit<T>)
+pub fn analyze_crud_algorithm<'a,
+                              _ResetClosure:  FnMut(u32) -> u32,
+                              _CreateClosure: FnMut(u32) -> u32,
+                              _ReadClusure:   FnMut(u32) -> u32,
+                              _UpdateClosure: FnMut(u32) -> u32,
+                              _DeleteClosure: FnMut(u32) -> u32,
+                              T: TryInto<u64> > (
+                                                 crud_name: &'a str,
+                                                 reset_fn:  &mut _ResetClosure,
+                                                 create_fn: &mut _CreateClosure,
+                                                 read_fn:   &mut _ReadClusure,
+                                                 update_fn: &mut _UpdateClosure,
+                                                 delete_fn: &mut _DeleteClosure,
+                                                 warmup_iterations:  u32,
+                                                 create_iterations:  u32,
+                                                 read_iterations:    u32,
+                                                 update_iterations:  u32,
+                                                 delete_iterations:  u32,
+                                                 time_unit: &TimeUnit<T>)
     -> (BigOAlgorithmAnalysis<SetResizingAlgorithmMeasurements<'a>>,
         BigOAlgorithmAnalysis<ConstantSetAlgorithmMeasurements<'a>>,
         BigOAlgorithmAnalysis<ConstantSetAlgorithmMeasurements<'a>>,
         BigOAlgorithmAnalysis<SetResizingAlgorithmMeasurements<'a>>) {
 
     /// wrap around the original 'run_pass' to output intermediate results
-    fn _run_pass<T: TryInto<u64>>(result_prefix: &str, result_suffix: &str, algorithm: fn(u32) -> u32, algorithm_type: &BigOAlgorithmType, range: Range<u32>, unit: &TimeUnit<T>) -> (u64, u32) {
+    fn _run_pass<_AlgorithmClosure, T>(result_prefix: &str, result_suffix: &str, algorithm: &mut _AlgorithmClosure, algorithm_type: &BigOAlgorithmType, range: Range<u32>, unit: &TimeUnit<T>)
+        -> (u64, u32) where _AlgorithmClosure: FnMut(u32) -> u32, T: TryInto<u64> {
         let (pass_elapsed_us, r) = run_pass(algorithm, algorithm_type, range, unit);
         OUTPUT(&format!("{}{}{}{}", result_prefix, pass_elapsed_us, unit.unit_str, result_suffix));
         (pass_elapsed_us, r)
@@ -47,7 +55,7 @@ pub fn analyze_crud_algorithm<'a, T: TryInto<u64>>(
     // computed result to avoid any call cancellation optimizations when running in release mode
     let mut r: u32 = 0;
 
-    OUTPUT(&format!("{} CRUD Algorithm Complexity Analysis:\n\n", crud_name));
+    OUTPUT(&format!("{} CRUD Algorithm Complexity Analysis:\n  ", crud_name));
 
     for pass in 0..NUMBER_OF_PASSES {
         // warmup only on the first pass
@@ -55,7 +63,7 @@ pub fn analyze_crud_algorithm<'a, T: TryInto<u64>>(
             OUTPUT("warm");
             io::stdout().flush().unwrap();
             reset_fn(0);
-            let (_warmup_elapsed, wr) = _run_pass::<T>("up: ", "; ", create_fn, &BigOAlgorithmType::SetResizing, 0..warmup_iterations, time_unit);
+            let (_warmup_elapsed, wr) = _run_pass("up: ", "; ", create_fn, &BigOAlgorithmType::SetResizing, 0..warmup_iterations, time_unit);
             r += wr;
             reset_fn(warmup_iterations);
         }
@@ -66,9 +74,9 @@ pub fn analyze_crud_algorithm<'a, T: TryInto<u64>>(
             "); Second"
         }));
         // execute passes
-        let (create_elapsed, cr) = _run_pass::<T>("create: ", "", create_fn, &BigOAlgorithmType::SetResizing, create_iterations*pass..create_iterations*(pass+1), time_unit);
-        let (read_elapsed,   rr) = _run_pass::<T>("; read: ", "", read_fn, &BigOAlgorithmType::SetResizing, read_iterations*pass..read_iterations*(pass+1), time_unit);
-        let (update_elapsed, ur) = _run_pass::<T>("; update: ", "", update_fn, &BigOAlgorithmType::SetResizing, update_iterations*pass..update_iterations*(pass+1), time_unit);
+        let (create_elapsed, cr) = _run_pass("create: ", "", create_fn, &BigOAlgorithmType::SetResizing, create_iterations*pass..create_iterations*(pass+1), time_unit);
+        let (read_elapsed,   rr) = _run_pass("; read: ", "", read_fn, &BigOAlgorithmType::SetResizing, read_iterations*pass..read_iterations*(pass+1), time_unit);
+        let (update_elapsed, ur) = _run_pass("; update: ", "", update_fn, &BigOAlgorithmType::SetResizing, update_iterations*pass..update_iterations*(pass+1), time_unit);
 
         create_elapsed_passes[pass as usize] = create_elapsed;
         read_elapsed_passes[pass as usize]   = read_elapsed;
@@ -120,7 +128,7 @@ pub fn analyze_crud_algorithm<'a, T: TryInto<u64>>(
             } else {
                 "2nd"
             });
-            let (delete_elapsed, dr) = _run_pass::<T>(&msg, "", delete_fn, &BigOAlgorithmType::SetResizing, delete_iterations * pass..delete_iterations * (pass + 1), time_unit);
+            let (delete_elapsed, dr) = _run_pass(&msg, "", delete_fn, &BigOAlgorithmType::SetResizing, delete_iterations * (pass + 1) .. delete_iterations * pass, time_unit);
             delete_elapsed_passes[pass as usize] = delete_elapsed;
             r += dr;
         }
@@ -151,21 +159,34 @@ pub fn analyze_crud_algorithm<'a, T: TryInto<u64>>(
 ///     fn algorithm(i: u32) -> u32 {0}
 /// ````
 /// returns: tuple with (elapsed_time: u64, computed_number: u32)
-fn run_pass<T: TryInto<u64>>(algorithm: fn(u32) -> u32, algorithm_type: &BigOAlgorithmType, range: Range<u32>, unit: &TimeUnit<T>) -> (u64, u32) {
-    let mut r: u32 = 0;
+fn run_pass<T, _AlgorithmClosure>
+           (algorithm: &mut _AlgorithmClosure, algorithm_type: &BigOAlgorithmType, range: Range<u32>, unit: &TimeUnit<T>)
+            -> (u64, u32) where T: TryInto<u64>, _AlgorithmClosure: FnMut(u32) -> u32 {
+    let mut r: u32 = range.end;
     let pass_start = SystemTime::now();
 
-    // run 'algorithm()'
+    // run 'algorithm()' allowing normal or reversed order
     match algorithm_type {
         BigOAlgorithmType::ConstantSet => {
-            let algorithm_parameter = range.end;
-            for _e in range {
-                r = r + algorithm(algorithm_parameter);
+            if range.end < range.start {
+                for e in (range.end..range.start).rev() {
+                    r ^= algorithm(e);
+                }
+            } else {
+                for e in range {
+                    r ^= algorithm(e);
+                }
             }
         },
         BigOAlgorithmType::SetResizing => {
-            for e in range {
-                r = r + algorithm(e);
+            if range.end < range.start {
+                for e in (range.end..range.start).rev() {
+                    r ^= algorithm(e);
+                }
+            } else {
+                for e in range {
+                    r ^= algorithm(e);
+                }
             }
         },
     }
@@ -216,21 +237,94 @@ mod tests {
     use super::*;
 
     use serial_test::serial;
+    use std::sync::Arc;
 
     #[test]
     #[serial(cpu)]
     fn analyze_crud_algorithm_output_check() {
-        analyze_crud_algorithm("MyContainer",
-            |n| (n+1)/(n+1),
-            |n| (n+1)/(n+1),
-            |n| (n+1)/(n+1),
-            |n| (n+1)/(n+1),
-            |n| (n+1)/(n+1),
-            1000,
-            100000,
-            100000,
-            100000,
-            100000,
-            &TimeUnits::NANOSECOND);
+        let iterations = 100000;
+        let mut vec = Arc::new(parking_lot::RwLock::new(Vec::<u32>::with_capacity(iterations)));
+        let mut reset_vec = Arc::clone(&vec);
+        let mut create_vec = Arc::clone(&vec);
+        let read_vec = Arc::clone(&vec);
+        let mut update_vec = Arc::clone(&vec);
+        let mut delete_vec = Arc::clone(&vec);
+        drop(vec);
+        analyze_crud_algorithm("Push & Pop (best case) Vec with ParkingLot",
+            &mut |n| {
+                let mut vec = reset_vec.write();
+                vec.clear();
+                vec.len() as u32
+            },
+            &mut |n| {
+                let mut vec = create_vec.write();
+                vec.push(n);
+                vec.len() as u32
+            },
+            &mut |n| {
+                let vec = read_vec.read();
+                vec[n as usize]
+            },
+            &mut |n| {
+                let mut vec = update_vec.write();
+                vec[n as usize] = n+1;
+                vec.len() as u32
+            },
+            &mut |n| {
+                let mut vec = delete_vec.write();
+                vec.remove(n as usize);
+                vec.len() as u32
+            },
+            (iterations / 100) as u32,
+            iterations as u32,
+            iterations as u32,
+            iterations as u32,
+            iterations as u32,
+            &TimeUnits::MICROSECOND);
     }
+
+    #[test]
+    #[serial(cpu)]
+    fn vec_worse_case() {
+        let iterations = 100000;
+        let mut vec = Arc::new(parking_lot::RwLock::new(Vec::<u32>::with_capacity(iterations)));
+        let mut reset_vec = Arc::clone(&vec);
+        let mut create_vec = Arc::clone(&vec);
+        let read_vec = Arc::clone(&vec);
+        let mut update_vec = Arc::clone(&vec);
+        let mut delete_vec = Arc::clone(&vec);
+        drop(vec);
+        analyze_crud_algorithm("Insert & Remove (worse case) Vec with ParkingLot",
+                               &mut |n| {
+                                   let mut vec = reset_vec.write();
+                                   vec.clear();
+                                   vec.len() as u32
+                               },
+                               &mut |n| {
+                                   let mut vec = create_vec.write();
+                                   vec.insert(0, (iterations as u32)*2 - n);
+                                   vec.len() as u32
+                               },
+                               &mut |n| {
+                                   let vec = read_vec.read();
+                                   vec[n as usize]
+                               },
+                               &mut |n| {
+                                   let mut vec = update_vec.write();
+                                   vec[n as usize] = n+1;
+                                   vec.len() as u32
+                               },
+                               &mut |n| {
+                                   let mut vec = delete_vec.write();
+                                   vec.remove(0);
+                                   vec.len() as u32
+                               },
+                               (iterations / 100) as u32,
+                               iterations as u32,
+                               iterations as u32,
+                               iterations as u32,
+                               iterations as u32,
+                               &TimeUnits::MICROSECOND);
+    }
+
 }

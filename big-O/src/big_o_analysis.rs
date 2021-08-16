@@ -354,37 +354,48 @@ mod tests {
     #[serial(cpu)]
     fn analyse_constant_set_algorithm_real_test() {
 
+        const repetitions: u32 = 1000;
+
         fn o_1_select(mut _n: u32) -> u32 {
             busy_loop(conditionals::BUSY_LOOP_DELAY*10)
         }
 
         fn o_log_n_select(mut n: u32) -> u32 {
-            let mut r: u32 = 0;
+            let mut r: u32 = 1;
+            if n < repetitions {
+                n = repetitions;
+            } else {
+                n = repetitions*2;
+            }
             while n > 0 {
-                r = r + busy_loop(conditionals::BUSY_LOOP_DELAY*2);
-                n = n/2;
+                r += busy_loop(conditionals::BUSY_LOOP_DELAY);
+                n /= 2;
             }
             r
         }
 
         fn o_n_select(mut n: u32) -> u32 {
-            let mut r: u32 = 0;
+            let mut r: u32 = 2;
+            if (n < repetitions) {
+                n = repetitions;
+            } else {
+                n = repetitions*2;
+            }
             while n > 0 {
-                r = r + busy_loop(conditionals::BUSY_LOOP_DELAY/100);
-                n = n-1;
+                r += busy_loop(conditionals::BUSY_LOOP_DELAY/100);
+                n -= 1;
             }
             r
         }
 
-        let assert = |measurement_name, select_function: fn(u32) -> u32, expected_complexity| {
-            let repetitions = 1000;
+        let assert = |measurement_name, mut select_function: fn(u32) -> u32, expected_complexity| {
             let pass_1_set_size = repetitions;
-            let pass_2_set_size = repetitions*3;
+            let pass_2_set_size = repetitions*2;
             OUTPUT(&format!("Real '{}' adding {} elements on each pass ", measurement_name, repetitions));
 
-            let (_warmup_time,            r1) = _run_pass("(warmup: ", "", select_function, &BigOAlgorithmType::ConstantSet, 0..repetitions/10, &TimeUnits::MICROSECOND);
-            let (pass_1_total_time, r2) = _run_pass("; pass1: ", "", select_function, &BigOAlgorithmType::ConstantSet, 0..pass_1_set_size, &TimeUnits::MICROSECOND);
-            let (pass_2_total_time, r3) = _run_pass("; pass2: ", "): ", select_function, &BigOAlgorithmType::ConstantSet, pass_2_set_size-repetitions..pass_2_set_size, &TimeUnits::MICROSECOND);
+            let (_warmup_time,            r1) = _run_pass("(warmup: ", "", &mut select_function, &BigOAlgorithmType::ConstantSet, 0..repetitions/10, &TimeUnits::MICROSECOND);
+            let (pass_1_total_time, r2) = _run_pass("; pass1: ", "", &mut select_function, &BigOAlgorithmType::ConstantSet, 0..pass_1_set_size, &TimeUnits::MICROSECOND);
+            let (pass_2_total_time, r3) = _run_pass("; pass2: ", "): ", &mut select_function, &BigOAlgorithmType::ConstantSet, pass_2_set_size-repetitions..pass_2_set_size, &TimeUnits::MICROSECOND);
 
             let observed_analysis = analyse_constant_set_algorithm(ConstantSetAlgorithmMeasurements {
                 measurement_name,
@@ -394,7 +405,7 @@ mod tests {
                 pass_2_set_size,
                 repetitions,
             });
-            OUTPUT(&format!("\n{} (r={})\n", observed_analysis, r1^r2^r3));
+            OUTPUT(&format!("\n{} (r={})\n", observed_analysis, r1+r2+r3));
             assert_eq!(observed_analysis.complexity, expected_complexity, "Algorithm Analysis on CONSTANT SET algorithm for '{}' check failed!", measurement_name);
 
         };
@@ -432,15 +443,15 @@ mod tests {
             r
         }
 
-        let assert = |measurement_name, insert_function: fn(u32) -> u32, expected_complexity| {
+        let assert = |measurement_name, mut insert_function: fn(u32) -> u32, expected_complexity| {
             let delta_set_size = 2000;
             OUTPUT(&format!("Real '{}' with {} elements on each pass ", measurement_name, delta_set_size));
 
             /* warmup pass -- container / database should be reset before and after this */
-            let (_warmup_time,           r1) = _run_pass("(warmup: ", "", insert_function, &BigOAlgorithmType::SetResizing, 0..delta_set_size/10, &TimeUnits::MICROSECOND);
+            let (_warmup_time,           r1) = _run_pass("(warmup: ", "", &mut insert_function, &BigOAlgorithmType::SetResizing, 0..delta_set_size/10, &TimeUnits::MICROSECOND);
             /* if we were operating on real data, we would reset the container / database after the warmup, before running pass 1 */
-            let (pass_1_total_time, r2) = _run_pass("; pass1: ", "", insert_function, &BigOAlgorithmType::SetResizing, 0..delta_set_size, &TimeUnits::MICROSECOND);
-            let (pass_2_total_time, r3) = _run_pass("; pass2: ", "): ", insert_function, &BigOAlgorithmType::SetResizing, delta_set_size..delta_set_size*2, &TimeUnits::MICROSECOND);
+            let (pass_1_total_time, r2) = _run_pass("; pass1: ", "", &mut insert_function, &BigOAlgorithmType::SetResizing, 0..delta_set_size, &TimeUnits::MICROSECOND);
+            let (pass_2_total_time, r3) = _run_pass("; pass2: ", "): ", &mut insert_function, &BigOAlgorithmType::SetResizing, delta_set_size..delta_set_size*2, &TimeUnits::MICROSECOND);
 
             let observed_analysis = analyse_set_resizing_algorithm(SetResizingAlgorithmMeasurements {
                 measurement_name,
@@ -468,7 +479,13 @@ mod tests {
     }
 
     /// wrap around the original 'run_pass' to output intermediate results
-    fn _run_pass<T: TryInto<u64>>(result_prefix: &str, result_suffix: &str, algorithm: fn(u32) -> u32, algorithm_type: &BigOAlgorithmType, range: Range<u32>, unit: &TimeUnit<T>) -> (u64, u32) {
+    fn _run_pass<_AlgorithmClosure: FnMut(u32) -> u32,
+                 T: TryInto<u64> > (result_prefix: &str,
+                                    result_suffix: &str,
+                                    algorithm: &mut _AlgorithmClosure,
+                                    algorithm_type: &BigOAlgorithmType,
+                                    range: Range<u32>,
+                                    unit: &TimeUnit<T>) -> (u64, u32) {
         let (pass_elapsed_us, r) = run_pass(algorithm, algorithm_type, range, unit);
         OUTPUT(&format!("{}{}{}{}", result_prefix, pass_elapsed_us, unit.unit_str, result_suffix));
         (pass_elapsed_us, r)
