@@ -10,8 +10,8 @@ const PERCENT_TOLERANCE: f64 = 0.10;
 
 /// return result for this module's main functions [analyse_constant_set_algorithm] & [analyse_set_resizing_algorithm]
 pub struct BigOAlgorithmAnalysis<T: BigOMeasurements> {
-    complexity:   BigOAlgorithmComplexity,
-    measurements: T,
+    pub complexity:   BigOAlgorithmComplexity,
+    pub measurements: T,
 }
 impl<T: BigOMeasurements> Display for BigOAlgorithmAnalysis<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -112,13 +112,13 @@ pub fn analyse_constant_set_algorithm(measurements: ConstantSetAlgorithmMeasurem
     if ((t1/t2) - 1.0_f64) >= PERCENT_TOLERANCE {
         // sanity check
         computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::BetterThanO1, measurements};
-    } else if ((t2/t1) - 1.0_f64).abs() < PERCENT_TOLERANCE {
+    } else if ((t2/t1) - 1.0_f64).abs() <= PERCENT_TOLERANCE {
         // check for O(1) -- t2/t1 ~= 1
         computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::O1, measurements};
-    } else if ( ((t2/t1) / ( n2.log2() / n1.log2() )) - 1.0_f64 ).abs() < PERCENT_TOLERANCE {
+    } else if ( ((t2/t1) / ( n2.log2() / n1.log2() )) - 1.0_f64 ).abs() <= PERCENT_TOLERANCE {
         // check for O(log(n)) -- (t2/t1) / (log(n2)/log(n1)) ~= 1
         computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::OLogN, measurements};
-    } else if ( ((t2/t1) / (n2 / n1)) - 1.0_f64 ).abs() < PERCENT_TOLERANCE {
+    } else if ( ((t2/t1) / (n2 / n1)) - 1.0_f64 ).abs() <= PERCENT_TOLERANCE {
         // check for O(n) -- (t2/t1) / (n2/n1) ~= 1
         computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::ON, measurements};
     } else if ( ((t2/t1) / (n2 / n1)) - 1.0_f64 ) > PERCENT_TOLERANCE {
@@ -175,13 +175,13 @@ pub fn analyse_set_resizing_algorithm(measurements: SetResizingAlgorithmMeasurem
     if ((t1/t2) - 1.0_f64) >= PERCENT_TOLERANCE {
         // sanity check
         computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::BetterThanO1, measurements};
-    } else if ((t2/t1) - 1.0_f64).abs() < PERCENT_TOLERANCE {
+    } else if ((t2/t1) - 1.0_f64).abs() <= PERCENT_TOLERANCE {
         // check for O(1) -- t2/t1 ~= 1
         computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::O1, measurements};
     } else if ( ((t2/t1) / ( (n * 3.0_f64).log2() / n.log2() )) - 1.0_f64 ).abs() < PERCENT_TOLERANCE {
         // check for O(log(n)) -- (t2/t1) / (log(n*3)/log(n)) ~= 1
         computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::OLogN, measurements};
-    } else if ( ((t2/t1) / 3.0_f64) - 1.0_f64 ).abs() < PERCENT_TOLERANCE {
+    } else if ( ((t2/t1) / 3.0_f64) - 1.0_f64 ).abs() <= PERCENT_TOLERANCE {
         // check for O(n) -- (t2/t1) / 3 ~= 1
         computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::ON, measurements};
     } else if ( ((t2/t1) / 3.0_f64) - 1.0_f64 ) > PERCENT_TOLERANCE {
@@ -207,7 +207,10 @@ mod tests {
 
     use serial_test::serial;
 
+    const BUSY_LOOP_DELAY: u32 = 999*conditionals::LOOP_MULTIPLIER;
+
     #[test]
+    #[serial(cpu)]
     fn serialization() {
         OUTPUT("BigOAlgorithmComplexity enum members, as strings:\n");
         let enum_members = [
@@ -225,6 +228,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(cpu)]
     fn analyse_constant_set_algorithm_theoretical_test() {
 
         let measurement_name = "analyse_constant_set_algorithm_theoretical_test";
@@ -293,6 +297,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(cpu)]
     fn analyse_set_resizing_algorithm_theoretical_test() {
 
         let measurement_name = "analyse_set_resizing_algorithm_theoretical_test";
@@ -351,12 +356,12 @@ mod tests {
     #[serial(cpu)]
     fn analyse_constant_set_algorithm_real_test() {
 
-        const REPETITIONS: u32 = 1000;
+        const REPETITIONS: u32 = 2000;
         const PASS_1_SET_SIZE: u32 = REPETITIONS;
         const PASS_2_SET_SIZE: u32 = REPETITIONS *3;
 
         fn o_1_select(mut _n: u32) -> u32 {
-            busy_loop(conditionals::BUSY_LOOP_DELAY*10)
+            busy_loop(BUSY_LOOP_DELAY*10)
         }
 
         fn o_log_n_select(mut n: u32) -> u32 {
@@ -367,7 +372,7 @@ mod tests {
                 n = PASS_2_SET_SIZE;
             }
             while n > 0 {
-                r += busy_loop(conditionals::BUSY_LOOP_DELAY);
+                r += busy_loop(BUSY_LOOP_DELAY);
                 n /= 2;
             }
             r
@@ -381,18 +386,18 @@ mod tests {
                 n = PASS_2_SET_SIZE;
             }
             while n > 0 {
-                r += busy_loop(conditionals::BUSY_LOOP_DELAY/100);
+                r += busy_loop(BUSY_LOOP_DELAY/100);
                 n -= 1;
             }
             r
         }
 
-        let assert = |measurement_name, mut select_function: fn(u32) -> u32, expected_complexity| {
+        let assert = |measurement_name, select_function: fn(u32) -> u32, expected_complexity| {
             OUTPUT(&format!("Real '{}' adding {} elements on each pass ", measurement_name, REPETITIONS));
 
-            let (_warmup_time,            r1) = _run_pass("(warmup: ", "", &mut select_function, &BigOAlgorithmType::ConstantSet, 0..REPETITIONS /10, &TimeUnits::MICROSECOND);
-            let (pass_1_total_time, r2) = _run_pass("; pass1: ", "", &mut select_function, &BigOAlgorithmType::ConstantSet, 0..PASS_1_SET_SIZE, &TimeUnits::MICROSECOND);
-            let (pass_2_total_time, r3) = _run_pass("; pass2: ", "): ", &mut select_function, &BigOAlgorithmType::ConstantSet, PASS_2_SET_SIZE - REPETITIONS..PASS_2_SET_SIZE, &TimeUnits::MICROSECOND);
+            let (_warmup_time,            r1) = _run_pass("(warmup: ", "", select_function, &BigOAlgorithmType::ConstantSet, 0..REPETITIONS /10, &TimeUnits::MICROSECOND);
+            let (pass_1_total_time, r2) = _run_pass("; pass1: ", "", select_function, &BigOAlgorithmType::ConstantSet, 0..PASS_1_SET_SIZE, &TimeUnits::MICROSECOND);
+            let (pass_2_total_time, r3) = _run_pass("; pass2: ", "): ", select_function, &BigOAlgorithmType::ConstantSet, PASS_2_SET_SIZE - REPETITIONS..PASS_2_SET_SIZE, &TimeUnits::MICROSECOND);
 
             let observed_analysis = analyse_constant_set_algorithm(ConstantSetAlgorithmMeasurements {
                 measurement_name,
@@ -418,13 +423,13 @@ mod tests {
     fn analyse_set_resizing_algorithm_real_test() {
 
         fn o_1_insert(mut _n: u32) -> u32 {
-            busy_loop(conditionals::BUSY_LOOP_DELAY*2)
+            busy_loop(BUSY_LOOP_DELAY*2)
         }
 
         fn o_log_n_insert(mut n: u32) -> u32 {
             let mut r: u32 = 0;
             while n > 0 {
-                r = r ^ busy_loop(conditionals::BUSY_LOOP_DELAY/2);
+                r = r ^ busy_loop(BUSY_LOOP_DELAY/2);
                 n = n/2;
             }
             r
@@ -434,21 +439,21 @@ mod tests {
         fn o_n_insert(mut n: u32) -> u32 {
             let mut r: u32 = 0;
             while n > 1 {
-                r = r ^ busy_loop(conditionals::BUSY_LOOP_DELAY/100);
+                r = r ^ busy_loop(BUSY_LOOP_DELAY/100);
                 n = n-2;
             }
             r
         }
 
-        let assert = |measurement_name, mut insert_function: fn(u32) -> u32, expected_complexity| {
-            let delta_set_size = 2000;
+        let assert = |measurement_name, insert_function: fn(u32) -> u32, expected_complexity| {
+            let delta_set_size = 3000;
             OUTPUT(&format!("Real '{}' with {} elements on each pass ", measurement_name, delta_set_size));
 
             /* warmup pass -- container / database should be reset before and after this */
-            let (_warmup_time,           r1) = _run_pass("(warmup: ", "", &mut insert_function, &BigOAlgorithmType::SetResizing, 0..delta_set_size/10, &TimeUnits::MICROSECOND);
+            let (_warmup_time,           r1) = _run_pass("(warmup: ", "", insert_function, &BigOAlgorithmType::SetResizing, 0..delta_set_size/10, &TimeUnits::MICROSECOND);
             /* if we were operating on real data, we would reset the container / database after the warmup, before running pass 1 */
-            let (pass_1_total_time, r2) = _run_pass("; pass1: ", "", &mut insert_function, &BigOAlgorithmType::SetResizing, 0..delta_set_size, &TimeUnits::MICROSECOND);
-            let (pass_2_total_time, r3) = _run_pass("; pass2: ", "): ", &mut insert_function, &BigOAlgorithmType::SetResizing, delta_set_size..delta_set_size*2, &TimeUnits::MICROSECOND);
+            let (pass_1_total_time, r2) = _run_pass("; pass1: ", "", insert_function, &BigOAlgorithmType::SetResizing, 0..delta_set_size, &TimeUnits::MICROSECOND);
+            let (pass_2_total_time, r3) = _run_pass("; pass2: ", "): ", insert_function, &BigOAlgorithmType::SetResizing, delta_set_size..delta_set_size*2, &TimeUnits::MICROSECOND);
 
             let observed_analysis = analyse_set_resizing_algorithm(SetResizingAlgorithmMeasurements {
                 measurement_name,
@@ -476,14 +481,14 @@ mod tests {
     }
 
     /// wrap around the original 'run_pass' to output intermediate results
-    fn _run_pass<_AlgorithmClosure: FnMut(u32) -> u32,
+    fn _run_pass<_AlgorithmClosure: Fn(u32) -> u32 + Sync,
                  T: TryInto<u64> > (result_prefix: &str,
                                     result_suffix: &str,
-                                    algorithm: &mut _AlgorithmClosure,
+                                    algorithm: _AlgorithmClosure,
                                     algorithm_type: &BigOAlgorithmType,
                                     range: Range<u32>,
                                     unit: &TimeUnit<T>) -> (u64, u32) {
-        let (pass_elapsed_us, r) = run_pass(algorithm, algorithm_type, range, unit);
+        let (pass_elapsed_us, r) = run_pass(&algorithm, algorithm_type, range, unit, 1);
         OUTPUT(&format!("{}{}{}{}", result_prefix, pass_elapsed_us, unit.unit_str, result_suffix));
         (pass_elapsed_us, r)
     }

@@ -5,13 +5,14 @@
 #![warn(dead_code)]
 
 use std::io::{stdout,stderr,Write};
+use crate::metrics_allocator::MetricsAllocator;
 
 #[cfg(debug_assertions)]
-/// busy waiting constant for debug & release compilation
-pub const BUSY_LOOP_DELAY: u32 = 9999;
+/// loop multiplier for debug compilation
+pub const LOOP_MULTIPLIER: u32 = 1;
 #[cfg(not(debug_assertions))]
-/// busy waiting constant for debug & release compilation
-pub const BUSY_LOOP_DELAY: u32 = 9999999;
+/// loop multiplier for release compilation
+pub const LOOP_MULTIPLIER: u32 = 100;
 
 // if features = stdout
 pub const OUTPUT: fn(&str) = stdout_write;
@@ -36,3 +37,7 @@ fn null_write(_buf: &str) {
     // release compilations will optimize out this call for '_buf' is not used
 }
 
+#[cfg(test)]
+#[global_allocator]
+/// Custom allocator when running tests
+pub static ALLOC: MetricsAllocator = MetricsAllocator::new();
