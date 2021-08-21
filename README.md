@@ -14,6 +14,8 @@ Contents:
         mmap-containers -- experiments with mmaped containers
         databases -- trying some NoSQL (object) embedded database crates...
         mmapped-cached-crate -- exploring the wonderful 'cached' crate and trying it with a mmap backed cache store
+        big-O -- big-O crate spikes
+        first-class-closures -- exploring closures as first-class values, including the possibility & circumsstances of their execution in different threads
         cpp-interop -- aiming at the higher efficiency possible
 
     Rust 2021:

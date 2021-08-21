@@ -1,0 +1,15 @@
+[package]
+name = "first-class-closures"
+version = "0.1.0"
+edition = "2018"
+default-run = "first-class-closures"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "first-class-closures"
+path = "src/first-class-closures.rs"
+
+[dependencies]
+crossbeam = "0.8"   # scoped threads
+parking_lot = "0.11"
