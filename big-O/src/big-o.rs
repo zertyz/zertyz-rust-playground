@@ -79,11 +79,6 @@ pub fn analyze_crud_algorithm<'a,
         // warmup (only on the first pass)
         if pass == 0 && warmup_percentage > 0 {
 
-eprintln!("\nHey! Ranges for warmup!!");
-eprintln!("\tC: {:?}", calc_warmup_CRU_range(create_iterations_per_pass));
-eprintln!("\tR: {:?}", calc_warmup_CRU_range(  read_iterations_per_pass));
-eprintln!("\tU: {:?}", calc_warmup_CRU_range(update_iterations_per_pass));
-eprintln!("\tD: {:?}", calc_warmup_D_range  (delete_iterations_per_pass));
             let warmup_start = SystemTime::now();
             _output("warming up [");
             io::stdout().flush().unwrap();
@@ -124,10 +119,6 @@ eprintln!("\tD: {:?}", calc_warmup_D_range  (delete_iterations_per_pass));
             "); Second"
         }));
 
-eprintln!("\nHey! CRU Ranges for pass {}!!", pass);
-eprintln!("\tC: {:?}", calc_regular_CRU_range(create_iterations_per_pass, pass));
-eprintln!("\tR: {:?}", calc_regular_CRU_range(  read_iterations_per_pass, pass));
-eprintln!("\tU: {:?}", calc_regular_CRU_range(update_iterations_per_pass, pass));
         // execute regular passes verbosely
         let (create_elapsed, cr) = run_pass_verbosely("create: ", "",   &create_fn, &BigOAlgorithmType::SetResizing, calc_regular_CRU_range(create_iterations_per_pass, pass), time_unit, create_threads, &mut _output);
         let (read_elapsed,   rr) = run_pass_verbosely("; read: ", "",   &read_fn,   &BigOAlgorithmType::ConstantSet, calc_regular_CRU_range(  read_iterations_per_pass, pass), time_unit, read_threads,   &mut _output);
@@ -183,7 +174,6 @@ eprintln!("\tU: {:?}", calc_regular_CRU_range(update_iterations_per_pass, pass))
             } else {
                 "2nd"
             });
-eprintln!("\nHey! D Range for pass {}: {:?}", pass, calc_regular_CRU_range(create_iterations_per_pass, pass));
             let (delete_elapsed, dr) = run_pass_verbosely(&msg, "", &delete_fn, &BigOAlgorithmType::SetResizing, calc_regular_D_range(delete_iterations_per_pass, pass), time_unit, delete_threads, &mut _output);
             delete_elapsed_passes[pass as usize] = delete_elapsed;
             r += dr;
@@ -431,7 +421,7 @@ mod tests {
     fn thread_chunk_division() {
         let iterations_per_pass = 1000;
         for n_threads in [1,2,4,5,10] {
-            let map_locker = parking_lot::RwLock::new(HashMap::<u32, u32>::with_capacity(iterations_per_pass as usize));
+            let map_locker = parking_lot::RwLock::new(HashMap::<u32, u32>::with_capacity(2 * iterations_per_pass as usize));
             let max_length = AtomicU32::new(0);
             analyze_crud_algorithm("Push & Pop (best case) Vec with ParkingLot",
                                    |_n| {0},
@@ -493,7 +483,7 @@ let mem_save_point = ALLOC.save_point();
                             let mut vec = vec_locker.write();
                             vec.pop().unwrap()
                         },
-                0, iterations_per_pass, iterations_per_pass, iterations_per_pass, iterations_per_pass,
+                25, iterations_per_pass, iterations_per_pass, iterations_per_pass, iterations_per_pass,
                 n_threads, n_threads, n_threads, n_threads,
                 &TimeUnits::MICROSECOND);
 eprintln!("ALLOCATION STATS: {}", ALLOC.delta_statistics(&mem_save_point));
@@ -512,9 +502,9 @@ eprintln!("ALLOCATION STATS: {}", ALLOC.delta_statistics(&mem_save_point));
     #[serial(cpu)]
     fn vec_worst_case_algorithm_analysis() {
 let mem_save_point = ALLOC.save_point();
-        let iterations_per_pass: u32 = 10_000/* *conditionals::LOOP_MULTIPLIER*/;
+        let iterations_per_pass: u32 = 25_000/* *conditionals::LOOP_MULTIPLIER*/;
         let n_threads = 1;
-        let vec_locker = parking_lot::RwLock::new(Vec::<u32>::with_capacity(2 * iterations_per_pass as usize));
+        let vec_locker = parking_lot::RwLock::new(Vec::<u32>::with_capacity(0));
         let crud_analysis = analyze_crud_algorithm("Insert & Remove (worse case) Vec with ParkingLot",
                |_n| {
                    let mut vec = vec_locker.write();
@@ -530,18 +520,18 @@ let mem_save_point = ALLOC.save_point();
                },
                |n| {
                    let vec = vec_locker.read();
-                   vec[n as usize]
+                   vec[(n % iterations_per_pass) as usize]
                },
                |n| {
                    let mut vec = vec_locker.write();
-                   vec[n as usize] = n;
+                   vec[(n % iterations_per_pass) as usize] = n;
                    vec.len() as u32
                },
                |_n| {
                    let mut vec = vec_locker.write();
                    vec.remove(0)
                },
-               25, iterations_per_pass, iterations_per_pass, iterations_per_pass, iterations_per_pass,
+               0, iterations_per_pass, iterations_per_pass*10, iterations_per_pass*10, iterations_per_pass,
                n_threads, n_threads, n_threads, n_threads,
                &TimeUnits::MICROSECOND);
 eprintln!("ALLOCATION STATS: {}", ALLOC.delta_statistics(&mem_save_point));
@@ -558,14 +548,14 @@ eprintln!("ALLOCATION STATS: {}", ALLOC.delta_statistics(&mem_save_point));
     #[serial(cpu)]
     fn hashmap_algorithm_analysis() {
 let mem_save_point = ALLOC.save_point();
-        let iterations_per_pass = 30_000*conditionals::LOOP_MULTIPLIER;
+        let iterations_per_pass = 40_000*conditionals::LOOP_MULTIPLIER;
         let n_threads = 1;
-        let map_locker = Arc::new(parking_lot::RwLock::new(HashMap::<String, u32>::with_capacity(0)));
+        let map_locker = Arc::new(parking_lot::RwLock::new(HashMap::<String, u32>::with_capacity(2 * iterations_per_pass as usize)));
         let crud_analysis = analyze_crud_algorithm("Hashmap<String, u32> with ParkingLot",
                |_n| {
                    let mut hashmap = map_locker.write();
                    hashmap.clear();
-                   hashmap.shrink_to_fit();
+                   //hashmap.shrink_to_fit();
                    hashmap.len() as u32
                },
                |n| {

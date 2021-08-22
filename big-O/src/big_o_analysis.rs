@@ -31,7 +31,7 @@ impl<T: BigOMeasurements> Display for BigOAlgorithmAnalysis<T> {
 /// to attend to rustc's rules. Most probably this trait is of no use outside it's own module.
 pub trait BigOMeasurements: Display {}
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum BigOAlgorithmComplexity {
     BetterThanO1,
     O1,
@@ -109,7 +109,7 @@ pub fn analyse_constant_set_algorithm(measurements: ConstantSetAlgorithmMeasurem
 
     let computed_complexity: BigOAlgorithmAnalysis<ConstantSetAlgorithmMeasurements>;
 
-    if ((t1/t2) - 1.0_f64) >= PERCENT_TOLERANCE {
+    if ((t1/t2) - 1.0_f64) > PERCENT_TOLERANCE {
         // sanity check
         computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::BetterThanO1, measurements};
     } else if ((t2/t1) - 1.0_f64).abs() <= PERCENT_TOLERANCE {
@@ -172,7 +172,7 @@ pub fn analyse_set_resizing_algorithm(measurements: SetResizingAlgorithmMeasurem
 
     let computed_complexity: BigOAlgorithmAnalysis<SetResizingAlgorithmMeasurements>;
 
-    if ((t1/t2) - 1.0_f64) >= PERCENT_TOLERANCE {
+    if ((t1/t2) - 1.0_f64) > PERCENT_TOLERANCE {
         // sanity check
         computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::BetterThanO1, measurements};
     } else if ((t2/t1) - 1.0_f64).abs() <= PERCENT_TOLERANCE {
@@ -243,7 +243,7 @@ mod tests {
         assert("Theoretical better than O(1) Update/Select", BigOAlgorithmComplexity::BetterThanO1,ConstantSetAlgorithmMeasurements {
             measurement_name,
             pass_1_total_time: 100,
-            pass_2_total_time: 90,
+            pass_2_total_time: 100 - (PERCENT_TOLERANCE*100.0) as u64,
             pass_1_set_size: 1000,
             pass_2_set_size: 2000,
             repetitions: 1000
@@ -312,7 +312,7 @@ mod tests {
         assert("Theoretical better than O(1) Insert/Delete", BigOAlgorithmComplexity::BetterThanO1, SetResizingAlgorithmMeasurements {
             measurement_name,
             pass_1_total_time: 100,
-            pass_2_total_time: 90,
+            pass_2_total_time: 100 - (PERCENT_TOLERANCE*100.0) as u64,
             delta_set_size: 1000
         });
 
@@ -354,14 +354,54 @@ mod tests {
 
     #[test]
     #[serial(cpu)]
+    fn smooth_transitions() {
+        // constant_set
+        let mut last_time_analysis = BigOAlgorithmComplexity::BetterThanO1;
+        for pass_2_total_time in 0..500 {
+            let current_analysis = analyse_constant_set_algorithm(ConstantSetAlgorithmMeasurements {
+                measurement_name: "Smooth Transitions",
+                pass_1_total_time: 100,
+                pass_2_total_time,
+                pass_1_set_size: 1000,
+                pass_2_set_size: 2000,
+                repetitions: 1000
+            });
+            let delta = current_analysis.complexity as i32 - last_time_analysis as i32;
+            assert!(delta == 0 || delta == 1, "Time analysis 'analyse_constant_set_algorithm(...)' suddenly went from {:?} to {:?} at pass_2_total_time of {}", last_time_analysis, current_analysis.complexity, pass_2_total_time);
+            if delta == 1 {
+                last_time_analysis = current_analysis.complexity;
+                eprintln!("'analyse_constant_set_algorithm(...)' transitioned to {:?} at {}", current_analysis.complexity, pass_2_total_time);
+            }
+        }
+
+        // set_resizing
+        let mut last_time_analysis = BigOAlgorithmComplexity::BetterThanO1;
+        for pass_2_total_time in 0..500 {
+            let current_analysis = analyse_set_resizing_algorithm(SetResizingAlgorithmMeasurements {
+                measurement_name: "Smooth Transitions",
+                pass_1_total_time: 100,
+                pass_2_total_time,
+                delta_set_size: 1000,
+            });
+            let delta = current_analysis.complexity as i32 - last_time_analysis as i32;
+            assert!(delta == 0 || delta == 1, "Time analysis 'analyse_set_resizing_algorithm(...)' suddenly went from {:?} to {:?} at pass_2_total_time of {}", last_time_analysis, current_analysis.complexity, pass_2_total_time);
+            if delta == 1 {
+                last_time_analysis = current_analysis.complexity;
+                eprintln!("'analyse_set_resizing_algorithm(...)' transitioned to {:?} at {}", current_analysis.complexity, pass_2_total_time);
+            }
+        }
+    }
+
+    #[test]
+    #[serial(cpu)]
     fn analyse_constant_set_algorithm_real_test() {
 
-        const REPETITIONS: u32 = 2000;
+        const REPETITIONS: u32 = 4000;
         const PASS_1_SET_SIZE: u32 = REPETITIONS;
-        const PASS_2_SET_SIZE: u32 = REPETITIONS *3;
+        const PASS_2_SET_SIZE: u32 = REPETITIONS * 3;
 
         fn o_1_select(mut _n: u32) -> u32 {
-            busy_loop(BUSY_LOOP_DELAY*10)
+            busy_loop(BUSY_LOOP_DELAY*5)
         }
 
         fn o_log_n_select(mut n: u32) -> u32 {
@@ -372,7 +412,7 @@ mod tests {
                 n = PASS_2_SET_SIZE;
             }
             while n > 0 {
-                r += busy_loop(BUSY_LOOP_DELAY);
+                r += busy_loop(BUSY_LOOP_DELAY/2);
                 n /= 2;
             }
             r
@@ -386,7 +426,7 @@ mod tests {
                 n = PASS_2_SET_SIZE;
             }
             while n > 0 {
-                r += busy_loop(BUSY_LOOP_DELAY/100);
+                r += busy_loop(BUSY_LOOP_DELAY/500);
                 n -= 1;
             }
             r
@@ -439,7 +479,7 @@ mod tests {
         fn o_n_insert(mut n: u32) -> u32 {
             let mut r: u32 = 0;
             while n > 1 {
-                r = r ^ busy_loop(BUSY_LOOP_DELAY/100);
+                r = r ^ busy_loop(BUSY_LOOP_DELAY/50);
                 n = n-2;
             }
             r
