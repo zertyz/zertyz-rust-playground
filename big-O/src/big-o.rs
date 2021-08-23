@@ -2,7 +2,7 @@ pub mod big_o_analysis;
 mod conditionals;
 mod metrics_allocator;
 
-use crate::big_o_analysis::{SetResizingAlgorithmMeasurements, ConstantSetAlgorithmMeasurements, BigOAlgorithmAnalysis};
+use crate::big_o_analysis::{SetResizingAlgorithmMeasurements, ConstantSetAlgorithmMeasurements, BigOAlgorithmAnalysis, BigOAlgorithmComplexity};
 use crate::conditionals::OUTPUT;
 
 use std::convert::TryInto;
@@ -194,6 +194,41 @@ pub fn analyze_crud_algorithm<'a,
     }
 
     (create_analysis, read_analysis, update_analysis, delete_analysis, full_report)
+}
+
+/// experimental/rudimentary assertion macro to let an 'observed_complexity' better than 'expected_complexity' to pass,
+/// in the hope to reduce false-negative test failures
+#[macro_export]
+macro_rules! assert_complexity {
+    ($observed_complexity:expr, $expected_complexity:expr $(,)?) => ({
+        match (&$observed_complexity, &$expected_complexity) {
+            (observed_complexity_val, expected_complexity_val) => {
+                if !(*observed_complexity_val as u32 <= *expected_complexity_val as u32) {
+                    assert_eq!(observed_complexity_val, expected_complexity_val, "expected enum value: {}; observed: {} -- which is not equal or less than the expected", expected_complexity_val, observed_complexity_val);
+                }
+            }
+        }
+    });
+    ($observed_complexity:expr, $expected_complexity:expr, $($arg:tt)+) => ({
+        match (&$observed_complexity, &$expected_complexity) {
+            (observed_complexity_val, expected_complexity_val) => {
+                if !(*observed_complexity_val as u32 <= *expected_complexity_val as u32) {
+                    assert_eq!(observed_complexity_val, expected_complexity_val, $($arg)+);
+                }
+            }
+        }
+    });
+}
+
+struct PassResult {
+    /// unit-less time took to run the pass
+    elapsed_time: u64,
+    /// number of allocations / deallocations / reallocations requested during the pass run
+    allocator_calls: u64,
+    /// sum of all allocations / reallocations
+    allocated_bytes: u64,
+    /// sum of all deallocations / reallocations
+    deallocated_bytes: u64,
 }
 
 /// Runs a pass on the given 'algorithm' callback function (see [AlgorithmFnPtr]),
@@ -488,10 +523,10 @@ let mem_save_point = ALLOC.save_point();
                 &TimeUnits::MICROSECOND);
 eprintln!("ALLOCATION STATS: {}", ALLOC.delta_statistics(&mem_save_point));
         let (create_analysis, read_analysis, update_analysis, delete_analysis, _full_report) = crud_analysis;
-        assert_eq!(create_analysis.complexity, BigOAlgorithmComplexity::O1, "CREATE complexity mismatch");
-        assert_eq!(  read_analysis.complexity, BigOAlgorithmComplexity::O1,   "READ complexity mismatch");
-        assert_eq!(update_analysis.complexity, BigOAlgorithmComplexity::O1, "UPDATE complexity mismatch");
-        assert_eq!(delete_analysis.complexity, BigOAlgorithmComplexity::O1, "DELETE complexity mismatch");
+        assert_complexity!(create_analysis.complexity, BigOAlgorithmComplexity::O1, "CREATE complexity mismatch");
+        assert_complexity!(  read_analysis.complexity, BigOAlgorithmComplexity::O1,   "READ complexity mismatch");
+        assert_complexity!(update_analysis.complexity, BigOAlgorithmComplexity::O1, "UPDATE complexity mismatch");
+        assert_complexity!(delete_analysis.complexity, BigOAlgorithmComplexity::O1, "DELETE complexity mismatch");
     }
 
     /// Attests the worse case CRUD for vectors:
@@ -536,10 +571,10 @@ let mem_save_point = ALLOC.save_point();
                &TimeUnits::MICROSECOND);
 eprintln!("ALLOCATION STATS: {}", ALLOC.delta_statistics(&mem_save_point));
         let (create_analysis, read_analysis, update_analysis, delete_analysis, _full_report) = crud_analysis;
-        assert_eq!(create_analysis.complexity, BigOAlgorithmComplexity::ON, "CREATE complexity mismatch");
-        assert_eq!(  read_analysis.complexity, BigOAlgorithmComplexity::O1,   "READ complexity mismatch");
-        assert_eq!(update_analysis.complexity, BigOAlgorithmComplexity::O1, "UPDATE complexity mismatch");
-        assert_eq!(delete_analysis.complexity, BigOAlgorithmComplexity::ON, "DELETE complexity mismatch");
+        assert_complexity!(create_analysis.complexity, BigOAlgorithmComplexity::ON, "CREATE complexity mismatch");
+        assert_complexity!(  read_analysis.complexity, BigOAlgorithmComplexity::O1,   "READ complexity mismatch");
+        assert_complexity!(update_analysis.complexity, BigOAlgorithmComplexity::O1, "UPDATE complexity mismatch");
+        assert_complexity!(delete_analysis.complexity, BigOAlgorithmComplexity::ON, "DELETE complexity mismatch");
 
     }
 
@@ -585,9 +620,9 @@ let mem_save_point = ALLOC.save_point();
                &TimeUnits::MICROSECOND);
 eprintln!("ALLOCATION STATS: {}", ALLOC.delta_statistics(&mem_save_point));
         let (create_analysis, read_analysis, update_analysis, delete_analysis, _full_report) = crud_analysis;
-        assert_eq!(create_analysis.complexity, BigOAlgorithmComplexity::O1, "CREATE complexity mismatch");
-        assert_eq!(  read_analysis.complexity, BigOAlgorithmComplexity::O1,   "READ complexity mismatch");
-        assert_eq!(update_analysis.complexity, BigOAlgorithmComplexity::O1, "UPDATE complexity mismatch");
-        assert_eq!(delete_analysis.complexity, BigOAlgorithmComplexity::O1, "DELETE complexity mismatch");
+        assert_complexity!(create_analysis.complexity, BigOAlgorithmComplexity::O1, "CREATE complexity mismatch");
+        assert_complexity!(  read_analysis.complexity, BigOAlgorithmComplexity::O1,   "READ complexity mismatch");
+        assert_complexity!(update_analysis.complexity, BigOAlgorithmComplexity::O1, "UPDATE complexity mismatch");
+        assert_complexity!(delete_analysis.complexity, BigOAlgorithmComplexity::O1, "DELETE complexity mismatch");
     }
 }
