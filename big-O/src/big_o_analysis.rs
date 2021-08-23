@@ -528,9 +528,9 @@ mod tests {
                                     algorithm_type: &BigOAlgorithmType,
                                     range: Range<u32>,
                                     unit: &TimeUnit<T>) -> (u64, u32) {
-        let (pass_elapsed_us, r) = run_pass(&algorithm, algorithm_type, range, unit, 1);
-        OUTPUT(&format!("{}{}{}{}", result_prefix, pass_elapsed_us, unit.unit_str, result_suffix));
-        (pass_elapsed_us, r)
+        let (pass_result, r) = run_pass(&algorithm, algorithm_type, range, unit, 1);
+        OUTPUT(&format!("{}{}{}{}", result_prefix, pass_result.elapsed_time, unit.unit_str, result_suffix));
+        (pass_result.elapsed_time, r)
     }
 
 }

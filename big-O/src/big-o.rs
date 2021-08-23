@@ -49,9 +49,14 @@ pub fn analyze_crud_algorithm<'a,
                                    threads: u32, mut _output: _OutputClosure)
                 -> (u64, u32) {
         _output(&format!("{}", result_prefix));
-        let (pass_elapsed, r) = run_pass(algorithm, algorithm_type, range, unit, threads);
-        _output(&format!("{}{}{}", pass_elapsed, unit.unit_str, result_suffix));
-        (pass_elapsed, r)
+        let (pass_result, r) = run_pass(algorithm, algorithm_type, range, unit, threads);
+        let memory_delta = pass_result.allocated_bytes as f32 - pass_result.deallocated_bytes as f32;
+        let sign = if memory_delta > 0.0 {"+"} else {""};
+        let memory_unit = if memory_delta > 1e9 {"G"} else if memory_delta > 1e6 {"M"} else if memory_delta > 1e3 {"K"} else {"b"};
+        let memory_delta = if memory_delta > 1e9 {memory_delta/1e9} else if memory_delta > 1e6 {memory_delta/1e6} else if memory_delta > 1e3 {memory_delta/1e3} else {memory_delta};
+        let memory_stats = format!("{}{}{}", sign, memory_delta, memory_unit);
+        _output(&format!("{}{}/{}{}", pass_result.elapsed_time, unit.unit_str, memory_stats, result_suffix));
+        (pass_result.elapsed_time, r)
     }
 
     const NUMBER_OF_PASSES: u32 = 2;
@@ -224,11 +229,11 @@ struct PassResult {
     /// unit-less time took to run the pass
     elapsed_time: u64,
     /// number of allocations / deallocations / reallocations requested during the pass run
-    allocator_calls: u64,
+    allocator_calls: usize,
     /// sum of all allocations / reallocations
-    allocated_bytes: u64,
+    allocated_bytes: usize,
     /// sum of all deallocations / reallocations
-    deallocated_bytes: u64,
+    deallocated_bytes: usize,
 }
 
 /// Runs a pass on the given 'algorithm' callback function (see [AlgorithmFnPtr]),
@@ -240,9 +245,9 @@ struct PassResult {
 ///     fn algorithm(i: u32) -> u32 {0}
 /// ````
 /// returns: tuple with (elapsed_time: u64, computed_number: u32)
-fn run_pass<_AlgorithmClosure: Fn(u32) -> u32 + Sync,
-            ScalarDuration: TryInto<u64>> (algorithm: &_AlgorithmClosure, algorithm_type: &BigOAlgorithmType, range: Range<u32>, unit: &TimeUnit<ScalarDuration>, threads: u32)
-                                           -> (u64, u32) {
+fn run_pass<_AlgorithmClosure: Fn(u32) -> u32 + Sync, ScalarDuration: TryInto<u64>>
+           (algorithm: &_AlgorithmClosure, algorithm_type: &BigOAlgorithmType, range: Range<u32>, unit: &TimeUnit<ScalarDuration>, threads: u32)
+           -> (PassResult, u32) {
 
     type ThreadLoopResult = (Duration, u32);
 
@@ -291,6 +296,7 @@ fn run_pass<_AlgorithmClosure: Fn(u32) -> u32 + Sync,
         let i32_range = range.end as i32 .. range.start as i32;
         let chunk_size = (i32_range.end-i32_range.start)/threads as i32;
         let mut thread_handlers: Vec<crossbeam::thread::ScopedJoinHandle<ThreadLoopResult>> = Vec::with_capacity(threads as usize);
+        let allocator_savepoint = conditionals::ALLOC.save_point();
         for n in 0..threads as i32 {
             let chunked_range = i32_range.start+chunk_size*n..i32_range.start+chunk_size*(n+1);
             thread_handlers.push( scope.spawn(move |_| thread_loop(algorithm, algorithm_type, chunked_range.start as u32 .. chunked_range.end as u32)) );
@@ -310,7 +316,14 @@ fn run_pass<_AlgorithmClosure: Fn(u32) -> u32 + Sync,
             r ^= thread_r;
         }
 
-        (elapsed_average as u64, r)
+        let allocator_statistics = conditionals::ALLOC.delta_statistics(&allocator_savepoint);
+
+        (PassResult {
+            elapsed_time: elapsed_average as u64,
+            allocator_calls: allocator_statistics.allocations_count + allocator_statistics.deallocations_count + allocator_statistics.reallocations_count + allocator_statistics.zeroed_allocations_count,
+            allocated_bytes: allocator_statistics.allocated_bytes + allocator_statistics.reallocated_news_bytes + allocator_statistics.zeroed_allocated_bytes,
+            deallocated_bytes: allocator_statistics.deallocated_bytes + allocator_statistics.reallocated_originals_bytes,
+        }, r)
 
     }).unwrap()
 
