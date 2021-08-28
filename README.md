@@ -19,3 +19,25 @@ Contents:
         cpp-interop -- aiming at the higher efficiency possible
 
     Rust 2021:
+
+
+# Amusements
+
+## to generate the program module graphs:
+## =====================================
+```
+package="big-O"; for layout in dot neato twopi circo fdp sfdp; do for format in svg pdf; do cargo modules generate graph --all-features --with-uses --with-types --with-tests --layout ${layout} --package "$package" | grep -v -E "\"${package}\" |label=\"owns\"" | sed 's|label="uses"|label=""|g' | sed 's|splines="line"|splines=true|g' | sed "s|${package}::||g" | sed 's|::|⸬|g' | dot -x -T${format} -o ${layout}.${format}; done; done
+```
+
+### install the 'cargo-modules' tool with:
+```
+cargo install cargo-modules
+```
+
+## to generate the program dependencies graph:
+## ==========================================
+```
+cargo depgraph --all-features --all-deps | dot -x -Tpdf -o deps.pdf
+```
+
+### install 'cargo-depgraph' from aur or like we did for 'cargo-modueles' above

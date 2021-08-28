@@ -9,14 +9,18 @@ use std::fmt::{Display,Formatter};
 const PERCENT_TOLERANCE: f64 = 0.10;
 
 /// return result for this module's main functions [analyse_constant_set_algorithm] & [analyse_set_resizing_algorithm]
-pub struct BigOAlgorithmAnalysis<T: BigOMeasurements> {
-    pub complexity:   BigOAlgorithmComplexity,
-    pub measurements: T,
+pub struct BigOAlgorithmAnalysis<T: BigOTimeMeasurements/*,
+                                 S: BigSpaceMeasurements*/> {
+    pub time_complexity:    BigOAlgorithmComplexity,
+    pub time_measurements:  T,
+/*    /// related to the maximum used memory (even if it is freed afterwards)
+    pub space_complexity:   BigOAlgorithmComplexity,
+    pub space_measurements: S,*/
 }
-impl<T: BigOMeasurements> Display for BigOAlgorithmAnalysis<T> {
+impl<T: BigOTimeMeasurements> Display for BigOAlgorithmAnalysis<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = || write!(f, "{}--> Algorithm Analysis: {}", self.measurements, self.complexity.as_pretty_str());
-        match self.complexity {
+        let mut fmt = || write!(f, "{}--> Algorithm Analysis: {}", self.time_measurements, self.time_complexity.as_pretty_str());
+        match self.time_complexity {
             BigOAlgorithmComplexity::BetterThanO1      => fmt(),
             BigOAlgorithmComplexity::O1                => fmt(),
             BigOAlgorithmComplexity::OLogN             => fmt(),
@@ -29,7 +33,7 @@ impl<T: BigOMeasurements> Display for BigOAlgorithmAnalysis<T> {
 
 /// base trait for [SetResizingAlgorithmMeasurements] & [ConstantSetAlgorithmMeasurements], made public
 /// to attend to rustc's rules. Most probably this trait is of no use outside it's own module.
-pub trait BigOMeasurements: Display {}
+pub trait BigOTimeMeasurements: Display {}
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum BigOAlgorithmComplexity {
@@ -75,7 +79,7 @@ pub struct ConstantSetAlgorithmMeasurements<'a> {
     /// each algorithm iteration should behave as executing on the same element without leaving side-effects
     pub repetitions: u32,
 }
-impl<'a> BigOMeasurements for ConstantSetAlgorithmMeasurements<'a> {}
+impl<'a> BigOTimeMeasurements for ConstantSetAlgorithmMeasurements<'a> {}
 impl<'a> Display for ConstantSetAlgorithmMeasurements<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "'{}' constant set algorithm measurements:\n\
@@ -111,22 +115,22 @@ pub fn analyse_constant_set_algorithm(measurements: ConstantSetAlgorithmMeasurem
 
     if ((t1/t2) - 1.0_f64) > PERCENT_TOLERANCE {
         // sanity check
-        computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::BetterThanO1, measurements};
+        computed_complexity = BigOAlgorithmAnalysis { time_complexity: BigOAlgorithmComplexity::BetterThanO1, time_measurements: measurements };
     } else if ((t2/t1) - 1.0_f64).abs() <= PERCENT_TOLERANCE {
         // check for O(1) -- t2/t1 ~= 1
-        computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::O1, measurements};
+        computed_complexity = BigOAlgorithmAnalysis { time_complexity: BigOAlgorithmComplexity::O1, time_measurements: measurements };
     } else if ( ((t2/t1) / ( n2.log2() / n1.log2() )) - 1.0_f64 ).abs() <= PERCENT_TOLERANCE {
         // check for O(log(n)) -- (t2/t1) / (log(n2)/log(n1)) ~= 1
-        computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::OLogN, measurements};
+        computed_complexity = BigOAlgorithmAnalysis { time_complexity: BigOAlgorithmComplexity::OLogN, time_measurements: measurements };
     } else if ( ((t2/t1) / (n2 / n1)) - 1.0_f64 ).abs() <= PERCENT_TOLERANCE {
         // check for O(n) -- (t2/t1) / (n2/n1) ~= 1
-        computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::ON, measurements};
+        computed_complexity = BigOAlgorithmAnalysis { time_complexity: BigOAlgorithmComplexity::ON, time_measurements: measurements };
     } else if ( ((t2/t1) / (n2 / n1)) - 1.0_f64 ) > PERCENT_TOLERANCE {
         // check for worse than O(n)
-        computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::WorseThanON, measurements};
+        computed_complexity = BigOAlgorithmAnalysis { time_complexity: BigOAlgorithmComplexity::WorseThanON, time_measurements: measurements };
     } else {
         // by exclusion...
-        computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::BetweenOLogNAndON, measurements};
+        computed_complexity = BigOAlgorithmAnalysis { time_complexity: BigOAlgorithmComplexity::BetweenOLogNAndON, time_measurements: measurements };
     }
 
     computed_complexity
@@ -148,7 +152,7 @@ pub struct SetResizingAlgorithmMeasurements<'a> {
     /// and the test set must start or end with 0 elements
     pub delta_set_size: u32,
 }
-impl<'a> BigOMeasurements for SetResizingAlgorithmMeasurements<'a> {}
+impl<'a> BigOTimeMeasurements for SetResizingAlgorithmMeasurements<'a> {}
 impl<'a> Display for SetResizingAlgorithmMeasurements<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "'{}' set resizing algorithm measurements:\n\
@@ -174,22 +178,22 @@ pub fn analyse_set_resizing_algorithm(measurements: SetResizingAlgorithmMeasurem
 
     if ((t1/t2) - 1.0_f64) > PERCENT_TOLERANCE {
         // sanity check
-        computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::BetterThanO1, measurements};
+        computed_complexity = BigOAlgorithmAnalysis { time_complexity: BigOAlgorithmComplexity::BetterThanO1, time_measurements: measurements };
     } else if ((t2/t1) - 1.0_f64).abs() <= PERCENT_TOLERANCE {
         // check for O(1) -- t2/t1 ~= 1
-        computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::O1, measurements};
+        computed_complexity = BigOAlgorithmAnalysis { time_complexity: BigOAlgorithmComplexity::O1, time_measurements: measurements };
     } else if ( ((t2/t1) / ( (n * 3.0_f64).log2() / n.log2() )) - 1.0_f64 ).abs() < PERCENT_TOLERANCE {
         // check for O(log(n)) -- (t2/t1) / (log(n*3)/log(n)) ~= 1
-        computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::OLogN, measurements};
+        computed_complexity = BigOAlgorithmAnalysis { time_complexity: BigOAlgorithmComplexity::OLogN, time_measurements: measurements };
     } else if ( ((t2/t1) / 3.0_f64) - 1.0_f64 ).abs() <= PERCENT_TOLERANCE {
         // check for O(n) -- (t2/t1) / 3 ~= 1
-        computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::ON, measurements};
+        computed_complexity = BigOAlgorithmAnalysis { time_complexity: BigOAlgorithmComplexity::ON, time_measurements: measurements };
     } else if ( ((t2/t1) / 3.0_f64) - 1.0_f64 ) > PERCENT_TOLERANCE {
         // check for worse than O(n)
-        computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::WorseThanON, measurements};
+        computed_complexity = BigOAlgorithmAnalysis { time_complexity: BigOAlgorithmComplexity::WorseThanON, time_measurements: measurements };
     } else {
         // by exclusion...
-        computed_complexity = BigOAlgorithmAnalysis {complexity: BigOAlgorithmComplexity::BetweenOLogNAndON, measurements};
+        computed_complexity = BigOAlgorithmAnalysis { time_complexity: BigOAlgorithmComplexity::BetweenOLogNAndON, time_measurements: measurements };
     }
 
     computed_complexity
@@ -237,7 +241,7 @@ mod tests {
             measurements.measurement_name = measurement_name;
             let observed_analysis = analyse_constant_set_algorithm(measurements);
             OUTPUT(&format!("{}\n", observed_analysis));
-            assert_eq!(observed_analysis.complexity, expected_complexity, "Algorithm Analysis on CONSTANT SET algorithm for '{}' check failed!", measurement_name);
+            assert_eq!(observed_analysis.time_complexity, expected_complexity, "Algorithm Analysis on CONSTANT SET algorithm for '{}' check failed!", measurement_name);
         };
 
         assert("Theoretical better than O(1) Update/Select", BigOAlgorithmComplexity::BetterThanO1,ConstantSetAlgorithmMeasurements {
@@ -306,7 +310,7 @@ mod tests {
             measurements.measurement_name = measurement_name;
             let observed_analysis = analyse_set_resizing_algorithm(measurements);
             OUTPUT(&format!("{}\n", observed_analysis));
-            assert_eq!(observed_analysis.complexity, expected_complexity, "Algorithm Analysis on SET RESIZING algorithm for '{}' check failed!", measurement_name);
+            assert_eq!(observed_analysis.time_complexity, expected_complexity, "Algorithm Analysis on SET RESIZING algorithm for '{}' check failed!", measurement_name);
         };
 
         assert("Theoretical better than O(1) Insert/Delete", BigOAlgorithmComplexity::BetterThanO1, SetResizingAlgorithmMeasurements {
@@ -366,11 +370,11 @@ mod tests {
                 pass_2_set_size: 2000,
                 repetitions: 1000
             });
-            let delta = current_analysis.complexity as i32 - last_time_analysis as i32;
-            assert!(delta == 0 || delta == 1, "Time analysis 'analyse_constant_set_algorithm(...)' suddenly went from {:?} to {:?} at pass_2_total_time of {}", last_time_analysis, current_analysis.complexity, pass_2_total_time);
+            let delta = current_analysis.time_complexity as i32 - last_time_analysis as i32;
+            assert!(delta == 0 || delta == 1, "Time analysis 'analyse_constant_set_algorithm(...)' suddenly went from {:?} to {:?} at pass_2_total_time of {}", last_time_analysis, current_analysis.time_complexity, pass_2_total_time);
             if delta == 1 {
-                last_time_analysis = current_analysis.complexity;
-                eprintln!("'analyse_constant_set_algorithm(...)' transitioned to {:?} at {}", current_analysis.complexity, pass_2_total_time);
+                last_time_analysis = current_analysis.time_complexity;
+                eprintln!("'analyse_constant_set_algorithm(...)' transitioned to {:?} at {}", current_analysis.time_complexity, pass_2_total_time);
             }
         }
 
@@ -383,11 +387,11 @@ mod tests {
                 pass_2_total_time,
                 delta_set_size: 1000,
             });
-            let delta = current_analysis.complexity as i32 - last_time_analysis as i32;
-            assert!(delta == 0 || delta == 1, "Time analysis 'analyse_set_resizing_algorithm(...)' suddenly went from {:?} to {:?} at pass_2_total_time of {}", last_time_analysis, current_analysis.complexity, pass_2_total_time);
+            let delta = current_analysis.time_complexity as i32 - last_time_analysis as i32;
+            assert!(delta == 0 || delta == 1, "Time analysis 'analyse_set_resizing_algorithm(...)' suddenly went from {:?} to {:?} at pass_2_total_time of {}", last_time_analysis, current_analysis.time_complexity, pass_2_total_time);
             if delta == 1 {
-                last_time_analysis = current_analysis.complexity;
-                eprintln!("'analyse_set_resizing_algorithm(...)' transitioned to {:?} at {}", current_analysis.complexity, pass_2_total_time);
+                last_time_analysis = current_analysis.time_complexity;
+                eprintln!("'analyse_set_resizing_algorithm(...)' transitioned to {:?} at {}", current_analysis.time_complexity, pass_2_total_time);
             }
         }
     }
@@ -448,7 +452,7 @@ mod tests {
                 repetitions: REPETITIONS,
             });
             OUTPUT(&format!("\n{} (r={})\n", observed_analysis, r1+r2+r3));
-            assert_eq!(observed_analysis.complexity, expected_complexity, "Algorithm Analysis on CONSTANT SET algorithm for '{}' check failed!", measurement_name);
+            assert_eq!(observed_analysis.time_complexity, expected_complexity, "Algorithm Analysis on CONSTANT SET algorithm for '{}' check failed!", measurement_name);
 
         };
 
@@ -502,7 +506,7 @@ mod tests {
                 delta_set_size,
             });
             OUTPUT(&format!("\n{} (r={})\n", observed_analysis, r1^r2^r3));
-            assert_eq!(observed_analysis.complexity, expected_complexity, "Algorithm Analysis on SET RESIZING algorithm for '{}' check failed!", measurement_name);
+            assert_eq!(observed_analysis.time_complexity, expected_complexity, "Algorithm Analysis on SET RESIZING algorithm for '{}' check failed!", measurement_name);
 
         };
 

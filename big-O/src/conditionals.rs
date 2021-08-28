@@ -37,7 +37,11 @@ fn null_write(_buf: &str) {
     // release compilations will optimize out this call for '_buf' is not used
 }
 
+/// maximum number of "save points" that might be in use at the same time
+/// (for which a call to [MetricsAllocatorStatistics.delta_statistics] will still be made)
+const SAVE_POINT_RING_BUFFER_SIZE: usize = 16;
+
 #[cfg(test)]
 #[global_allocator]
 /// Custom allocator when running tests
-pub static ALLOC: MetricsAllocator = MetricsAllocator::new();
+pub static ALLOC: MetricsAllocator/*<SAVE_POINT_RING_BUFFER_SIZE>*/ = MetricsAllocator::new();

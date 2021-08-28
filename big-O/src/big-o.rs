@@ -1,6 +1,7 @@
 pub mod big_o_analysis;
 mod conditionals;
 mod metrics_allocator;
+mod ring_buffer;
 
 use crate::big_o_analysis::{SetResizingAlgorithmMeasurements, ConstantSetAlgorithmMeasurements, BigOAlgorithmAnalysis, BigOAlgorithmComplexity};
 use crate::conditionals::OUTPUT;
@@ -52,8 +53,8 @@ pub fn analyze_crud_algorithm<'a,
         let (pass_result, r) = run_pass(algorithm, algorithm_type, range, unit, threads);
         let memory_delta = pass_result.allocated_bytes as f32 - pass_result.deallocated_bytes as f32;
         let sign = if memory_delta > 0.0 {"+"} else {""};
-        let memory_unit = if memory_delta > 1e9 {"G"} else if memory_delta > 1e6 {"M"} else if memory_delta > 1e3 {"K"} else {"b"};
-        let memory_delta = if memory_delta > 1e9 {memory_delta/1e9} else if memory_delta > 1e6 {memory_delta/1e6} else if memory_delta > 1e3 {memory_delta/1e3} else {memory_delta};
+        let memory_unit = if memory_delta > (1<<30) as f32 {"G"}                         else if memory_delta > (1<<20) as f32 {"M"}                         else if memory_delta > (1<<10) as f32 {"K"} else {"b"};
+        let memory_delta = if memory_delta > (1<<30) as f32 {memory_delta/(1<<30) as f32} else if memory_delta > (1<<20) as f32 {memory_delta/(1<<20) as f32} else if memory_delta > (1<<10) as f32 {memory_delta/(1<<10) as f32} else {memory_delta};
         let memory_stats = format!("{}{}{}", sign, memory_delta, memory_unit);
         _output(&format!("{}{}/{}{}", pass_result.elapsed_time, unit.unit_str, memory_stats, result_suffix));
         (pass_result.elapsed_time, r)
@@ -372,7 +373,7 @@ mod tests {
     use serial_test::serial;
     use std::sync::Arc;
     use std::collections::HashMap;
-    use crate::big_o_analysis::{BigOMeasurements, BigOAlgorithmComplexity};
+    use crate::big_o_analysis::{BigOTimeMeasurements, BigOAlgorithmComplexity};
     use crate::conditionals::ALLOC;
 
     /// Attests that the right report structures are produced for all possible CRUD tests:
@@ -392,10 +393,10 @@ mod tests {
         fn assert_does_not_contain_status(report: &str, excerpt: &str) {
             assert!(!report.contains(excerpt), "found '{}' status on the full report, where it shouldn't be", excerpt);
         }
-        fn assert_contains_algorithm_report<T: BigOMeasurements>(report: &str, algorithm_analysis: BigOAlgorithmAnalysis<T>, algorithm_name: &str) {
+        fn assert_contains_algorithm_report<T: BigOTimeMeasurements>(report: &str, algorithm_analysis: BigOAlgorithmAnalysis<T>, algorithm_name: &str) {
             assert!(report.contains(&algorithm_analysis.to_string()), "couldn't find '{}' report analysis on the full report", algorithm_name);
         }
-        fn assert_does_not_contain_algorithm_report<T: BigOMeasurements>(report: &str, algorithm_analysis: BigOAlgorithmAnalysis<T>, algorithm_name: &str) {
+        fn assert_does_not_contain_algorithm_report<T: BigOTimeMeasurements>(report: &str, algorithm_analysis: BigOAlgorithmAnalysis<T>, algorithm_name: &str) {
             assert!(!report.contains(&algorithm_analysis.to_string()), "found a '{}' report analysis that shouldn't be on the full report", algorithm_name);
         }
 
@@ -536,13 +537,13 @@ let mem_save_point = ALLOC.save_point();
                 &TimeUnits::MICROSECOND);
 eprintln!("ALLOCATION STATS: {}", ALLOC.delta_statistics(&mem_save_point));
         let (create_analysis, read_analysis, update_analysis, delete_analysis, _full_report) = crud_analysis;
-        assert_complexity!(create_analysis.complexity, BigOAlgorithmComplexity::O1, "CREATE complexity mismatch");
-        assert_complexity!(  read_analysis.complexity, BigOAlgorithmComplexity::O1,   "READ complexity mismatch");
-        assert_complexity!(update_analysis.complexity, BigOAlgorithmComplexity::O1, "UPDATE complexity mismatch");
-        assert_complexity!(delete_analysis.complexity, BigOAlgorithmComplexity::O1, "DELETE complexity mismatch");
+        assert_complexity!(create_analysis.time_complexity, BigOAlgorithmComplexity::O1, "CREATE complexity mismatch");
+        assert_complexity!(  read_analysis.time_complexity, BigOAlgorithmComplexity::O1,   "READ complexity mismatch");
+        assert_complexity!(update_analysis.time_complexity, BigOAlgorithmComplexity::O1, "UPDATE complexity mismatch");
+        assert_complexity!(delete_analysis.time_complexity, BigOAlgorithmComplexity::O1, "DELETE complexity mismatch");
     }
 
-    /// Attests the worse case CRUD for vectors:
+    /// Attests the worst case CRUD for vectors:
     ///   - Create always at the beginning -- O(n)
     ///   - Delete always at the beginning -- O(n)
     ///   - Reads and updates as the usual O(1)
@@ -553,7 +554,7 @@ let mem_save_point = ALLOC.save_point();
         let iterations_per_pass: u32 = 25_000/* *conditionals::LOOP_MULTIPLIER*/;
         let n_threads = 1;
         let vec_locker = parking_lot::RwLock::new(Vec::<u32>::with_capacity(0));
-        let crud_analysis = analyze_crud_algorithm("Insert & Remove (worse case) Vec with ParkingLot",
+        let crud_analysis = analyze_crud_algorithm("Insert & Remove (worst case) Vec with ParkingLot",
                |_n| {
                    let mut vec = vec_locker.write();
                    vec.clear();
@@ -584,10 +585,10 @@ let mem_save_point = ALLOC.save_point();
                &TimeUnits::MICROSECOND);
 eprintln!("ALLOCATION STATS: {}", ALLOC.delta_statistics(&mem_save_point));
         let (create_analysis, read_analysis, update_analysis, delete_analysis, _full_report) = crud_analysis;
-        assert_complexity!(create_analysis.complexity, BigOAlgorithmComplexity::ON, "CREATE complexity mismatch");
-        assert_complexity!(  read_analysis.complexity, BigOAlgorithmComplexity::O1,   "READ complexity mismatch");
-        assert_complexity!(update_analysis.complexity, BigOAlgorithmComplexity::O1, "UPDATE complexity mismatch");
-        assert_complexity!(delete_analysis.complexity, BigOAlgorithmComplexity::ON, "DELETE complexity mismatch");
+        assert_complexity!(create_analysis.time_complexity, BigOAlgorithmComplexity::ON, "CREATE complexity mismatch");
+        assert_complexity!(  read_analysis.time_complexity, BigOAlgorithmComplexity::O1,   "READ complexity mismatch");
+        assert_complexity!(update_analysis.time_complexity, BigOAlgorithmComplexity::O1, "UPDATE complexity mismatch");
+        assert_complexity!(delete_analysis.time_complexity, BigOAlgorithmComplexity::ON, "DELETE complexity mismatch");
 
     }
 
@@ -633,9 +634,9 @@ let mem_save_point = ALLOC.save_point();
                &TimeUnits::MICROSECOND);
 eprintln!("ALLOCATION STATS: {}", ALLOC.delta_statistics(&mem_save_point));
         let (create_analysis, read_analysis, update_analysis, delete_analysis, _full_report) = crud_analysis;
-        assert_complexity!(create_analysis.complexity, BigOAlgorithmComplexity::O1, "CREATE complexity mismatch");
-        assert_complexity!(  read_analysis.complexity, BigOAlgorithmComplexity::O1,   "READ complexity mismatch");
-        assert_complexity!(update_analysis.complexity, BigOAlgorithmComplexity::O1, "UPDATE complexity mismatch");
-        assert_complexity!(delete_analysis.complexity, BigOAlgorithmComplexity::O1, "DELETE complexity mismatch");
+        assert_complexity!(create_analysis.time_complexity, BigOAlgorithmComplexity::O1, "CREATE complexity mismatch");
+        assert_complexity!(  read_analysis.time_complexity, BigOAlgorithmComplexity::O1,   "READ complexity mismatch");
+        assert_complexity!(update_analysis.time_complexity, BigOAlgorithmComplexity::O1, "UPDATE complexity mismatch");
+        assert_complexity!(delete_analysis.time_complexity, BigOAlgorithmComplexity::O1, "DELETE complexity mismatch");
     }
 }
