@@ -48,24 +48,24 @@ pub fn analyze_crud_algorithm<'a,
                  T: TryInto<u64>> (result_prefix: &str, result_suffix: &str,
                                    algorithm: &_AlgorithmClosure, algorithm_type: &BigOAlgorithmType, range: Range<u32>, unit: &TimeUnit<T>,
                                    threads: u32, mut _output: _OutputClosure)
-                -> (u64, u32) {
+                -> (PassResult, u32) {
         _output(&format!("{}", result_prefix));
         let (pass_result, r) = run_pass(algorithm, algorithm_type, range, unit, threads);
-        let memory_delta = pass_result.allocated_bytes as f32 - pass_result.deallocated_bytes as f32;
-        let sign = if memory_delta > 0.0 {"+"} else {""};
-        let memory_unit = if memory_delta > (1<<30) as f32 {"G"}                         else if memory_delta > (1<<20) as f32 {"M"}                         else if memory_delta > (1<<10) as f32 {"K"} else {"b"};
-        let memory_delta = if memory_delta > (1<<30) as f32 {memory_delta/(1<<30) as f32} else if memory_delta > (1<<20) as f32 {memory_delta/(1<<20) as f32} else if memory_delta > (1<<10) as f32 {memory_delta/(1<<10) as f32} else {memory_delta};
-        let memory_stats = format!("{}{}{}", sign, memory_delta, memory_unit);
+        let used_memory = pass_result.delta_bytes as f32;   // intermediate results will show the pass resulting used memory (instead of the min/max used mem, used for analysis)
+        let sign = if used_memory > 0.0 {"+"} else {"-"};
+        let memory_unit = if used_memory.abs() > (1<<30) as f32 {"G"}                          else if used_memory.abs() > (1<<20) as f32 {"M"}                                else if used_memory.abs() > (1<<10) as f32 {"K"} else {"b"};
+        let memory_delta = if used_memory.abs() > (1<<30) as f32 { used_memory /(1<<30) as f32} else if used_memory.abs() > (1<<20) as f32 { used_memory.abs() /(1<<20) as f32} else if used_memory.abs() > (1<<10) as f32 { used_memory.abs() /(1<<10) as f32} else { used_memory.abs() };
+        let memory_stats = format!("{}{:.2}{}", sign, memory_delta, memory_unit);
         _output(&format!("{}{}/{}{}", pass_result.elapsed_time, unit.unit_str, memory_stats, result_suffix));
-        (pass_result.elapsed_time, r)
+        (pass_result, r)
     }
 
     const NUMBER_OF_PASSES: u32 = 2;
 
-    let mut create_elapsed_passes = [0u64; NUMBER_OF_PASSES as usize];
-    let mut   read_elapsed_passes = [0u64; NUMBER_OF_PASSES as usize];
-    let mut update_elapsed_passes = [0u64; NUMBER_OF_PASSES as usize];
-    let mut delete_elapsed_passes = [0u64; NUMBER_OF_PASSES as usize];
+    let mut create_passes_results = [PassResult{elapsed_time: 0, delta_bytes: 0,  min_max_delta_bytes: 0}; NUMBER_OF_PASSES as usize];
+    let mut   read_passes_results = [PassResult{elapsed_time: 0, delta_bytes: 0,  min_max_delta_bytes: 0}; NUMBER_OF_PASSES as usize];
+    let mut update_passes_results = [PassResult{elapsed_time: 0, delta_bytes: 0,  min_max_delta_bytes: 0}; NUMBER_OF_PASSES as usize];
+    let mut delete_passes_results = [PassResult{elapsed_time: 0, delta_bytes: 0,  min_max_delta_bytes: 0}; NUMBER_OF_PASSES as usize];
 
     // computed result to avoid any call cancellation optimizations when running in release mode
     let mut r: u32 = 0;
@@ -126,13 +126,13 @@ pub fn analyze_crud_algorithm<'a,
         }));
 
         // execute regular passes verbosely
-        let (create_elapsed, cr) = run_pass_verbosely("create: ", "",   &create_fn, &BigOAlgorithmType::SetResizing, calc_regular_CRU_range(create_iterations_per_pass, pass), time_unit, create_threads, &mut _output);
-        let (read_elapsed,   rr) = run_pass_verbosely("; read: ", "",   &read_fn,   &BigOAlgorithmType::ConstantSet, calc_regular_CRU_range(  read_iterations_per_pass, pass), time_unit, read_threads,   &mut _output);
-        let (update_elapsed, ur) = run_pass_verbosely("; update: ", "", &update_fn, &BigOAlgorithmType::ConstantSet, calc_regular_CRU_range(update_iterations_per_pass, pass), time_unit, update_threads, &mut _output);
+        let (create_pass, cr) = run_pass_verbosely("create: ",   "", &create_fn, &BigOAlgorithmType::SetResizing, calc_regular_CRU_range(create_iterations_per_pass, pass), time_unit, create_threads, &mut _output);
+        let (read_pass,   rr) = run_pass_verbosely("; read: ",   "", &read_fn,   &BigOAlgorithmType::ConstantSet, calc_regular_CRU_range(  read_iterations_per_pass, pass), time_unit,   read_threads, &mut _output);
+        let (update_pass, ur) = run_pass_verbosely("; update: ", "", &update_fn, &BigOAlgorithmType::ConstantSet, calc_regular_CRU_range(update_iterations_per_pass, pass), time_unit, update_threads, &mut _output);
 
-        create_elapsed_passes[pass as usize] = create_elapsed;
-          read_elapsed_passes[pass as usize] = read_elapsed;
-        update_elapsed_passes[pass as usize] = update_elapsed;
+        create_passes_results[pass as usize] = create_pass;
+          read_passes_results[pass as usize] = read_pass;
+        update_passes_results[pass as usize] = update_pass;
 
         r += cr^rr^ur;
     }
@@ -141,24 +141,30 @@ pub fn analyze_crud_algorithm<'a,
     // analyze & output "create", "read" and "update" reports
     let create_analysis = big_o_analysis::analyse_set_resizing_algorithm(SetResizingAlgorithmMeasurements {
         measurement_name: "Create",
-        pass_1_total_time: create_elapsed_passes[0],
-        pass_2_total_time: create_elapsed_passes[1],
-        delta_set_size: create_iterations_per_pass
+        pass_1_total_time: create_passes_results[0].elapsed_time,
+        pass_2_total_time: create_passes_results[1].elapsed_time,
+        pass_1_max_mem:    create_passes_results[0].min_max_delta_bytes,
+        pass_2_max_mem:    create_passes_results[1].min_max_delta_bytes,
+        delta_set_size:    create_iterations_per_pass
     });
     let read_analysis = big_o_analysis::analyse_constant_set_algorithm(ConstantSetAlgorithmMeasurements {
         measurement_name: "Read",
-        pass_1_total_time: read_elapsed_passes[0],
-        pass_2_total_time: read_elapsed_passes[1],
-        pass_1_set_size: create_iterations_per_pass,
-        pass_2_set_size: create_iterations_per_pass *2,
-        repetitions: read_iterations_per_pass,
+        pass_1_total_time: read_passes_results[0].elapsed_time,
+        pass_2_total_time: read_passes_results[1].elapsed_time,
+        pass_1_max_mem:    read_passes_results[0].min_max_delta_bytes,
+        pass_2_max_mem:    read_passes_results[1].min_max_delta_bytes,
+        pass_1_set_size:   create_iterations_per_pass,
+        pass_2_set_size:   create_iterations_per_pass * 2,
+        repetitions:       read_iterations_per_pass,
     });
     let update_analysis = big_o_analysis::analyse_constant_set_algorithm(ConstantSetAlgorithmMeasurements {
         measurement_name: "Update",
-        pass_1_total_time: update_elapsed_passes[0],
-        pass_2_total_time: update_elapsed_passes[1],
-        pass_1_set_size: create_iterations_per_pass,
-        pass_2_set_size: create_iterations_per_pass *2,
+        pass_1_total_time: update_passes_results[0].elapsed_time,
+        pass_2_total_time: update_passes_results[1].elapsed_time,
+        pass_1_max_mem:    update_passes_results[0].min_max_delta_bytes,
+        pass_2_max_mem:    update_passes_results[1].min_max_delta_bytes,
+        pass_1_set_size:   create_iterations_per_pass,
+        pass_2_set_size:   create_iterations_per_pass * 2,
         repetitions: update_iterations_per_pass,
     });
     if create_iterations_per_pass > 0 {
@@ -181,7 +187,7 @@ pub fn analyze_crud_algorithm<'a,
                 "2nd"
             });
             let (delete_elapsed, dr) = run_pass_verbosely(&msg, "", &delete_fn, &BigOAlgorithmType::SetResizing, calc_regular_D_range(delete_iterations_per_pass, pass), time_unit, delete_threads, &mut _output);
-            delete_elapsed_passes[pass as usize] = delete_elapsed;
+            delete_passes_results[pass as usize] = delete_elapsed;
             r += dr;
         }
     }
@@ -191,9 +197,11 @@ pub fn analyze_crud_algorithm<'a,
     // analyze & output "delete" report
     let delete_analysis = big_o_analysis::analyse_set_resizing_algorithm(SetResizingAlgorithmMeasurements {
         measurement_name: "Delete",
-        pass_1_total_time: delete_elapsed_passes[0],
-        pass_2_total_time: delete_elapsed_passes[1],
-        delta_set_size: delete_iterations_per_pass,
+        pass_1_total_time: delete_passes_results[0].elapsed_time,
+        pass_2_total_time: delete_passes_results[1].elapsed_time,
+        pass_1_max_mem:    delete_passes_results[0].min_max_delta_bytes,
+        pass_2_max_mem:    delete_passes_results[1].min_max_delta_bytes,
+        delta_set_size:    delete_iterations_per_pass,
     });
     if delete_iterations_per_pass > 0 {
         _output(&format!("{}\n\n", delete_analysis));
@@ -226,15 +234,15 @@ macro_rules! assert_complexity {
     });
 }
 
+#[derive(Clone,Copy)]
 struct PassResult {
     /// unit-less time took to run the pass
     elapsed_time: u64,
-    /// number of allocations / deallocations / reallocations requested during the pass run
-    allocator_calls: usize,
-    /// sum of all allocations / reallocations
-    allocated_bytes: usize,
-    /// sum of all deallocations / reallocations
-    deallocated_bytes: usize,
+    /// delta between mem used at the end of the pass and mem used at the beginning of the pass --
+    /// positive if pass mainly allocates, negative if it mainly frees memory.
+    delta_bytes: i32,
+    /// always positive delta between min mem used & max mem used during the pass execution.
+    min_max_delta_bytes: u32,
 }
 
 /// Runs a pass on the given 'algorithm' callback function (see [AlgorithmFnPtr]),
@@ -321,9 +329,10 @@ fn run_pass<_AlgorithmClosure: Fn(u32) -> u32 + Sync, ScalarDuration: TryInto<u6
 
         (PassResult {
             elapsed_time: elapsed_average as u64,
-            allocator_calls: allocator_statistics.allocations_count + allocator_statistics.deallocations_count + allocator_statistics.reallocations_count + allocator_statistics.zeroed_allocations_count,
-            allocated_bytes: allocator_statistics.allocated_bytes + allocator_statistics.reallocated_news_bytes + allocator_statistics.zeroed_allocated_bytes,
-            deallocated_bytes: allocator_statistics.deallocated_bytes + allocator_statistics.reallocated_originals_bytes,
+            delta_bytes: ( (allocator_statistics.allocated_bytes + allocator_statistics.reallocated_news_bytes + allocator_statistics.zeroed_allocated_bytes) as isize -
+                           (allocator_statistics.deallocated_bytes + allocator_statistics.reallocated_originals_bytes) as isize) as i32,
+            min_max_delta_bytes: allocator_statistics.max_used_memory as u32 - allocator_statistics.min_used_memory as u32,
+
         }, r)
 
     }).unwrap()
