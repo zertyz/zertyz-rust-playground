@@ -7,7 +7,10 @@ use std::{
     io::{Write,BufWriter},
     process::Command,
     collections::HashMap,
+    time::{SystemTime,Duration},
 };
+use std::ops::Add;
+use chrono::{DateTime, Utc};
 use flate2::{
     GzBuilder,
     Compression,
@@ -100,6 +103,7 @@ fn on_release() {
 /// saves (possibly compressing) 'static_files' into a const hash map for use by the application.\
 /// 'file_links' := {link_name = real_file_name, ...}
 fn save_static_files(static_files: HashMap<String, Vec<u8>>, file_links: HashMap<String, String>) {
+    const CACHE_MAX_AGE_SECONDS: u64 = 31536000;
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("static_files.rs");
     let mut writer = BufWriter::with_capacity(4*1024*1024, fs::File::create(dest_path).unwrap());
@@ -122,7 +126,6 @@ use std::collections::HashMap;
 
 "#;
     let hash_map_header = r#"
-
 lazy_static! {
     pub static ref STATIC_FILES: HashMap<&'static str, (/*gzipped*/bool, /*contents*/&'static [u8])> = {
         let mut m = HashMap::new();
@@ -135,7 +138,7 @@ lazy_static! {
     // header
     writer.write(file_header.as_bytes()).unwrap();
 
-    // constants
+    // file constants
     for (file_name, file_contents) in &static_files {
         let mut gzip = GzEncoder::new(Vec::new(), Compression::best());
         gzip.write_all(file_contents).unwrap();
@@ -145,29 +148,39 @@ lazy_static! {
             writer.write(format!("// \"{}\": {} compressed / {} plain ==> compressed to {:.2}% of the original\n\
                                        const {}: (bool, &[u8]) = (true, &{:?});\n",
                                      file_name, gzipped_bytes.len(), file_contents.len(), (gzipped_bytes.len() as f64 / file_contents.len() as f64) * 100.0,
-                                     file_name_as_token(file_name), gzipped_bytes.as_slice()).as_bytes());
+                                     file_name_as_token(file_name), gzipped_bytes.as_slice()).as_bytes() ).unwrap();
         } else {
             // serve it plain (images, videos, ...)
             writer.write(format!("// \"{}\": {} compressed / {} plain ==> would be {:.2}% of the original\n\
-                                       const {}: (bool, &[u8]) = (false, &{:?});\n",
+                                       const {}: (bool, &[u8]) = (false, &{:?});\n\n",
                                       file_name, gzipped_bytes.len(), file_contents.len(), (gzipped_bytes.len() as f64 / file_contents.len() as f64) * 100.0,
-                                      file_name_as_token(file_name), file_contents.as_slice()).as_bytes());
+                                      file_name_as_token(file_name), file_contents.as_slice()).as_bytes() ).unwrap();
         }
     }
 
+    // date constants
+    let now_time: DateTime<Utc> = Utc::now();
+    let expiration_time = DateTime::<Utc>::from(SystemTime::from(now_time).add(Duration::from_secs(CACHE_MAX_AGE_SECONDS)));
+    let generation_date_str = now_time.to_rfc2822();
+    let expiration_date_str = expiration_time.to_rfc2822();
+    let cache_control_str = format!("public, max-age: {}", CACHE_MAX_AGE_SECONDS);
+    writer.write(format!("pub const GENERATION_DATE: &str = \"{}\";\n", generation_date_str).as_bytes() ).unwrap();
+    writer.write(format!("pub const EXPIRATION_DATE: &str = \"{}\";\n", expiration_date_str).as_bytes() ).unwrap();
+    writer.write(format!("pub const CACHE_CONTROL:   &str = \"{}\";\n\n", cache_control_str).as_bytes() ).unwrap();
+
     // hash map header
-    writer.write(hash_map_header.as_bytes()).unwrap();
+    writer.write(hash_map_header.as_bytes() ).unwrap();
 
     // contents (hash map)
     writer.write("        // links\n".as_bytes());
     for (link_name, real_file_name) in &file_links {
-        writer.write(format!("        m.insert(\"{}\", {});\n", link_name, file_name_as_token(real_file_name)).as_bytes());
+        writer.write(format!("        m.insert(\"{}\", {});\n", link_name, file_name_as_token(real_file_name)).as_bytes() ).unwrap();
     }
     writer.write("        // files\n".as_bytes());
     for (file_name, file_contents) in &static_files {
-        writer.write(format!("        m.insert(\"{}\", {});\n", file_name, file_name_as_token(file_name)).as_bytes());
+        writer.write(format!("        m.insert(\"{}\", {});\n", file_name, file_name_as_token(file_name)).as_bytes() ).unwrap();
     }
 
     // footer
-    writer.write(function_and_file_footers.as_bytes()).unwrap();
+    writer.write(function_and_file_footers.as_bytes() ).unwrap();
 }
