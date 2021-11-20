@@ -19,6 +19,7 @@ Contents:
         cpp-interop -- aiming at the higher efficiency possible
 
     Rust 2021:
+        web-backend-rocket -- a JSON backend using Rocket for HTML 5 applications
 
 
 # Amusements

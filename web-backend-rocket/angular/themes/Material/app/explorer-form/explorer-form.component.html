@@ -1,0 +1,69 @@
+<form [formGroup]="formGroup" novalidate (ngSubmit)="onSubmit()">
+  <mat-card class="shipping-card">
+    <mat-card-header>
+      <mat-card-title>{{form.form_title}}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <span>{{form.service_description}}</span>
+
+      <div class="row" *ngFor="let fieldSet of form.fields; index as i">
+        <div class="col"*ngFor="let field of fieldSet">
+          <mat-radio-group *ngIf="field.presentationType == 'RadioButtons'; else standardField" formControlName="{{field.name}}">
+            <mat-radio-button *ngFor="let option of field.possibleValues" [value]="option.value" >{{option.text}}</mat-radio-button>
+          </mat-radio-group>
+          <ng-template #standardField>
+            <mat-form-field class="full-width">
+              <input *ngIf="field.presentationType == 'Input'" matInput #{{field.name}} placeholder="{{field.label}}" formControlName="{{field.name}}">
+              <input *ngIf="field.presentationType == 'SteppedInput'" matInput #{{field.name}} maxlength="{{(''+field.possibleRangeFinish).length}}}" placeholder="{{field.label}}" formControlName="{{field.name}}" type="number">
+              <textarea *ngIf="field.presentationType == 'Area'" matInput #{{field.name}} placeholder="{{field.label}}" formControlName="{{field.name}}"></textarea>
+              <mat-select *ngIf="field.presentationType == 'ComboBox'" #{{field.name}} placeholder="{{field.label}}" formControlName="{{field.name}}">
+                <mat-option *ngFor="let option of field.possibleValues" [value]="option.value">
+                  {{option.text}}
+                </mat-option>
+              </mat-select>
+              <!--<mat-hint align="end">{{field.name}}.value.length / 5</mat-hint>-->
+              <mat-error *ngIf="formGroup.controls[field.name].hasError('required')">
+                {{field.helperText}}
+              </mat-error>
+              <mat-error *ngIf="formGroup.controls[field.name].hasError('minlength')">
+                The minimum length is {{field.possibleRangeStart}}
+              </mat-error>
+              <mat-error *ngIf="formGroup.controls[field.name].hasError('maxlength')">
+                The maximum length is {{field.possibleRangeFinish}}
+              </mat-error>
+              <mat-error *ngIf="formGroup.controls[field.name].hasError('min')">
+                The minimum value is {{field.possibleRangeStart}}
+              </mat-error>
+              <mat-error *ngIf="formGroup.controls[field.name].hasError('max')">
+                The maximum value is {{field.possibleRangeFinish}}
+              </mat-error>
+              <mat-error *ngIf="environment.ui_debug && formGroup.controls[field.name].errors != null">
+                ERRORS: {{formGroup.controls[field.name].errors | json}}
+              </mat-error>
+            </mat-form-field>
+          </ng-template>
+        </div>
+      </div>
+
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-raised-button color="primary" type="submit" [disabled]="!formGroup.valid">Submit</button>
+    </mat-card-actions>
+  </mat-card>
+</form>
+
+<p>
+  Backend Data: {{backendData | json}}
+</p>
+
+<span *ngIf="environment.ui_debug">
+Form will be built for:<pre>
+  FormGroup: {{formGroup.value | json}}
+  Service: '{{form.service}}',
+  Method: {{form.method}},
+  Fields: {{form.fields | json}}
+
+  formGroup model: {{formGroupModel | json}}
+
+  </pre>
+</span>

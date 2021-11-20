@@ -1,0 +1,16 @@
+<p>get-service works!</p>
+<app-explorer-form [form]="{
+    service: '/get-service-explorer',
+    method: 'GET',
+    form_title: 'GET what you want',
+    service_description: 'Just a bound-to-be-dumb text while I do not have the real thing to put here',
+    fields: [
+      [{
+        label: 'Your Field',
+        name: 'my_field',
+        dataType: 'Text',
+        presentationType: 'Input',
+        helperText: 'Just type in whatever you want'
+      }]
+    ]
+}"></app-explorer-form>

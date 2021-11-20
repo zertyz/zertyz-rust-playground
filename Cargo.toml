@@ -15,6 +15,7 @@ members = [
     "big-O",
     "first-class-closures",
     "cpp-interop",
+    "web-backend-rocket",
 ]
 
 [dependencies]

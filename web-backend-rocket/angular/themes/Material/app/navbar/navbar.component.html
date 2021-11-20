@@ -1,0 +1,15 @@
+<mat-toolbar color="primary">
+  <span><a class="mat-button-toggle-standalone" style="color:azure; text-decoration:none" [routerLink]="['']">DemoAngularAndBootstrapUI</a></span>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <span>
+    <!--<span routerLinkActive="active"><a mat-raised-button color="primary" [routerLink]="['home']">Home</a></span>-->
+    &nbsp;&nbsp;&nbsp;
+    <span class="mat-slider-thumb-label-text">API explorers:</span>
+    &nbsp;&nbsp;&nbsp;
+    <span routerLinkActive="active"><a mat-raised-button color="primary" [routerLink]="['rest-service-explorer']">REST Service</a></span>
+    &nbsp;&nbsp;&nbsp;
+    <span routerLinkActive="active"><a mat-raised-button color="primary" [routerLink]="['get-service-explorer']">GET Service</a></span>
+    &nbsp;&nbsp;&nbsp;
+    <span routerLinkActive="active"><a mat-raised-button color="primary" [routerLink]="['post-service-explorer']">POST Service</a></span>
+  </span>
+</mat-toolbar>

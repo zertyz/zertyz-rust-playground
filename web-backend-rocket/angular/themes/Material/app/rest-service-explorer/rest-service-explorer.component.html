@@ -1,0 +1,22 @@
+<p>rest-service works!</p>
+<app-explorer-form [form]="{
+    service: '/rest-service/{world}',
+    method: 'REST',
+    form_title: 'REST what you want',
+    service_description: 'Just a bound-to-be-dumb text while I do not have the real thing to put here',
+    fields: [
+      [{
+        label: 'World',
+        name: 'world',
+        dataType: 'Text',
+        presentationType: 'ComboBox',
+        required: true,
+        helperText: 'Greetings from where?',
+        possibleValues: [
+          {text:'Earth', value: 'Earth'},
+          {text:'Mars', value: 'Mars'},
+          {text:'Moon', value: 'Moon'},
+        ]
+      }]
+    ]
+}"></app-explorer-form>
