@@ -1,0 +1,83 @@
+<section class="py-5 bg-light shadow-sm index-forward">
+  <div class="container py-5">
+    <div class="card rounded-0 border-0">
+      <div class="card-body p-4 p-lg-5">
+        <div class="row py-5">
+          <div class="col-lg-5">
+            <h2>{{form.form_title}}</h2>
+            <p class="mb-5 text-primary">{{form.service_description}}</p>
+            <p class="mb-5 text-muted"><b>Response:</b></p>
+            <ul class="list-unstyled mb-0">
+              <li *ngFor="let item of backendData | keyvalue">
+                <h5 class="text-muted">{{item.key}}</h5>
+                <p class="text-muted">{{item.value}}</p>
+              </li>
+            </ul>
+          </div>
+          <div class="col-lg-7">
+            <form [formGroup]="formGroup" novalidate (ngSubmit)="onSubmit()">
+              <div class="row">
+                <span *ngFor="let fieldSet of form.fields; index as i">
+                  <div class="form-group col-lg-12" *ngFor="let field of fieldSet">
+                    <span *ngIf="field.presentationType == 'RadioButtons'; else standardField">
+                      <label *ngFor="let option of field.possibleValues">
+                        <input type="radio" [value]="option.value" formControlName="{{field.name}}">
+                        {{option.text}}&nbsp;&nbsp;&nbsp;
+                      </label>
+                    </span>
+                    <ng-template #standardField>
+                        <input *ngIf="field.presentationType == 'Input'" class="form-control" #{{field.name}} placeholder="{{field.label}}" formControlName="{{field.name}}">
+                        <input *ngIf="field.presentationType == 'SteppedInput'" class="form-control"  #{{field.name}} maxlength="{{(''+field.possibleRangeFinish).length}}}" placeholder="{{field.label}}" formControlName="{{field.name}}" type="number">
+                        <textarea *ngIf="field.presentationType == 'Area'" class="form-control"  #{{field.name}} placeholder="{{field.label}}" formControlName="{{field.name}}"></textarea>
+                        <select *ngIf="field.presentationType == 'ComboBox'" class="form-control"  #{{field.name}} formControlName="{{field.name}}">
+                          <option *ngFor="let option of field.possibleValues" [value]="option.value">
+                            {{option.text}}
+                          </option>
+                        </select>
+                        <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('required')">
+                          {{field.helperText}}
+                        </sup>
+                        <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('minlength')">
+                          The minimum length is {{field.possibleRangeStart}}
+                        </sup>
+                        <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('maxlength')">
+                          The maximum length is {{field.possibleRangeFinish}}
+                        </sup>
+                        <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('min')">
+                          The minimum value is {{field.possibleRangeStart}}
+                        </sup>
+                        <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('max')">
+                          The maximum value is {{field.possibleRangeFinish}}
+                        </sup>
+                        <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && environment.ui_debug && formGroup.controls[field.name].errors != null">
+                          ERRORS: {{formGroup.controls[field.name].errors | json}}
+                        </sup>
+                    </ng-template>
+                  </div>
+                </span>
+                <div class="form-group col-lg-12">
+                  <button class="btn btn-outline-primary" type="submit" [disabled]="!formGroup.valid">Submit</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<span *ngIf="environment.ui_debug">
+<p>
+  Backend Data: {{backendData | json}}
+</p>
+  Form will be built for:<pre>
+  FormGroup: {{formGroup.value | json}}
+  Service: '{{form.service}}',
+  Method: {{form.method}},
+  Fields: {{form.fields | json}}
+
+  formGroup model: {{formGroupModel | json}}
+
+  </pre>
+</span>
