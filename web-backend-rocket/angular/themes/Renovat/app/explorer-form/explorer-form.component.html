@@ -6,7 +6,7 @@
           <div class="col-lg-5">
             <h2>{{form.form_title}}</h2>
             <p class="mb-5 text-primary">{{form.service_description}}</p>
-            <p class="mb-5 text-muted"><b>Response:</b></p>
+            <p class="mb-5 text-muted" *ngIf="(backendData | keyvalue)?.length"><b>Response:</b></p>
             <ul class="list-unstyled mb-0">
               <li *ngFor="let item of backendData | keyvalue">
                 <h5 class="text-muted">{{item.key}}</h5>
