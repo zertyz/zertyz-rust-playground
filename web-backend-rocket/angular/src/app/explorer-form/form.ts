@@ -35,7 +35,7 @@ export enum FieldPresentationType {
   Toggle = "Toggle",
   ComboBox = "ComboBox",
   ListBox = "ListBox",
-  CheckBoxes = "CheckBoxes",
+  CheckBox = "CheckBox",
   RadioButtons = "RadioButtons",
 }
 

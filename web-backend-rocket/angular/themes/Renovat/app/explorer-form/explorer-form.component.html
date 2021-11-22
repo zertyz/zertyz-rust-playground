@@ -19,10 +19,16 @@
               <div class="row">
                 <span *ngFor="let fieldSet of form.fields; index as i">
                   <div class="form-group col-lg-12" *ngFor="let field of fieldSet">
-                    <span *ngIf="field.presentationType == 'RadioButtons'; else standardField">
+                    <p *ngIf="field.presentationType == 'RadioButtons'; else checkBox">
                       <label *ngFor="let option of field.possibleValues">
                         <input type="radio" [value]="option.value" formControlName="{{field.name}}">
                         {{option.text}}&nbsp;&nbsp;&nbsp;
+                      </label>
+                    </p>
+                    <span #checkBox>
+                      <label *ngIf="field.presentationType == 'CheckBox'; else standardField" >
+                        <input type="checkbox" #{{field.name}} formControlName="{{field.name}}">{{field.label}}
+                        {{option.text}}
                       </label>
                     </span>
                     <ng-template #standardField>

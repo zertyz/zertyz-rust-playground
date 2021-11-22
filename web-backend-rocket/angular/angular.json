@@ -28,6 +28,7 @@
             "inlineStyleLanguage": "sass",
             "assets": [
               "src/favicon.ico",
+              "src/common_assets",
               "src/assets"
             ],
             "styles": [
@@ -96,6 +97,7 @@
             "inlineStyleLanguage": "sass",
             "assets": [
               "src/favicon.ico",
+              "src/common_assets",
               "src/assets"
             ],
             "styles": [

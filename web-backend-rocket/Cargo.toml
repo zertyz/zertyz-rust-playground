@@ -23,7 +23,7 @@ chrono = "0.4"
 
 [dependencies]
 lazy_static = "1.4"
-rocket = "0.5.0-rc.1"
+rocket = { version = "0.5.0-rc.1", features = ["json"] }
 
 # see https://deterministic.space/high-performance-rust.html
 [profile.release]

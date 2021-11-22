@@ -1,9 +1,8 @@
-<p>post-service works!</p>
 <app-explorer-form [form]="{
-    service: '/post-service-explorer',
+    service: '/post-service',
     method: 'POST',
     form_title: 'Shipping Information',
-    service_description: 'This form came from the Angular-Material example and I will only remove it once I can manage to represent this very form with my wired data structures',
+    service_description: 'This form came from the Angular-Material example -- with an added checkbox',
     fields: [
       [{
         label: 'Company',
@@ -29,7 +28,7 @@
           presentationType: 'Input',
           required: true,
           helperText: 'Your last name -- required, or else your shipping might reach the wrong person'
-        },
+        }
       ],
       [{
         label: 'Address',
@@ -119,7 +118,7 @@
             {text: 'Wisconsin', value: 'WI'},
             {text: 'Wyoming', value: 'WY'}
           ]
-        },
+        }
       ],
       [{
         label: 'Postal Code',
@@ -143,6 +142,13 @@
           {text: 'Priority Shipping', value: 'priority'},
           {text: 'Next Day Shipping', value: 'next_day'},
         ]
+      }],
+      [{
+        label: 'Refuse delivery to a house mate?',
+        name: 'refuse_housemate',
+        dataType: 'Boolean',
+        presentationType: 'CheckBox',
+        helperText: 'Mark to only deliver your shipment to you and not anyone else'
       }],
     ]
 }"></app-explorer-form>

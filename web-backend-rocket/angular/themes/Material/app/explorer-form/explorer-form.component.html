@@ -8,9 +8,15 @@
 
       <div class="row" *ngFor="let fieldSet of form.fields; index as i">
         <div class="col"*ngFor="let field of fieldSet">
-          <mat-radio-group *ngIf="field.presentationType == 'RadioButtons'; else standardField" formControlName="{{field.name}}">
-            <mat-radio-button *ngFor="let option of field.possibleValues" [value]="option.value" >{{option.text}}</mat-radio-button>
-          </mat-radio-group>
+          <!-- radio buttons & checkboxes must be out of a mat-form-field (which is just for text fields) -- https://stackoverflow.com/a/54461014/10297793 -->
+          <p *ngIf="field.presentationType == 'RadioButtons'; else checkBox">
+            <mat-radio-group formControlName="{{field.name}}">
+              <mat-radio-button *ngFor="let option of field.possibleValues" [value]="option.value" >{{option.text}}</mat-radio-button>
+            </mat-radio-group>
+          </p>
+          <ng-template #checkBox>
+            <mat-checkbox *ngIf="field.presentationType == 'CheckBox'; else standardField" matInput #{{field.name}} formControlName="{{field.name}}">{{field.label}}</mat-checkbox>
+          </ng-template>
           <ng-template #standardField>
             <mat-form-field class="full-width">
               <input *ngIf="field.presentationType == 'Input'" matInput #{{field.name}} placeholder="{{field.label}}" formControlName="{{field.name}}">
@@ -56,14 +62,12 @@
   Backend Data: {{backendData | json}}
 </p>
 
-<span *ngIf="environment.ui_debug">
-Form will be built for:<pre>
+<pre *ngIf="environment.ui_debug">
+Form will be built for:
   FormGroup: {{formGroup.value | json}}
   Service: '{{form.service}}',
   Method: {{form.method}},
   Fields: {{form.fields | json}}
 
   formGroup model: {{formGroupModel | json}}
-
-  </pre>
-</span>
+</pre>

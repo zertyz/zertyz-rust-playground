@@ -19,6 +19,7 @@ import { ExplorerFormComponent } from './explorer-form/explorer-form.component';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatCardModule } from '@angular/material/card';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonToggleModule } from "@angular/material/button-toggle";
@@ -53,6 +54,7 @@ import { PostServiceExplorerComponent } from './post-service-explorer/post-servi
     MatInputModule,
     MatSelectModule,
     MatRadioModule,
+    MatCheckboxModule,
     MatCardModule,
     ReactiveFormsModule,
     MatButtonToggleModule,

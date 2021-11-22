@@ -59,6 +59,9 @@ export class ExplorerFormComponent {
           } else if (field.presentationType == 'RadioButtons' && field.possibleValues != null && field.required) {
             // required radio buttons comes with the first value pre-selected
             next[field.name] = [field.possibleValues[0].value, Validators.required];
+          } else if (field.presentationType == 'CheckBox') {
+            // checkboxes default to unchecked
+            next[field.name] = [false];
           } else if (field.required) {
             // field accepts any value other than empty
             next[field.name] = [null, Validators.required];
@@ -75,6 +78,7 @@ export class ExplorerFormComponent {
 
   onSubmit(): void {
     let resolvedService = this.resolveService();
+    let resolvedDataToSend = this.resolveDataToSend();
     if (environment.http_debug) {
       let message = 'About to send the form \'' + JSON.stringify(this.formGroup.value) + '\' to service \''+this.form.service+'\' via '+this.form.method;
       if (resolvedService != this.form.service) {
@@ -82,13 +86,31 @@ export class ExplorerFormComponent {
       }
       alert(message);
     }
-
-    this.httpClient.get<any>(resolvedService)
-      .pipe(
-        retry(3),
-        catchError(this.handleHttpError)
-      )
-      .subscribe(data => this.backendData = data);
+    if (this.form.method == 'POST') {
+      // POST
+      this.httpClient.post<any>(resolvedService, resolvedDataToSend)
+        .pipe(
+          retry(3),
+          catchError(this.handleHttpError)
+        )
+        .subscribe(data => this.backendData = data);
+    } else if (resolvedDataToSend == null) {
+      // REST
+      this.httpClient.get<any>(resolvedService)
+        .pipe(
+          retry(3),
+          catchError(this.handleHttpError)
+        )
+        .subscribe(data => this.backendData = data);
+    } else {
+      // GET
+      this.httpClient.get<any>(resolvedService, resolvedDataToSend)
+        .pipe(
+          retry(3),
+          catchError(this.handleHttpError)
+        )
+        .subscribe(data => this.backendData = data);
+    }
 
   }
 
@@ -98,6 +120,23 @@ export class ExplorerFormComponent {
       Object.keys(this.formGroup.value).forEach(formFieldName => resolvedService = resolvedService.replace("{"+formFieldName+"}", this.formGroup.value[formFieldName]));
     }
     return resolvedService;
+  }
+
+  private resolveDataToSend(): any {
+    if (this.form.method == 'REST') {
+      return null;
+    } else if (this.form.method == 'GET') {
+      return {
+        //headers?: HttpHeaders | {[header: string]: string | string[]},
+        //observe?: 'body' | 'events' | 'response',
+        params: this.formGroup.value,
+        //reportProgress?: boolean,
+        //responseType?: 'arraybuffer'|'blob'|'json'|'text',
+        //withCredentials?: boolean,
+      };
+    } else if (this.form.method == 'POST') {
+      return this.formGroup.value;
+    }
   }
 
   private handleHttpError(error: HttpErrorResponse) {
