@@ -58,9 +58,22 @@
   </mat-card>
 </form>
 
-<p>
-  Backend Data: {{backendData | json}}
-</p>
+<div class="response-title" *ngIf="(backendData | keyvalue)?.length" class="json-headers-align">
+  <strong>Response:</strong>
+</div>
+<mat-accordion *ngIf="(backendData | keyvalue)?.length" class="json-headers-align" multi>
+  <mat-expansion-panel hideToggle *ngFor="let item of backendData | keyvalue">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        {{item.key}}
+      </mat-panel-title>
+      <mat-panel-description>
+        {{item.value}}
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    <pre>{{backendData | json}}</pre>
+  </mat-expansion-panel>
+</mat-accordion>
 
 <pre *ngIf="environment.ui_debug">
 Form will be built for:

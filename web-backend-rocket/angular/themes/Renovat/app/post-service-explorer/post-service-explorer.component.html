@@ -11,7 +11,7 @@
 </section>-->
 
 <app-explorer-form [form]="{
-  service: '/post-service-explorer',
+  service: '/post-service',
   method: 'POST',
   form_title: 'Shipping Information',
   service_description: 'This form came from the Angular-Material example and has been adapted to this bootstrap theme',
@@ -154,6 +154,13 @@
         {text: 'Priority Shipping', value: 'priority'},
         {text: 'Next Day Shipping', value: 'next_day'},
       ]
+    }],
+    [{
+      label: 'Refuse delivery to a house mate?',
+      name: 'refuse_housemate',
+      dataType: 'Boolean',
+      presentationType: 'CheckBox',
+      helperText: 'Mark to only deliver your shipment to you and not anyone else'
     }],
   ]
 }"></app-explorer-form>

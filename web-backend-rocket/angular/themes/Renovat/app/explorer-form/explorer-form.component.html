@@ -25,12 +25,12 @@
                         {{option.text}}&nbsp;&nbsp;&nbsp;
                       </label>
                     </p>
-                    <span #checkBox>
+                    <ng-template #checkBox>
                       <label *ngIf="field.presentationType == 'CheckBox'; else standardField" >
-                        <input type="checkbox" #{{field.name}} formControlName="{{field.name}}">{{field.label}}
-                        {{option.text}}
+                        <input type="checkbox" #{{field.name}} formControlName="{{field.name}}">
+                        {{field.label}}
                       </label>
-                    </span>
+                    </ng-template>
                     <ng-template #standardField>
                         <input *ngIf="field.presentationType == 'Input'" class="form-control" #{{field.name}} placeholder="{{field.label}}" formControlName="{{field.name}}">
                         <input *ngIf="field.presentationType == 'SteppedInput'" class="form-control"  #{{field.name}} maxlength="{{(''+field.possibleRangeFinish).length}}}" placeholder="{{field.label}}" formControlName="{{field.name}}" type="number">

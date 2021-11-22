@@ -23,6 +23,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatCardModule } from '@angular/material/card';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonToggleModule } from "@angular/material/button-toggle";
+import { MatExpansionModule } from "@angular/material/expansion";
 import { HomeComponent } from './home/home.component';
 import { RestServiceExplorerComponent } from './rest-service-explorer/rest-service-explorer.component';
 import { GetServiceExplorerComponent } from './get-service-explorer/get-service-explorer.component';
@@ -58,6 +59,7 @@ import { PostServiceExplorerComponent } from './post-service-explorer/post-servi
     MatCardModule,
     ReactiveFormsModule,
     MatButtonToggleModule,
+    MatExpansionModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
