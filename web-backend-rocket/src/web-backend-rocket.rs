@@ -101,7 +101,7 @@ fn post_service(shipping_info_json: Json<ShippingInfo>) -> Json<ShippingInfo> {
 #[derive(Debug, PartialEq, FromForm, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 struct ShippingInfo {
-    company:          String,
+    company:          Option<String>,
     first_name:       String,
     last_name:        String,
     address:          String,

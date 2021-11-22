@@ -148,9 +148,7 @@ export class ExplorerFormComponent {
     }
     console.error(errorMessage);
     this.backendData = {error: errorMessage};
-    if (environment.http_debug) {
-      alert('Error: ' + errorMessage);
-    }
+    alert('Error making the HTTP request: ' + errorMessage);
     return throwError(errorMessage);
   }
 }

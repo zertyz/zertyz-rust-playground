@@ -109,17 +109,17 @@ fn on_release() {
 /// when clients request them. Additionally, defines some date constants useful for optimizing the browser's cache.\
 /// 'file_links' refers to 'static_files' in the form {link_name = real_file_name, ...}\
 fn save_static_files(static_files: HashMap<String, Vec<u8>>, file_links: HashMap<String, String>) {
-    const CACHE_MAX_AGE_SECONDS: u64 = 31536000;
+    const CACHE_MAX_AGE_SECONDS: u64 = 3600 * 24 * 365;
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("static_files.rs");
     let mut writer = BufWriter::with_capacity(4*1024*1024, fs::File::create(dest_path).unwrap());
 
     // file names to Rust identifiers (file contents are stored in consts)
     fn file_name_as_token(file_name: &str) -> String {
-        let to_understore = ["/", "-", "."];
+        let to_underscore = ["/", "-", "."];
         let mut file_name_as_token = file_name.to_string();
         file_name_as_token.insert_str(0, "FILE_");
-        for replacement in to_understore {
+        for replacement in to_underscore {
             file_name_as_token = file_name_as_token.replace(replacement, "_");
         }
         file_name_as_token
