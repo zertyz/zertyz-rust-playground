@@ -3,64 +3,31 @@ mod static_files;
 use rocket::{
     Request,
     Response,
-    response::{self, Responder, status, Builder},
+    response::{self, Responder},
     http::{
-        Header,
-        Cookie,
         ContentType,
         Status,
     },
     FromFormField,
     FromForm,
+    serde::{json::Json, Serialize, Deserialize},
 };
-use rocket::serde::json::Json;
-use rocket::serde::{Serialize, Deserialize};
 
 use std::{
-    path::{Path,PathBuf},
     process::Command,
     io::Cursor,
+    path::PathBuf,
 };
-use std::borrow::Cow;
-use rocket::form::Form;
 
 #[macro_use] extern crate lazy_static;
 #[macro_use] extern crate rocket;
 
-#[derive(Responder)]
-#[response(status = 200, content_type = "json")]
-struct RawJson {
-    json: String
-}
 
-struct InternalFile {
-    file_name: String,
-}
-impl<'r> Responder<'r, 'r> for InternalFile {
-    fn respond_to(self, req: &'r Request<'_>) -> response::Result<'r> {
-        let file_name = self.file_name;
-        let (compressed, file_contents) = match static_files::STATIC_FILES.get(file_name.as_str()) {
-            Some(tuple) => tuple,
-            None => return Result::Err(Status{code:404}),
-        };
-        let file_extension = match file_name.rsplit_once(".") {
-            Some((file_name_before_last_dot, file_extension)) => file_extension,
-            None => "html",
-        };
-        let mut response_builder = Response::build();
-        response_builder.header(ContentType::from_extension(file_extension).unwrap());
-        if *compressed {
-            // informs the client that we have everything gzipped
-            response_builder.raw_header("Content-Encoding", "gzip");
-        }
-        response_builder
-            // enforce caching on the client
-            .raw_header("Cache-Control", static_files::CACHE_CONTROL)
-            .raw_header("expires", static_files::EXPIRATION_DATE)
-            .raw_header("last-modified", static_files::GENERATION_DATE)
-            .sized_body(file_contents.len(), Cursor::new(file_contents))
-            .ok()
-    }
+/// serves statically linked files for blazing-fast speeds (no context switches nor cache additions/evictions)
+#[get("/<file..>")]
+fn internal_files(file: PathBuf) -> InternalFile {
+    let internal_file_name = format!("/{}", file.to_string_lossy().to_string());
+    InternalFile {file_name: internal_file_name}
 }
 
 #[get("/rest-service/<world>")]
@@ -112,13 +79,42 @@ struct ShippingInfo {
     refuse_housemate: bool,
 }
 
-/// serves statically linked files for blazing-fast speeds (no context switches)
-#[get("/<file..>")]
-fn internal_files(file: PathBuf) -> InternalFile {
-    let internal_file_name = format!("/{}", file.to_string_lossy().to_string());
-    InternalFile {file_name: internal_file_name}
+#[derive(Responder)]
+#[response(status = 200, content_type = "json")]
+struct RawJson {
+    json: String
 }
 
+struct InternalFile {
+    file_name: String,
+}
+
+impl<'r> Responder<'r, 'r> for InternalFile {
+    fn respond_to(self, _req: &'r Request<'_>) -> response::Result<'r> {
+        let file_name = self.file_name;
+        let (compressed, file_contents) = match static_files::STATIC_FILES.get(file_name.as_str()) {
+            Some(tuple) => tuple,
+            None => return Result::Err(Status{code:404}),
+        };
+        let file_extension = match file_name.rsplit_once(".") {
+            Some((_file_name_before_last_dot, file_extension)) => file_extension,
+            None => "html",
+        };
+        let mut response_builder = Response::build();
+        response_builder.header(ContentType::from_extension(file_extension).unwrap());
+        if *compressed {
+            // informs the client that we have everything gzipped
+            response_builder.raw_header("Content-Encoding", "gzip");
+        }
+        response_builder
+            // enforce caching on the client
+            .raw_header("Cache-Control", static_files::CACHE_CONTROL)
+            .raw_header("expires", static_files::EXPIRATION_DATE)
+            .raw_header("last-modified", static_files::GENERATION_DATE)
+            .sized_body(file_contents.len(), Cursor::new(file_contents))
+            .ok()
+    }
+}
 
 #[launch]
 fn rocket() -> _ {

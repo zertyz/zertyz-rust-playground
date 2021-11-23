@@ -1,15 +1,9 @@
 <mat-toolbar color="primary" id="imageContainer">
   <span><a [routerLink]="['']"><img src="common_assets/img/logo.png" height="60"></a></span>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <span>
-    <!--<span routerLinkActive="active"><a mat-raised-button color="primary" [routerLink]="['home']">Home</a></span>-->
-    &nbsp;&nbsp;&nbsp;
-    <span class="mat-slider-thumb-label-text">API explorers:</span>
-    &nbsp;&nbsp;&nbsp;
-    <span routerLinkActive="active"><a mat-raised-button color="primary" [routerLink]="['rest-service-explorer']">REST Service</a></span>
-    &nbsp;&nbsp;&nbsp;
-    <span routerLinkActive="active"><a mat-raised-button color="primary" [routerLink]="['get-service-explorer']">GET Service</a></span>
-    &nbsp;&nbsp;&nbsp;
-    <span routerLinkActive="active"><a mat-raised-button color="primary" [routerLink]="['post-service-explorer']">POST Service</a></span>
-  </span>
+  <span class="spacer"></span>
+  <div>
+    <a mat-button routerLinkActive="opened" [routerLink]="['rest-service-explorer']">REST Service</a>
+    <a mat-button routerLinkActive="opened" [routerLink]="['get-service-explorer']">GET Service</a>
+    <a mat-button routerLinkActive="opened" [routerLink]="['post-service-explorer']">POST Service</a>
+  </div>
 </mat-toolbar>

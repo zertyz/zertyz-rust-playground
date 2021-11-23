@@ -13,7 +13,6 @@ use std::{
 use walkdir::WalkDir;
 use chrono::{DateTime, Utc};
 use flate2::{
-    GzBuilder,
     Compression,
     write::GzEncoder,
 };
@@ -183,7 +182,7 @@ lazy_static! {
         writer.write(format!("        m.insert(\"{}\", {});\n", link_name, file_name_as_token(real_file_name)).as_bytes() ).unwrap();
     }
     writer.write("        // files\n".as_bytes() ).unwrap();
-    for (file_name, file_contents) in &static_files {
+    for (file_name, _file_contents) in &static_files {
         writer.write(format!("        m.insert(\"{}\", {});\n", file_name, file_name_as_token(file_name)).as_bytes() ).unwrap();
     }
 

@@ -20,7 +20,7 @@
           <ng-template #standardField>
             <mat-form-field class="full-width">
               <input *ngIf="field.presentationType == 'Input'" matInput #{{field.name}} placeholder="{{field.label}}" formControlName="{{field.name}}">
-              <input *ngIf="field.presentationType == 'SteppedInput'" matInput #{{field.name}} maxlength="{{(''+field.possibleRangeFinish).length}}}" placeholder="{{field.label}}" formControlName="{{field.name}}" type="number">
+              <input *ngIf="field.presentationType == 'SteppedInput'" matInput #{{field.name}} maxlength="{{(''+field.upperBound).length}}}" placeholder="{{field.label}}" formControlName="{{field.name}}" type="number">
               <textarea *ngIf="field.presentationType == 'Area'" matInput #{{field.name}} placeholder="{{field.label}}" formControlName="{{field.name}}"></textarea>
               <mat-select *ngIf="field.presentationType == 'ComboBox'" #{{field.name}} placeholder="{{field.label}}" formControlName="{{field.name}}">
                 <mat-option *ngFor="let option of field.possibleValues" [value]="option.value">
@@ -32,16 +32,16 @@
                 {{field.helperText}}
               </mat-error>
               <mat-error *ngIf="formGroup.controls[field.name].hasError('minlength')">
-                The minimum length is {{field.possibleRangeStart}}
+                The minimum length is {{field.lowerBound}}
               </mat-error>
               <mat-error *ngIf="formGroup.controls[field.name].hasError('maxlength')">
-                The maximum length is {{field.possibleRangeFinish}}
+                The maximum length is {{field.upperBound}}
               </mat-error>
               <mat-error *ngIf="formGroup.controls[field.name].hasError('min')">
-                The minimum value is {{field.possibleRangeStart}}
+                The minimum value is {{field.lowerBound}}
               </mat-error>
               <mat-error *ngIf="formGroup.controls[field.name].hasError('max')">
-                The maximum value is {{field.possibleRangeFinish}}
+                The maximum value is {{field.upperBound}}
               </mat-error>
               <mat-error *ngIf="environment.ui_debug && formGroup.controls[field.name].errors != null">
                 ERRORS: {{formGroup.controls[field.name].errors | json}}

@@ -9,3 +9,12 @@ div#imageContainer {
 #imageContainer img {
   vertical-align: bottom
 }
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.opened {
+  background: #774ab7;
+  opacity: 1;
+}

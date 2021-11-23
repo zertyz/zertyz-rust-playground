@@ -17,52 +17,56 @@
           <div class="col-lg-7">
             <form [formGroup]="formGroup" novalidate (ngSubmit)="onSubmit()">
               <div class="row">
-                <span *ngFor="let fieldSet of form.fields; index as i">
-                  <div class="form-group col-lg-12" *ngFor="let field of fieldSet">
-                    <p *ngIf="field.presentationType == 'RadioButtons'; else checkBox">
-                      <label *ngFor="let option of field.possibleValues">
-                        <input type="radio" [value]="option.value" formControlName="{{field.name}}">
-                        {{option.text}}&nbsp;&nbsp;&nbsp;
-                      </label>
-                    </p>
-                    <ng-template #checkBox>
-                      <label *ngIf="field.presentationType == 'CheckBox'; else standardField" >
-                        <input type="checkbox" #{{field.name}} formControlName="{{field.name}}">
-                        {{field.label}}
-                      </label>
-                    </ng-template>
-                    <ng-template #standardField>
-                        <input *ngIf="field.presentationType == 'Input'" class="form-control" #{{field.name}} placeholder="{{field.label}}" formControlName="{{field.name}}">
-                        <input *ngIf="field.presentationType == 'SteppedInput'" class="form-control"  #{{field.name}} maxlength="{{(''+field.possibleRangeFinish).length}}}" placeholder="{{field.label}}" formControlName="{{field.name}}" type="number">
-                        <textarea *ngIf="field.presentationType == 'Area'" class="form-control"  #{{field.name}} placeholder="{{field.label}}" formControlName="{{field.name}}"></textarea>
-                        <select *ngIf="field.presentationType == 'ComboBox'" class="form-control"  #{{field.name}} formControlName="{{field.name}}">
-                          <option *ngFor="let option of field.possibleValues" [value]="option.value">
-                            {{option.text}}
-                          </option>
-                        </select>
-                        <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('required')">
-                          {{field.helperText}}
-                        </sup>
-                        <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('minlength')">
-                          The minimum length is {{field.possibleRangeStart}}
-                        </sup>
-                        <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('maxlength')">
-                          The maximum length is {{field.possibleRangeFinish}}
-                        </sup>
-                        <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('min')">
-                          The minimum value is {{field.possibleRangeStart}}
-                        </sup>
-                        <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('max')">
-                          The maximum value is {{field.possibleRangeFinish}}
-                        </sup>
-                        <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && environment.ui_debug && formGroup.controls[field.name].errors != null">
-                          ERRORS: {{formGroup.controls[field.name].errors | json}}
-                        </sup>
-                    </ng-template>
-                  </div>
-                </span>
+                <ng-container *ngFor="let fieldSet of form.fields; index as i">
+
+                    <div *ngFor="let field of fieldSet" [ngClass]="
+                         field.presentationType == 'CheckBox' ? 'form-group form-check' :
+                             fieldSet.length == 1 ? 'form-group col-lg-12' : 'form-group col-lg-6'">
+                      <p *ngIf="field.presentationType == 'RadioButtons'; else checkBox">
+                        <label *ngFor="let option of field.possibleValues">
+                          <input type="radio" [value]="option.value" formControlName="{{field.name}}">
+                          {{option.text}}&nbsp;&nbsp;&nbsp;
+                        </label>
+                      </p>
+                      <ng-template #checkBox>
+                        <ng-container  *ngIf="field.presentationType == 'CheckBox'; else standardField">
+                          <input type="checkbox" formControlName="{{field.name}}">
+                          <label>&nbsp;{{field.label}}</label>
+                        </ng-container>
+                      </ng-template>
+                      <ng-template #standardField>
+                          <input *ngIf="field.presentationType == 'Input'" class="form-control" placeholder="{{field.label}}" formControlName="{{field.name}}">
+                          <input *ngIf="field.presentationType == 'SteppedInput'" class="form-control" maxlength="{{(''+field.upperBound).length}}}" placeholder="{{field.label}}" formControlName="{{field.name}}" type="number">
+                          <textarea *ngIf="field.presentationType == 'Area'" class="form-control" placeholder="{{field.label}}" formControlName="{{field.name}}"></textarea>
+                          <select *ngIf="field.presentationType == 'ComboBox'" class="form-control" formControlName="{{field.name}}">
+                            <option *ngFor="let option of field.possibleValues" [value]="option.value">
+                              {{option.text}}
+                            </option>
+                          </select>
+                          <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('required')">
+                            {{field.helperText}}
+                          </sup>
+                          <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('minlength')">
+                            The minimum length is {{field.lowerBound}}
+                          </sup>
+                          <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('maxlength')">
+                            The maximum length is {{field.upperBound}}
+                          </sup>
+                          <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('min')">
+                            The minimum value is {{field.lowerBound}}
+                          </sup>
+                          <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && formGroup.controls[field.name].hasError('max')">
+                            The maximum value is {{field.upperBound}}
+                          </sup>
+                          <sup style="color: #721c24" *ngIf="formGroup.value[field.name] != null && environment.ui_debug && formGroup.controls[field.name].errors != null">
+                            ERRORS: {{formGroup.controls[field.name].errors | json}}
+                          </sup>
+                      </ng-template>
+                    </div>
+
+                </ng-container>
                 <div class="form-group col-lg-12">
-                  <button class="btn btn-outline-primary" type="submit" [disabled]="!formGroup.valid">Submit</button>
+                  <button class="btn btn-outline-primary" type="submit" [disabled]="!formGroup.valid">{{form.submit_label}}</button>
                 </div>
               </div>
             </form>

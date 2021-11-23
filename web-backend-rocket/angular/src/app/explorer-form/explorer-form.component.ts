@@ -1,10 +1,10 @@
 import {Component, Input} from '@angular/core';
 import {HttpClient, HttpErrorResponse} from "@angular/common/http";
-import { Observable, throwError } from 'rxjs';
-import { catchError, retry } from 'rxjs/operators';
+import {throwError} from 'rxjs';
+import {catchError, retry} from 'rxjs/operators';
 import {environment} from '../../environments/environment';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {Form, FormField} from './form';
+import {FieldDataType, FieldPresentationType, Form, FormField, HttpMethod} from './form';
 
 
 @Component({
@@ -22,6 +22,7 @@ export class ExplorerFormComponent {
     method: "<<method>>",
     form_title: "<<form_title>>",
     service_description: "<<service_description>>",
+    submit_label: '<<submit_label>>',
     fields: [],
   };
 
@@ -42,24 +43,24 @@ export class ExplorerFormComponent {
       .reduce((prev: {[p: string]: any}, fieldRow: FormField[])  => {
         let next = prev;
         fieldRow.forEach((field: FormField) => {
-          if (field.dataType == 'Text' && field.possibleRangeStart != null && field.possibleRangeFinish != null) {
+          if (field.dataType == "Text" && field.lowerBound != null && field.upperBound != null) {
             // min & max length for text fields
             next[field.name] = [null, Validators.compose([
               Validators.required,
-              Validators.minLength(field.possibleRangeStart),
-              Validators.maxLength(field.possibleRangeFinish)
+              Validators.minLength(field.lowerBound),
+              Validators.maxLength(field.upperBound)
             ])]
-          } else if (field.dataType == 'Number' && field.possibleRangeStart != null && field.possibleRangeFinish != null) {
+          } else if (field.dataType == "Number" && field.lowerBound != null && field.upperBound != null) {
             // min & max length for text fields
             next[field.name] = [null, Validators.compose([
               Validators.required,
-              Validators.min(field.possibleRangeStart),
-              Validators.max(field.possibleRangeFinish)
+              Validators.min(field.lowerBound),
+              Validators.max(field.upperBound)
             ])]
-          } else if (field.presentationType == 'RadioButtons' && field.possibleValues != null && field.required) {
+          } else if (field.presentationType == "RadioButtons" && field.possibleValues != null && field.required) {
             // required radio buttons comes with the first value pre-selected
             next[field.name] = [field.possibleValues[0].value, Validators.required];
-          } else if (field.presentationType == 'CheckBox') {
+          } else if (field.presentationType == "CheckBox") {
             // checkboxes default to unchecked
             next[field.name] = [false];
           } else if (field.required) {
@@ -86,7 +87,7 @@ export class ExplorerFormComponent {
       }
       alert(message);
     }
-    if (this.form.method == 'POST') {
+    if (this.form.method == "POST") {
       // POST
       this.httpClient.post<any>(resolvedService, resolvedDataToSend)
         .pipe(
@@ -116,16 +117,16 @@ export class ExplorerFormComponent {
 
   private resolveService(): string {
     let resolvedService = this.form.service;
-    if (this.form.method == 'REST') {
+    if (this.form.method == "REST") {
       Object.keys(this.formGroup.value).forEach(formFieldName => resolvedService = resolvedService.replace("{"+formFieldName+"}", this.formGroup.value[formFieldName]));
     }
     return resolvedService;
   }
 
   private resolveDataToSend(): any {
-    if (this.form.method == 'REST') {
+    if (this.form.method == "REST") {
       return null;
-    } else if (this.form.method == 'GET') {
+    } else if (this.form.method == "GET") {
       return {
         //headers?: HttpHeaders | {[header: string]: string | string[]},
         //observe?: 'body' | 'events' | 'response',
@@ -134,7 +135,7 @@ export class ExplorerFormComponent {
         //responseType?: 'arraybuffer'|'blob'|'json'|'text',
         //withCredentials?: boolean,
       };
-    } else if (this.form.method == 'POST') {
+    } else if (this.form.method == "POST") {
       return this.formGroup.value;
     }
   }
@@ -151,4 +152,5 @@ export class ExplorerFormComponent {
     alert('Error making the HTTP request: ' + errorMessage);
     return throwError(errorMessage);
   }
+
 }

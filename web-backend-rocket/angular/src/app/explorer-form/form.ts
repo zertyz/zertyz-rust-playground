@@ -4,6 +4,7 @@ export interface Form {
   method: HttpMethod | string,
   form_title: string,
   service_description: string,
+  submit_label: string,
   fields: FormField[][],
 }
 
@@ -15,31 +16,33 @@ export interface FormField {
   required?: boolean,
   helperText: string,
   possibleValues?: {text: string, value: string}[],
-  possibleRangeStart?: number,
-  possibleRangeFinish?: number,
+  /** for 'Number' fields, this means the lower value possible; for 'Text' fields, the minimum string */
+  lowerBound?: number,
+  /** for 'Number' fields, this means the greatest value possible; for 'Text' fields, the maximum string */
+  upperBound?: number,
 }
 
 export enum FieldDataType {
-  Integer = "Integer",
-  Float = "Float",
-  Text = "Text",
-  Boolean = "Boolean",
+  Number,
+  Text,
+  Boolean,
 }
 
 export enum FieldPresentationType {
-  Input = "Input",
-  SteppedInput = "SteppedInput",
-  Area = "Area",
-  Date = "Date",
-  DateTime = "DateTime",
-  Toggle = "Toggle",
-  ComboBox = "ComboBox",
-  ListBox = "ListBox",
-  CheckBox = "CheckBox",
-  RadioButtons = "RadioButtons",
+  Input,
+  SteppedInput,
+  Area,
+  Date,
+  DateTime,
+  Toggle,
+  ComboBox,
+  ListBox,
+  CheckBox,
+  RadioButtons,
 }
 
 export enum HttpMethod {
-  GET = "GET",
-  POST = "POST",
+  GET,
+  POST,
+  REST,
 }
