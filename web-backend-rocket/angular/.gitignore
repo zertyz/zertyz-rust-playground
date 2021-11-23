@@ -1,5 +1,13 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
+# theme files
+src/**/*.html
+src/**/*.sass
+src/**/*.scss
+src/**/*.less
+src/**/*.css
+themes/current
+
 # compiled output
 /dist
 /tmp
