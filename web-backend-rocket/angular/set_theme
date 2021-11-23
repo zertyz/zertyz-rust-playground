@@ -1,0 +1,51 @@
+#! /bin/bash
+
+NEW_THEME="$1"
+if [ -z "${NEW_THEME}" ]; then
+	echo "Usage: ./set_theme <teme_name> -- where 'theme_name' is a directory in 'themes'. One of:"
+	ls -1 themes
+	exit 1
+fi
+
+# check we are at the right directory
+if ! pwd | grep '/angular$' &>/dev/null; then
+	echo "==> 'set_theme' will only run on the 'angular' directory. Bailing out..."
+	exit 1
+fi
+
+CURRENT_THEME=`stat themes/current | grep 'File: ' | sed 's|.*\-> \(.*\)|\1|'`
+echo "==> Current Theme: '${CURRENT_THEME}'"
+
+# verify all theme files are hard links to themes/current
+find src -name '*.html' -o -name '*.sass' -o -name '*.scss' -o -name '*.css' -o -name '*.less' | while read f; do
+	if stat "$f" | grep 'Links: 1' &>/dev/null; then
+		echo "    XXX File '$f' seems to only be present in 'src'. When changing themes, src/*.{html,sass,scss,css,less} will be deleted -- so they must be in themes/${CURRENT_THEME}"
+		exit 1
+	else
+		if ! diff -q "themes/current/${f/src\//}" "$f" &>/dev/null; then
+			echo "    XXX diff -q 'themes/current/${f/src\//}' '$f' &>/dev/null' failed. Please, fix. Bailing out..."
+			exit 1
+		fi
+	fi
+done
+
+# set the theme link
+if [ -s "themes/${NEW_THEME}" ]; then
+	rm themes/current
+	ln -s "${NEW_THEME}" themes/current
+	echo -en "==> Changing theme to '${NEW_THEME}'..."
+else
+	echo "XXX Desired theme '${NEW_THEME}' not found. Bailing out..."
+fi
+
+# delete linked files
+find src -name '*.html' -o -name '*.sass' -o -name '*.scss' -o -name '*.css' -o -name '*.less' | while read f; do
+	rm "$f" && echo -en '.' || exit 1
+done
+
+# create new linked files
+find themes/current/ -name '*.html' -o -name '*.sass' -o -name '*.scss' -o -name '*.css' -o -name '*.less' | while read f; do
+	ln "$f" src/"${f/themes\/current\//}" && echo -en '.'
+done
+
+echo " OK"
