@@ -1,4 +1,4 @@
-// build.rs: keeps static files to be served inside the main executable, allowing for blasting-fast service (without context switches)
+// build.rs: keeps static files to be served inside the main executable, allowing for blazing-fast service (without context switches nor cache manipulations)
 
 use std::{
     env,
@@ -12,13 +12,19 @@ use std::{
 };
 use walkdir::WalkDir;
 use chrono::{DateTime, Utc};
-use flate2::{
-    Compression,
-    write::GzEncoder,
-};
 
-/// how smaller (in bytes) the gzipped file must be, in comparison to the plain version, for us to serve it in the compressed form
-const GZIP_THRESHOLD: usize = 100;
+/// which compressor to use to serve the static files
+const COMPRESSOR: Compressors = Compressors::GZIP;
+
+/// how smaller (in bytes) the compressed file must be, in comparison to the plain version, for us to serve it in the compressed form
+const COMPRESSION_THRESHOLD: usize = 100;
+
+enum Compressors {
+    /// must be supported by all browsers
+    GZIP,
+    /// offers ~15% better compression ratios for text, when compared to gzip -- not accepted by Firefox 94.0.1 (2021, nov, 24) when accessing via HTTP
+    BROTLI,
+}
 
 fn main() {
 
@@ -46,8 +52,7 @@ fn on_non_release() {
     );
 }
 
-/// builds the angular site for production, then loads (and compresses) the resulting static files, storing them in a hash map for use by the application.\
-///
+/// builds the angular site for production, then loads (and compresses) the resulting static files, storing them in a hash map for use by the application.
 fn on_release() {
     let angular_relative_path = "./angular";
     let angular_dist_path = format!("{}/dist/DemoAngularAndBootstrapUI", angular_relative_path);
@@ -104,12 +109,12 @@ fn on_release() {
     save_static_files(files_contents, file_links);
 }
 
-/// saves (possibly compressing) 'static_files' into a const hash map for use by the web server & application
-/// when clients request them. Additionally, defines some date constants useful for optimizing the browser's cache.\
+/// saves (possibly compressing) 'static_files' into a const hash map for use by the web server & application when
+/// clients request them. Additionally, defines some constants related to compression & optimizing the browser's cache.\
 /// 'file_links' refers to 'static_files' in the form {link_name = real_file_name, ...}\
 fn save_static_files(static_files: HashMap<String, Vec<u8>>, file_links: HashMap<String, String>) {
     const CACHE_MAX_AGE_SECONDS: u64 = 3600 * 24 * 365;
-    let out_dir = env::var_os("OUT_DIR").unwrap();
+    let out_dir = env::var_os("OUT_DIR").expect("Environment var 'OUT_DIR' is not present");
     let dest_path = Path::new(&out_dir).join("static_files.rs");
     let mut writer = BufWriter::with_capacity(4*1024*1024, fs::File::create(dest_path).unwrap());
 
@@ -132,7 +137,7 @@ use std::collections::HashMap;
 "#;
     let hash_map_header = r#"
 lazy_static! {
-    pub static ref STATIC_FILES: HashMap<&'static str, (/*gzipped*/bool, /*contents*/&'static [u8])> = {
+    pub static ref STATIC_FILES: HashMap<&'static str, (/*compressed*/bool, /*contents*/&'static [u8])> = {
         let mut m = HashMap::new();
 "#;
     let function_and_file_footers = r#"
@@ -145,23 +150,24 @@ lazy_static! {
 
     // file constants
     for (file_name, file_contents) in &static_files {
-        let mut gzip = GzEncoder::new(Vec::new(), Compression::best());
-        gzip.write_all(file_contents).unwrap();
-        let gzipped_bytes = gzip.finish().expect(&format!("Could not compress file '{}'", file_name));
-        if gzipped_bytes.len() + GZIP_THRESHOLD < file_contents.len() {
-            // serve it gzipped (text)
+        let compressed_bytes = compress(&file_name, &file_contents);
+        if compressed_bytes.len() + COMPRESSION_THRESHOLD < file_contents.len() {
+            // serve it compressed (text)
             writer.write(format!("// \"{}\": {} compressed / {} plain ==> compressed to {:.2}% of the original\n\
                                        const {}: (bool, &[u8]) = (true, &{:?});\n",
-                                     file_name, gzipped_bytes.len(), file_contents.len(), (gzipped_bytes.len() as f64 / file_contents.len() as f64) * 100.0,
-                                     file_name_as_token(file_name), gzipped_bytes.as_slice()).as_bytes() ).unwrap();
+                                 file_name, compressed_bytes.len(), file_contents.len(), (compressed_bytes.len() as f64 / file_contents.len() as f64) * 100.0,
+                                 file_name_as_token(file_name), compressed_bytes.as_slice()).as_bytes() ).unwrap();
         } else {
             // serve it plain (images, videos, ...)
-            writer.write(format!("// \"{}\": {} compressed / {} plain ==> would be {:.2}% of the original\n\
-                                       const {}: (bool, &[u8]) = (false, &{:?});\n\n",
-                                      file_name, gzipped_bytes.len(), file_contents.len(), (gzipped_bytes.len() as f64 / file_contents.len() as f64) * 100.0,
-                                      file_name_as_token(file_name), file_contents.as_slice()).as_bytes() ).unwrap();
+            writer.write(format!("\n// \"{}\": {} compressed / {} plain ==> would be {:.2}% of the original\n\
+                                         const {}: (bool, &[u8]) = (false, &{:?});\n",
+                                 file_name, compressed_bytes.len(), file_contents.len(), (compressed_bytes.len() as f64 / file_contents.len() as f64) * 100.0,
+                                 file_name_as_token(file_name), file_contents.as_slice()).as_bytes() ).unwrap();
         }
     }
+
+    // Content-Encoding (compressor) constant
+    writer.write(format!("\npub const CONTENT_ENCODING: &str = \"{}\";\n", compressor_http_header()).as_bytes()).unwrap();
 
     // date constants
     let now_time: DateTime<Utc> = Utc::now();
@@ -169,9 +175,9 @@ lazy_static! {
     let generation_date_str = now_time.to_rfc2822();
     let expiration_date_str = expiration_time.to_rfc2822();
     let cache_control_str = format!("public, max-age: {}", CACHE_MAX_AGE_SECONDS);
-    writer.write(format!("pub const GENERATION_DATE: &str = \"{}\";\n", generation_date_str).as_bytes() ).unwrap();
-    writer.write(format!("pub const EXPIRATION_DATE: &str = \"{}\";\n", expiration_date_str).as_bytes() ).unwrap();
-    writer.write(format!("pub const CACHE_CONTROL:   &str = \"{}\";\n\n", cache_control_str).as_bytes() ).unwrap();
+    writer.write(format!("pub const GENERATION_DATE:  &str = \"{}\";\n", generation_date_str).as_bytes() ).unwrap();
+    writer.write(format!("pub const EXPIRATION_DATE:  &str = \"{}\";\n", expiration_date_str).as_bytes() ).unwrap();
+    writer.write(format!("pub const CACHE_CONTROL:    &str = \"{}\";\n\n", cache_control_str).as_bytes() ).unwrap();
 
     // hash map header
     writer.write(hash_map_header.as_bytes() ).unwrap();
@@ -188,4 +194,43 @@ lazy_static! {
 
     // footer
     writer.write(function_and_file_footers.as_bytes() ).unwrap();
+}
+
+/// adapter for a compressor, respecting the global config
+fn compress(file_name: &String, file_content: &Vec<u8>) -> Vec<u8> {
+    match COMPRESSOR {
+        Compressors::GZIP => gzip_compress(&file_name, &file_content),
+        Compressors::BROTLI => brotli_compress(&file_name, &file_content),
+    }
+}
+
+/// returns the corresponding 'Content-Encoding' HTTP header value for the chosen 'COMPRESSOR'
+fn compressor_http_header() -> &'static str {
+    match COMPRESSOR {
+        Compressors::GZIP => "gzip",
+        Compressors::BROTLI => "br",
+    }
+}
+
+use flate2::{
+    Compression,
+    write::GzEncoder,
+};
+/// equivalent of 'gzip -9'
+fn gzip_compress(file_name: &String, file_content: &Vec<u8>) -> Vec<u8> {
+    let mut gzip = GzEncoder::new(Vec::new(), Compression::best());
+    gzip.write_all(file_content).unwrap();
+    let gzipped_bytes = gzip.finish().expect(&format!("Could not compress file '{}'", file_name));
+    gzipped_bytes
+}
+
+
+/// equivalent of 'brotli -q 11 -w 24'
+fn brotli_compress(_file_name: &String, file_content: &Vec<u8>) -> Vec<u8> {
+    let mut brotlied_bytes = Vec::new();
+    let mut brotli = brotli::CompressorWriter::new(&mut brotlied_bytes, 4096, 11, 24);
+    brotli.write_all(file_content).unwrap();
+    brotli.flush().unwrap();
+    drop(brotli);
+    brotlied_bytes
 }

@@ -17,7 +17,8 @@ path = "src/web-backend-rocket.rs"
 [build-dependencies]
 walkdir = "2.3"
 #flate2 = { version = "1.0", features = ["zlib-ng-compat"], default-features = false }  # gzip / gunzip
-flate2 = "1.0"  # gzip / gunzip
+flate2 = "1.0"      # gzip / gunzip
+brotli = "3.3"      # brotli compression
 chrono = "0.4"
 
 

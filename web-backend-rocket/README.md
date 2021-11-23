@@ -7,9 +7,34 @@ Demonstrates how to work with Angular & Rocket.
   * The backend automatically starts the angular dev serving scripts, making a good development pipeline -- even from the IDE
 
   * When compiled for release 'RUSTFLAGS="-C target-cpu=native" cargo build --release', build.rs runs
-    'ng build --aot --build-optimizer --optimization --prod --progress', then the generated files are -9 gzipped and incorporated
+    'ng build --aot --build-optimizer --optimization --prod --progress', then the generated files are compressed and incorporated
     into the Rocket server, along with all the backend services -- so the stand-alone executable also serves the UI and no
     external web servers are needed.
+
+  * Static files may be compressed in 'gzip -9' or 'brotli -q 11 -w 24' (default)
+
+
+## Setup
+
+You'll need Angular CLI 12.2.0+ installed. Then run (only tested on Linux & Mac):
+
+```
+    $ cd angular
+    $ npm install
+    $ ./set_theme Material # or ./set_theme Renovat
+```
+
+Test the client setup with:
+```
+    $ ng serve
+```
+
+To build the standalone application:
+```
+    $ cd ..
+    $ RUSTFLAGS="-C target-cpu=native" cargo build --release
+```
+
 
 # Screenshots
 
