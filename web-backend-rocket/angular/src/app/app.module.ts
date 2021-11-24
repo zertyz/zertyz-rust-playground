@@ -41,7 +41,7 @@ import { MatExpansionModule } from "@angular/material/expansion";
     PostServiceExplorerPage
   ],
   imports: [
-    BrowserModule,
+    BrowserModule.withServerTransition({ appId: 'serverApp' }),
     AppRoutingModule,
     NgbModule,
     BrowserAnimationsModule,

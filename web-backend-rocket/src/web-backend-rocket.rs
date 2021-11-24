@@ -133,7 +133,7 @@ fn rocket() -> _ {
 /// (make sure the app runs from the project's root folder)
 fn start_ng_dev_server() {
     let message = "Starting DEV Angular server";
-    let command = format!("echo '{}'; cd angular && npm start", message);
+    let command = format!("echo '{}'; cd angular && ng serve --host 0.0.0.0", message);
     let shell;
     if cfg!(target_os = "windows") {
         shell = "cmd";

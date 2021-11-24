@@ -13,17 +13,46 @@ use std::{
 use walkdir::WalkDir;
 use chrono::{DateTime, Utc};
 
+// ---------------------------------- CONFIGURATION START ----------------------------------
+
+/// the Angular app name, as created in 'dist/' when building the app
+const ANGULAR_APP_NAME: &str = "DemoAngularAndBootstrapUI";
+
+/// should we build a regular Angular site or a blazing fast pre-rendered, universal one?
+const ANGULAR_BUILD_TYPE: AngularBuildTypes = AngularBuildTypes::PreRenderedUniversal;
+
 /// which compressor to use to serve the static files
-const COMPRESSOR: Compressors = Compressors::GZIP;
+const COMPRESSOR: Compressors = Compressors::GZip;
+
+// ----------------------------------- CONFIGURATION END -----------------------------------
 
 /// how smaller (in bytes) the compressed file must be, in comparison to the plain version, for us to serve it in the compressed form
 const COMPRESSION_THRESHOLD: usize = 100;
 
+/// builds a production-ready website using regular Angular scripts
+const REGULAR_ANGULAR_BUILD_COMMAND: &str = "ng build --aot --build-optimizer --optimization --prod --progress";
+
+/// builds a production-ready website + dynamic server (which is not used by us, for we only care for URL parameter-less routes)
+/// -- look at 'angular.json' for which routes will participate on the pre-rendering
+const PRE_RENDERED_UNIVERSAL_BUILD_COMMAND: &str = "npm run prerender";
+
+/// selects between Vanilla or Angular Universal builds
+#[derive(Debug)]
+enum AngularBuildTypes {
+    /// Universal build with pre-rendered static pages -- HTML already contains the final DOM, so
+    /// the page is presented even before any JavaScripts are loaded
+    PreRenderedUniversal,
+    /// regular vanilla Angular build -- DOM rendered after JavaScripts are loaded
+    Regular,
+}
+
+/// selects between compressors to use for static files
+#[derive(Debug)]
 enum Compressors {
     /// must be supported by all browsers
-    GZIP,
+    GZip,
     /// offers ~15% better compression ratios for text, when compared to gzip -- not accepted by Firefox 94.0.1 (2021, nov, 24) when accessing via HTTP
-    BROTLI,
+    Brotli,
 }
 
 fn main() {
@@ -55,20 +84,27 @@ fn on_non_release() {
 /// builds the angular site for production, then loads (and compresses) the resulting static files, storing them in a hash map for use by the application.
 fn on_release() {
     let angular_relative_path = "./angular";
-    let angular_dist_path = format!("{}/dist/DemoAngularAndBootstrapUI", angular_relative_path);
-    let angular_production_build_command = format!("cd '{}' && ng build --aot --build-optimizer --optimization --prod --progress", angular_relative_path);
-    let get_angular_routes_command = format!(r#"grep "{{ path: '" {}/src/app/app-routing.module.ts | sed "s|.* path: '\([^']*\)'.*|\1|""#, angular_relative_path);
-
-    eprintln!("\tRunning Angular's production build: '{}'", angular_production_build_command);
-    let shell;
-    if cfg!(target_os = "windows") {
-        shell = "cmd";
-    } else {
-        shell = "sh";
+    let angular_dist_path = format!("{}/dist/{}/browser", angular_relative_path, ANGULAR_APP_NAME);
+    let angular_build_command = match ANGULAR_BUILD_TYPE {
+        AngularBuildTypes::PreRenderedUniversal => PRE_RENDERED_UNIVERSAL_BUILD_COMMAND,
+        AngularBuildTypes::Regular =>              REGULAR_ANGULAR_BUILD_COMMAND,
     };
+    let full_build_command = format!("cd '{}' && {}", angular_relative_path, angular_build_command);
+    let get_angular_routes_command = format!(r#"grep "{{ path: '" {}/src/app/app-routing.module.ts | sed "s|.* path: '\([^']*\)'.*|\1|""#, angular_relative_path);
+    let shell = if cfg!(target_os = "windows") {"cmd"} else {"sh"};
+
+    eprintln!("\tGetting Angular routes...");
+    let output = Command::new(shell)
+        .args(["-c", &get_angular_routes_command])
+        .output().expect("Failed to start Angular UI Application!")
+        .stdout;
+    let angular_routes_output = String::from_utf8(output).expect("command output is not in UTF-8");
+    let angular_routes = angular_routes_output.split("\n");
+
+    eprintln!("\tRunning Angular's production build: {:?} ==> '{}'", ANGULAR_BUILD_TYPE, full_build_command);
     let _exit_status = Command::new(shell)
-        .args(["-c", &angular_production_build_command])
-        .spawn().expect("Failed to start Angular UI Application!")
+        .args(["-c", &full_build_command])
+        .spawn().expect(&format!("Failed to start Angular UI build command '{}'", full_build_command))
         .wait().unwrap();
 
     // reads all static files, recursively
@@ -76,7 +112,7 @@ fn on_release() {
     let mut current_dir = env::current_dir().unwrap();
     current_dir = current_dir.join(angular_dist_path);
     let root_dir = PathBuf::from(&current_dir);
-    eprintln!("Incorporating all files from '{:?}' into the executable", root_dir);
+    eprintln!("Incorporating all files from '{:?}' into the executable -- and compressing them with {:?}", root_dir, COMPRESSOR);
     WalkDir::new(current_dir)
         .into_iter()
         .filter_entry(|entry| entry
@@ -95,16 +131,29 @@ fn on_release() {
         });
 
     // includes all angular routes as links to index.html
-    let output = Command::new(shell)
-        .args(["-c", &get_angular_routes_command])
-        .output().expect("Failed to start Angular UI Application!")
-        .stdout;
-    let output_string = String::from_utf8(output).expect("command not in UTF-8");
-    let routes = output_string.split("\n");
-    let file_links: HashMap<String, String> = routes.into_iter()
-        .map(|route| (format!("/{}", route), "/index.html".to_string()) )
+    // -- for universal builds, they'll be linked to 'index.original.html' and the pre-rendered
+    //    routes will be overwritten by the corresponding pre-rendered file
+    let dynamic_routes_index_name = match ANGULAR_BUILD_TYPE {
+        AngularBuildTypes::PreRenderedUniversal => "index.original.html",
+        AngularBuildTypes::Regular => "index.html",
+    };
+    eprintln!("\tLinking '/{}' to all dynamic Angular routes", dynamic_routes_index_name);
+    let mut file_links: HashMap<String, String> = angular_routes.into_iter()
+        .map(|route| (format!("/{}", route), format!("/{}", dynamic_routes_index_name)) )
         .collect();
-    //file_links.insert("/".to_string(), "/index.html".to_string());    <-- already included by the above command for an empty line (path: '')
+
+    // allows automatic dir -> dir/index.html access -- pre-rendered routes uses this mechanism
+    eprintln!("\tLinking 'index.html's to their parent directory name -- so '/dir/index.html' may be accessed by just '/dir'...");
+    for (file_name, _file_contents) in &files_contents {
+        if file_name.ends_with("index.html") {
+            let mut directory_name = file_name.replace("/index.html", "");
+            if directory_name.len() == 0 {
+                // instead of linking "", links "/" to index.html
+                directory_name = "/".to_string();
+            }
+            file_links.insert(directory_name.to_string(), file_name.to_string());
+        }
+    }
 
     save_static_files(files_contents, file_links);
 }
@@ -199,16 +248,16 @@ lazy_static! {
 /// adapter for a compressor, respecting the global config
 fn compress(file_name: &String, file_content: &Vec<u8>) -> Vec<u8> {
     match COMPRESSOR {
-        Compressors::GZIP => gzip_compress(&file_name, &file_content),
-        Compressors::BROTLI => brotli_compress(&file_name, &file_content),
+        Compressors::GZip => gzip_compress(&file_name, &file_content),
+        Compressors::Brotli => brotli_compress(&file_name, &file_content),
     }
 }
 
 /// returns the corresponding 'Content-Encoding' HTTP header value for the chosen 'COMPRESSOR'
 fn compressor_http_header() -> &'static str {
     match COMPRESSOR {
-        Compressors::GZIP => "gzip",
-        Compressors::BROTLI => "br",
+        Compressors::GZip => "gzip",
+        Compressors::Brotli => "br",
     }
 }
 
