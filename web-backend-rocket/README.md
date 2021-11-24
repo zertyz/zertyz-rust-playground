@@ -11,7 +11,7 @@ Demonstrates how to work with Angular & Rocket.
     into the Rocket server, along with all the backend services -- so the stand-alone executable also serves the UI and no
     external web servers are needed.
 
-  * Static files may be compressed in 'gzip -9' or 'brotli -q 11 -w 24' (default)
+  * Static files are ahead-of-time compressed in 'gzip -9' (default) or 'brotli -q 11 -w 24'
 
 
 ## Setup
