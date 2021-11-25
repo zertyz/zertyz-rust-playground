@@ -58,5 +58,5 @@ Inspect ```build.rs``` for embedding options.
 (only 44ms needed to show the content -- 13ms to load index.html + 31ms to render it. After being presented, Angular is loaded and after 664ms we have a fully working website)
 
 # Pigdom measurements
-rust+angular+bootstrap+Pingdom+results.png
+![rust+angular+bootstrap+Pingdom+results.png](screenshots/rust+angular+bootstrap+Pingdom+results.png)
 (measurements for Angular + Bootstrap)
