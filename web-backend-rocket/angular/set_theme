@@ -1,20 +1,20 @@
 #! /bin/bash
 
-NEW_THEME="$1"
-if [ -z "${NEW_THEME}" ]; then
-	echo "Usage: ./set_theme <teme_name> -- where 'theme_name' is a directory in 'themes'. One of:"
-	ls -1 themes
-	exit 1
-fi
-
 # check we are at the right directory
 if ! pwd | grep '/angular$' &>/dev/null; then
 	echo "==> 'set_theme' will only run on the 'angular' directory. Bailing out..."
 	exit 1
 fi
 
-CURRENT_THEME=`stat themes/current | grep 'File: ' | sed 's|.*\-> \(.*\)|\1|'`
+CURRENT_THEME=$(stat themes/current | grep 'File: ' | sed 's|.*\-> \(.*\)|\1|')
 echo "==> Current Theme: '${CURRENT_THEME}'"
+
+NEW_THEME="$1"
+if [ -z "${NEW_THEME}" ]; then
+	echo "Usage: ./set_theme <teme_name> -- where 'theme_name' is a directory in 'themes'. One of:"
+	ls -1 themes
+	exit 1
+fi
 
 # verify all theme files are hard links to themes/current
 find src -name '*.html' -o -name '*.sass' -o -name '*.scss' -o -name '*.css' -o -name '*.less' | while read f; do
@@ -36,6 +36,7 @@ if [ -s "themes/${NEW_THEME}" ]; then
 	echo -en "==> Changing theme to '${NEW_THEME}'..."
 else
 	echo "XXX Desired theme '${NEW_THEME}' not found. Bailing out..."
+	exit 1
 fi
 
 # delete linked files

@@ -50,7 +50,9 @@ Inspect ```build.rs``` for embedding options.
 ![rust+angular+bootstrap 1.png](screenshots/rust+angular+bootstrap%201.png)
 ![rust+angular+bootstrap 2.png](screenshots/rust+angular+bootstrap%202.png)
 ![rust+angular+bootstrap 3.png](screenshots/rust+angular+bootstrap%203.png)
+(186ms to load & render what is needed to present -- bootstrap themes still requires loading & executing bootstrap.js)
 
 ## Google Material Theme
 ![rust+angular+material 1.png](screenshots/rust+angular+material%201.png)
 ![rust+angular+material 2.png](screenshots/rust+angular+material%202.png)
+(only 44ms needed to show the content -- 13ms to load index.html + 31ms to render it. After being presented, Angular is loaded and after 664ms we have a fully working website)
