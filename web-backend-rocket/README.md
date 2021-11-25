@@ -56,3 +56,7 @@ Inspect ```build.rs``` for embedding options.
 ![rust+angular+material 1.png](screenshots/rust+angular+material%201.png)
 ![rust+angular+material 2.png](screenshots/rust+angular+material%202.png)
 (only 44ms needed to show the content -- 13ms to load index.html + 31ms to render it. After being presented, Angular is loaded and after 664ms we have a fully working website)
+
+# Pigdom measurements
+rust+angular+bootstrap+Pingdom+results.png
+(measurements for Angular + Bootstrap)
