@@ -1,0 +1,15 @@
+[package]
+name = "compiler-bug"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "compiler-bug"
+path = "src/compiler-bug.rs"
+
+[dependencies]
+tokio      = { version = "1", features = ["full", "rt-multi-thread"] }
+async-std  = "1.6"  # version defined by async-tar
+tokio-util = { version = "0.6", features = ["compat"] }     # the "compat" future provides futures::io::AsyncRead.compat() -> tokio::io::AsyncRead and vice-versa

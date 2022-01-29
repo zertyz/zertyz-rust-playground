@@ -16,6 +16,7 @@ members = [
     "first-class-closures",
     "cpp-interop",
     "web-backend-rocket",
+    "compiler-bug",
 ]
 
 [dependencies]
