@@ -6,7 +6,8 @@ fn main() {
     //captured_variable_cannot_escape_FnMut_closure_body();
     //borrow_is_only_returned_after_last_lambda_call();
     //immutable_closure_mutating_a_counter_from_two_threads();
-    big_o_simulation();
+    //big_o_simulation();
+    closure_storage_and_passing_back_and_forth();
 }
 
 struct ClosureSimulator<P, R> {
@@ -133,4 +134,83 @@ fn immutable_closure_mutating_a_counter_from_two_threads() {
 
     println!("Conclusion: here was demonstrated the a closure may be called by two threads and may operate on an Arc enclosed value");
     println!("            while still preserving it's 'immutable' properties");
+}
+
+/// the motivation for this spike started when working on the ogre-events framework.
+/// There, I need to provide closures that are stored on Struct A (the event pipeline);
+/// this, then, is moved to Struct B (the event channel) and, finally, a vector of
+/// thread loop closures are returned, to call each of the original closures whenever B.produce(payload)
+/// arrives.
+/// All was working fine with the static version -- using arrays.
+/// When I moved to a dynamic version (using vectors), life time problems started popping up.
+fn closure_storage_and_passing_back_and_forth() {
+
+    type EventProcessorClosureType<'scope> = dyn FnMut() + 'scope;
+    type ThreadLoopClosureType<'scope>     = dyn FnMut() + 'scope;
+
+    /// this one is analogous to the 'build_loop_callback' family of functions
+    fn event_processor_to_thread_loop_closure<'a>(mut event_processor: &'a mut (impl FnMut() + 'a)) -> Vec<Box<ThreadLoopClosureType<'a>>> {
+        let mut v: Vec<Box<ThreadLoopClosureType<'a>>> = Vec::new();
+        v.push(Box::new(move || event_processor()));
+        v
+    }
+
+    struct A_Array<'a, const LEN: usize> {
+        closures: [&'a mut EventProcessorClosureType<'a>;LEN],
+    }
+    struct B_Array<'a, const LEN: usize> {
+        A: A_Array<'a, LEN>,
+    }
+    fn array_backed_storage() {
+        let mut array_callback_ran = false;
+        let a = A_Array {
+            closures: [
+                &mut || {
+                    eprintln!("A_Array closure was called");
+                    array_callback_ran = true;
+                },
+            ]
+        };
+        let mut b = B_Array {
+            A: a,
+        };
+        let mut loops = event_processor_to_thread_loop_closure(&mut b.A.closures[0]);
+        for l in loops.iter_mut() {
+            l();
+        }
+        drop(loops);
+        drop(b);
+        eprintln!("¿array_callback_ran? {}", array_callback_ran);
+    }
+
+    struct A_Vec<'a> {
+        closures: Vec<Box<EventProcessorClosureType<'a>>>,
+    }
+    struct B_Vec<'a> {
+        A: A_Vec<'a>,
+    }
+    fn vec_backed_storage() {
+        let mut vec_callback_ran = false;
+        let a = A_Vec {
+            closures: vec![
+                Box::new(|| {
+                    eprintln!("A_Vec closure was called");
+                    vec_callback_ran = true;
+                }),
+            ]
+        };
+        let mut b = B_Vec {
+            A: a,
+        };
+        let mut loops = event_processor_to_thread_loop_closure(&mut b.A.closures[0]);
+        for l in loops.iter_mut() {
+            l();
+        }
+        drop(loops);
+        drop(b);
+        eprintln!("¿vec_callback_ran? {}", vec_callback_ran);
+    }
+
+    array_backed_storage();
+    vec_backed_storage();
 }
