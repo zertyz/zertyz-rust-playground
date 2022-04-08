@@ -17,6 +17,7 @@ members = [
     "cpp-interop",
     "web-backend-rocket",
     "compiler-bug",
+    "self-referential-structs",
 ]
 
 [dependencies]
