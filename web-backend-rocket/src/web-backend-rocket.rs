@@ -22,17 +22,14 @@ use std::{
 #[macro_use] extern crate lazy_static;
 #[macro_use] extern crate rocket;
 
-
-/// serves statically linked files for blazing-fast speeds (no context switches nor cache additions/evictions)
-#[get("/<file..>")]
-fn internal_files(file: PathBuf) -> InternalFile {
-    let internal_file_name = format!("/{}", file.to_string_lossy().to_string());
-    InternalFile {file_name: internal_file_name}
-}
-
 #[get("/rest-service/<world>")]
 fn rest_service(world: &str) -> RawJson {
     RawJson { json: format!(r#"{{"msg":"Hello, world of {}!"}}"#, world) }
+}
+#[derive(Responder)]
+#[response(status = 200, content_type = "json")]
+struct RawJson {
+    json: String
 }
 
 #[get("/get-service?<from_temperature>&<from_length>&<conversion>")]
@@ -79,17 +76,16 @@ struct ShippingInfo {
     refuse_housemate: bool,
 }
 
-#[derive(Responder)]
-#[response(status = 200, content_type = "json")]
-struct RawJson {
-    json: String
+/// serves statically linked files for blazing-fast speeds (no context switches nor cache additions/evictions)
+#[get("/<file..>")]
+fn get_embedded_file(file: PathBuf) -> EmbeddedFile {
+    let internal_file_name = format!("/{}", file.to_string_lossy().to_string());
+    EmbeddedFile {file_name: internal_file_name}
 }
-
-struct InternalFile {
+struct EmbeddedFile {
     file_name: String,
 }
-
-impl<'r> Responder<'r, 'r> for InternalFile {
+impl<'r> Responder<'r, 'r> for EmbeddedFile {
     fn respond_to(self, _req: &'r Request<'_>) -> response::Result<'r> {
         let file_name = self.file_name;
         let (compressed, file_contents) = match static_files::STATIC_FILES.get(file_name.as_str()) {
@@ -125,7 +121,7 @@ fn rocket() -> _ {
     #[cfg(not(debug_assertions))]
     include_static_production_angular_files();
 
-    rocket::build().mount("/", routes![internal_files, rest_service, get_service, post_service])
+    rocket::build().mount("/", routes![get_embedded_file, rest_service, get_service, post_service])
 }
 
 /// runs the angular compile & serve scripts to serve the static angular files -- note
