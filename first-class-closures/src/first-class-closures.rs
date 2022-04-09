@@ -7,7 +7,43 @@ fn main() {
     //borrow_is_only_returned_after_last_lambda_call();
     //immutable_closure_mutating_a_counter_from_two_threads();
     //big_o_simulation();
-    closure_storage_and_passing_back_and_forth();
+    //closure_storage_and_passing_back_and_forth();
+    generic_callbacks();
+}
+
+fn generic_callbacks() {
+    println!("With this test I want to demonstrate that a struct is able to receive a callback as a generic, which would enable the maximum optimizations possible");
+    println!("-- this is desirable for structs receiving callbacks\n");
+
+    struct Queue<IS_EMPTY>
+           where IS_EMPTY: FnMut() -> bool {
+        is_empty_callback: IS_EMPTY,
+    }
+
+    impl<IS_EMPTY: FnMut() -> bool> Queue<IS_EMPTY> {
+        fn new(is_empty_callback: IS_EMPTY) -> Self {
+            Queue {
+                is_empty_callback
+            }
+        }
+        fn dequeue(&self) {
+            let mutable_self = unsafe {&mut *((self as *const Self) as *mut Self)};
+            (mutable_self.is_empty_callback)();
+        }
+    }
+
+    let mut x=10;
+    let queue = Queue::new(|| {
+        println!("YEAHP! I was called!!!");
+        x += 1;
+        true
+    });
+
+    queue.dequeue();
+
+    println!("x is now {}", x);
+
+    println!("\nNow go and past this code on the compiler explorer https://rust.godbolt.org/, change the callback -- maybe to nothing -- and watch if there are optimizations");
 }
 
 struct ClosureSimulator<P, R> {
