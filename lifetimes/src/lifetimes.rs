@@ -3,7 +3,7 @@
 use std::alloc::{GlobalAlloc, Layout, System};
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::fmt::{Display, Formatter};
-use proc_macro::TokenStream;
+//use proc_macro::TokenStream;
 
 fn main() {
     eprintln!("##################################");
@@ -13,7 +13,37 @@ fn main() {
 //    match_lifetime_trick();
 //    match_with_additional_case_conditions();
 //    custom_allocator();
-    method_annotations();
+//    method_annotations();
+    serde_zero_copy();
+}
+
+use serde_json; // 1.0.56
+use serde; // 1.0.114
+use std::fs;
+use std::io;
+use std::borrow::Cow;
+
+#[derive(serde::Deserialize, Debug)]
+#[serde(bound(deserialize = "'s: 'de"))]
+struct Resource<'s> {
+    // The Cow should allow for either borrowed or owned data
+    pub foo: Cow<'s, str>,
+}
+
+fn serde_zero_copy() {
+    {
+        // Works as expected when referencing a string...
+        let s = "{\"foo\":\"bar\"}";
+        let resource: Resource = serde_json::from_str(s).unwrap();
+        println!("From RAM: {:?}", resource);
+    }
+    {
+        // ...now it compiles
+        let file = fs::File::open("/tmp/dummy.json").unwrap();
+        let reader = io::BufReader::new(file);
+        let resource: Resource = serde_json::from_reader(reader).unwrap();
+        println!("From RAM: {:?}", resource);
+    }
 }
 
 fn match_with_additional_case_conditions() {
@@ -204,13 +234,13 @@ fn method_annotations() {
     eprintln!("##################### ");
     eprintln!("# can we intercept a method definition and add pre/post code to it?");
 
-    wtf();
+    //wtf();
 
 }
 
-#[proc_macro_attribute]
-#[proc_macro_error]
-pub fn my_annotation(attr: TokenStream, input: TokenStream) -> TokenStream {
+//#[proc_macro_attribute]
+//#[proc_macro_error]
+/*pub fn my_annotation(attr: TokenStream, input: TokenStream) -> TokenStream {
     my_annotation_handler(attr.into(), input.into()).into()
 }
 
@@ -299,7 +329,7 @@ fn my_annotation_handler(
     }
 }
 
-#[my_annotation]
+//#[my_annotation]
 fn wtf() {
     eprintln!("\tWTF ran...");
-}
+}*/
