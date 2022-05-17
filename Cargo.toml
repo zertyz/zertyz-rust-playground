@@ -20,4 +20,15 @@ members = [
     "self-referential-structs",
 ]
 
-[dependencies]
+# uncomment the bellow section to enable aggressive linking optimizations when compiling for release,
+# impacting positively the executable size & performance, at the cost of increasing building time.
+# optimizations gets at its peak when compiling with: RUSTFLAGS="-C target-cpu=native" cargo build --release
+# see https://deterministic.space/high-performance-rust.html
+[profile.release]
+strip = "symbols" # can be "none", "debuginfo", "symbols" (also strips debug info)
+debug-assertions = false
+overflow-checks = false
+lto = "fat"         # can be "fat", "thin", "off" (keep it off so PGO may work as of Rust 1.59 -- see https://github.com/rust-lang/rust/issues/90522)
+codegen-units = 1
+debug = false
+panic = "abort"     # disables stack traces / stack unwiding -- can be "unwind", "abort"
