@@ -18,6 +18,7 @@ members = [
     "web-backend-rocket",
     "compiler-bug",
     "self-referential-structs",
+    "iterators-vs-streams",
 ]
 
 # uncomment the bellow section to enable aggressive linking optimizations when compiling for release,

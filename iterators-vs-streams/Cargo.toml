@@ -1,0 +1,20 @@
+[package]
+name = "iterators-vs-streams"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "iterators-vs-streams"
+path = "src/iterators-vs-streams.rs"
+
+[dependencies]
+
+tokio        = { version = "1", features = ["full", "rt-multi-thread"] }
+tokio-stream = "0.1"
+futures      = { version = "0.3" }
+par-stream   = { version = "0.10", default-features = false, features = ["runtime-tokio"] }   # allows stream executors to process items in parallel
+
+[features]
+dox = []
