@@ -1,5 +1,8 @@
 Crates to investigate:
-	DB: sanakirja
+	TIME MEASUREMENTS:                          minstant,quanta
+	DB:                                         sanakirja,jammdb,
+	MMAP Containers:                            memvec
+	SERIALIZATION (zero-copy deserialization?): zerovec,rmp-serde
 Design Patterns to build:
 	Multi-Frontend app, follow RustBrake's nice Generics architecture
 canvas:
