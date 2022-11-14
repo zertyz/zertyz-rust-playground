@@ -1,0 +1,464 @@
+#!/bin/bash
+
+# Generates Metatrader and Rust sources (.mqh and .rs files) for models shared between the languages
+# -- obtained from the MT5 online documentation.
+# This script is intended to be run by maintainers of this crate only, which should do so whenever a
+# new breaking Metatrader 5 Terminal version is released.
+# When reviewing the changes, keep in mind that both .mqh and .rs files should be in sync with each
+# other, as things as simple as field ordering can completely screw up the binary structure mappings
+# shared between the two languages.
+# The online resources are a key aspect of this crate, therefore copies of such resources are kept
+# locally (for any future reference that might be needed, in case the site gets restructured and
+# this script should be updated)
+
+# Please update these properties whenever new sources are generated
+RUST_MT5_BRIDGE_VERSION="1.0.2"
+MT5_TERMINAL_GOOD_KNOWN_VERSION="5.00 build 3491 6 Nov 2022"
+
+
+# MQ5 types to Rust types -- types that match 100% the memory layout, even if further conversions are needed
+# based on https://www.mql5.com/en/docs/basis/types
+MQ5_TYPES_TO_RUST="         \
+  char     = 'i8',          \
+  uchar    = 'u8',          \
+  bool     = 'bool',        \
+  short    = 'i16',         \
+  ushort   = 'u16',         \
+  int      = 'i32',         \
+  uint     = 'u32',         \
+  color    = 'MQ5Color',    \
+  long     = 'i64',         \
+  ulong    = 'u64',         \
+  datetime = 'MQ5DateTime', \
+  enum     = '_TBD_',       \
+  string   = 'MQ5String',   \
+  float    = 'f32',         \
+  double   = 'f64',         \
+"
+
+# Custom Rust types that indicate a value conversion is needed to make them useful
+RUST_TYPES_PRELUDE="                                                                                                        \
+  /// Number of seconds since January 01, 1970./                                                                            \
+  /// useful with \`let datetime = NaiveDateTime::from_timestamp(mq5_datetime as i64, 0);\`                                 \
+  type MQ5DateTime = u64;                                                                                                   \
+  /// First byte is ignored -- remaining bytes are RGB                                                                      \
+  type MQ5Color = i32;                                                                                                      \
+  /// A Metatrader string is zero-terminated and its chars are UTF-16 encoded. Use it with:/                                \
+  /// \`\`\`                                                                                                                \
+  /// let string = unsafe { U16CString::from_ptr_str(mq5_string) }                                                          \
+  ///     .to_string().unwrap_or(String::from(\"««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for 'param' »»\")); \
+  type MQ5String = *const u16;                                                                                              \
+"
+
+# Qualifiers for Rust structs and enums
+RUST_QUALIFIERS="#[repr(C)]\n#[derive(Debug)]"
+
+# lua script for parsing HTML tables in the MT5 site containing "queriable properties"
+cat << "END" >/tmp/lua.script
+  a=io.read("*a")
+  html_table=string.gsub(a, ".*"..site_struct_name.."</span></p>.-(<table.-</table>).*", "%1")
+  html_table=string.gsub(html_table, "<thead.-</thead>", "")
+  string.gsub(html_table, "<tr .->(.-)</tr>", function (row)
+    pattern=".-<td .-><span .->(.-)</span>.-<td .-><span .->(.-)</span>.-<td .-><span .->(.-)</span>.*"
+    global_name=string.gsub(row, pattern, "%1")
+    comment=string.gsub(row, pattern, "%2")
+    mql5_type=string.gsub(row, pattern, "%3")
+    comment=string.gsub(comment, "<.->(.-)<.->", "%1")
+    mql5_type=string.gsub(mql5_type, "<.->(.-)<.->", "%1")
+    mql5_type=type_replacements[mql5_type] or mql5_type
+    for_row(comment, global_name, mql5_type)
+  end)
+END
+PROPERTY_PARSING_LUA_SCRIPT=`cat /tmp/lua.script`
+
+# lua script for parsing HTML sections in the MT5 site containing "MQL5 struct definitions"
+cat << END >/tmp/lua.script
+  a=io.read("*a")
+  local pattern = ".*<H1>.-"..site_struct_name..".-</H1>.-<p .-><span .->(.-)</span></p>.-<table .->.-<tr>(.-<span .->struct.-</span>.-</p>).*"
+  struct_comment=string.gsub(a, pattern, "%1")
+  struct_comment=string.gsub(struct_comment, "&nbsp;", " ")
+  html_struct_definition=string.gsub(a, pattern, "%2")
+  plain_struct_definition=string.gsub(html_struct_definition, "<.->", "")
+  plain_struct_definition=string.gsub(plain_struct_definition, "&nbsp;", " ")
+  block=string.gsub(plain_struct_definition, ".-{(.*)}.*", "%1")
+
+  prefix(struct_comment)
+  string.gsub(block, "(.-[^%s].-)\n", function (field_declaration_line)
+    local pattern = "[%s]*([^%s]*)[%s]*([^;]*);[%s]*(.*)"
+    local type    = string.gsub(field_declaration_line, pattern, "%1")
+    type = type_replacements[type] or type
+    local name    = string.gsub(field_declaration_line, pattern, "%2")
+    local comment = string.gsub(field_declaration_line, pattern, "%3")
+    for_field(comment, name, type)
+  end)
+  suffix()
+END
+STRUCT_PARSING_LUA_SCRIPT=`cat /tmp/lua.script`
+
+# lua script for parsing HTML sections in the MT5 site containing "MQL5 enum definitions" -- allowing exporting, to Rust, enums present in the MQL5 stdlib
+cat << END >/tmp/lua.script
+  a=io.read("*a")
+  -- enums are matched by one of the following patterns
+  local patterns = {
+    ".*<p [^>]*><span [^>]*>(.-)</span></p>.-<a id=\""..string.lower(site_enum_name).."\" [^>]*>.-"..site_enum_name..".-(<table [^>]*>.-</table>).*",
+    ".*<p [^>]*><span [^>]*>(.-)</span></p>.-<span [^>]*>"..site_enum_name..".-(<table [^>]*>.-</table>).*",
+  }
+  for _, pattern in ipairs(patterns) do
+    local _, n = string.gsub(a, pattern, function (enum_comment, html_enum_table)
+      g_enum_comment=enum_comment
+      g_enum_comment=string.gsub(g_enum_comment, "\r?\n",   "")
+      g_enum_comment=string.gsub(g_enum_comment, "<[^>]*>", "")
+      g_enum_comment=string.gsub(g_enum_comment, "&nbsp;",  "")
+      g_html_enum_table=html_enum_table
+      return ""
+    end)
+    if n > 0 then
+      break
+    end
+  end
+
+  prefix(g_enum_comment)
+  string.gsub(g_html_enum_table, "<tr [^>]*>(.-)</tr>", function (row)
+    local pattern = ".-<td [^>]*><p [^>]*><span [^>]*>(.-)</span></p>\r?\n</td>\r?\n<td [^>]*><p [^>]*><span [^>]*>(.-)</span></p>\r?\n</td>.*"
+    string.gsub(row, pattern, for_variant)
+  end)
+  suffix()
+END
+ENUM_PARSING_LUA_SCRIPT=`cat /tmp/lua.script`
+
+# lua script for parsing HTML sections in the MT5 site containing "MQL5 struct definitions"
+cat << END >/tmp/lua.script
+  a=io.read("*a")
+  local pattern = ".*<H1>.-"..site_struct_name..".-</H1>.-<p .-><span .->(.-)</span></p>.-<table .->.-<tr>(.-<span .->struct.-</span>.-</p>).*"
+  struct_comment=string.gsub(a, pattern, "%1")
+  struct_comment=string.gsub(struct_comment, "&nbsp;", " ")
+  html_struct_definition=string.gsub(a, pattern, "%2")
+  plain_struct_definition=string.gsub(html_struct_definition, "<.->", "")
+  plain_struct_definition=string.gsub(plain_struct_definition, "&nbsp;", " ")
+  block=string.gsub(plain_struct_definition, ".-{(.*)}.*", "%1")
+
+  prefix(struct_comment)
+  string.gsub(block, "(.-[^%s].-)\n", function (field_declaration_line)
+    local pattern = "[%s]*([^%s]*)[%s]*([^;]*);[%s]*(.*)"
+    local type    = string.gsub(field_declaration_line, pattern, "%1")
+    type = type_replacements[type] or type
+    local name    = string.gsub(field_declaration_line, pattern, "%2")
+    local comment = string.gsub(field_declaration_line, pattern, "%3")
+    for_field(comment, name, type)
+  end)
+  suffix()
+END
+STRUCT_PARSING_LUA_SCRIPT=`cat /tmp/lua.script`
+
+
+
+function download {
+  local page="$1"
+  local outfile="local/`basename \"${page/\#*/}\"`"
+  if [ ! -s "$outfile" ]; then
+    cd local; wget "$page"; cd - &>/dev/null
+  fi
+  echo "$outfile"
+}
+
+# defines, in Metatrader, fields (for a struct) obtainable by properties inquiring
+function append_struct_field_definitions_to_mq5_file {
+  local page="$1"
+  local site_struct_name="$2"
+  local out_file="$3"
+  local type_replacements="$4"
+  local local_page=$(download "$page")
+#echo "page=$page; site_struct_name=$site_struct_name; out_file=$out_file; type_replacements=${type_replacements}; local_page=$local_page"
+
+cat << END  > "/tmp/lua.script"
+
+  function for_row(comment, name, type)
+    print("\t/// "..comment)
+    print("\t"..string.lower(name)..": "..type..",")
+  end
+
+  type_replacements={${type_replacements}}
+  site_struct_name="${site_struct_name}"
+  ${PROPERTY_PARSING_LUA_SCRIPT}
+
+END
+
+  lua /tmp/lua.script >>"$out_file" < "$local_page"
+}
+
+# defines, in Rust, fields (for a struct) obtainable by properties inquiring
+function append_struct_field_definitions_to_rust_file {
+  local page="$1"
+  local site_struct_name="$2"
+  local out_file="$3"
+  local type_replacements="$4"
+  local local_page=$(download "$page")
+#echo "page=$page; site_struct_name=$site_struct_name; out_file=$out_file; type_replacements=${type_replacements}; local_page=$local_page"
+
+cat << END  > "/tmp/lua.script"
+
+  function for_row(comment, name, type)
+    print("\t/// "..comment)
+    print("\t"..string.lower(name)..": "..type..",")
+  end
+
+  type_replacements={${type_replacements}}
+  site_struct_name="${site_struct_name}"
+  ${PROPERTY_PARSING_LUA_SCRIPT}
+
+END
+
+  lua /tmp/lua.script >>"$out_file" < "$local_page"
+}
+
+# for a struct containing fields obtainable by properties inquiring, generates the code to populate such fields
+function append_struct_fields_instantiation_to_mq5_file {
+  local page="$1"
+  local site_struct_name="$2"
+  local mq5_struct_name="$3"
+  local out_file="$4"
+  local query_function_template="$5"
+  local local_page=$(download "$page")
+#echo "page=$page; site_struct_name=$site_struct_name; mq5_struct_name=${mq5_struct_name}; out_file=$out_file; query_function_template=${query_function_template}; local_page=$local_page"
+
+cat << END  > "/tmp/lua.script"
+
+  function for_row(comment, name, type)
+    local vars = {
+      comment = comment,
+      name    = name,
+      type    = type,
+      name_lower = string.lower(name)
+    }
+    local name_lower = string.lower(name)
+    local query_function_call = string.gsub("${query_function_template}", "%%(.-)%%", function (macro) return vars[macro] or "%macro%" end)
+    print("\t"..query_function_call)
+  end
+
+  type_replacements={}
+  site_struct_name="${site_struct_name}"
+  ${PROPERTY_PARSING_LUA_SCRIPT}
+
+END
+
+  lua /tmp/lua.script >>"$out_file" < "$local_page"
+}
+
+function append_struct_definition_to_rust_file {
+  local page="$1"
+  local mq5_struct_name="$2"
+  local out_file="$3"
+  local additional_type_replacements="$4"
+  local rust_struct_name="$mq5_struct_name"
+  local local_page=$(download "$page")
+#echo "page=$page; mq5_struct_name=$mq5_struct_name; out_file=$out_file; additional_type_replacements=$additional_type_replacements, rust_struct_name=${rust_struct_name}; local_page=$local_page"
+
+cat << END  > "/tmp/lua.script"
+
+  function prefix(struct_comment)
+    print("/// "..struct_comment.."\\\\")
+    print("/// auto-generated from ${page}")
+    print("${RUST_QUALIFIERS}")
+    print("struct ${rust_struct_name} {")
+  end
+
+  function for_field(comment, name, type)
+    print("\t/"..comment)
+    print("\t"..name..": "..type..",")
+  end
+
+  function suffix()
+    print("}\n")
+  end
+
+  type_replacements={${MQ5_TYPES_TO_RUST} ${additional_type_replacements}}
+  site_struct_name="${mq5_struct_name}"
+  ${STRUCT_PARSING_LUA_SCRIPT}
+
+END
+
+  echo -en "Auto-generating Rust struct '${rust_struct_name}'..."
+  lua /tmp/lua.script <"$local_page" >>"$out_file" && echo ' OK' || (echo ' FAILURE -- Enter to edit'; read; vim /tmp/lua.script)
+}
+
+function append_enum_definition_to_rust_file {
+  local page="$1"
+  local mq5_enum_name="$2"
+  local out_file="$3"
+  local rust_enum_name="$4"
+  local ident="${5:-Auto-generating Rust }"
+  local local_page=$(download "$page")
+#echo "page=$page; mq5_enum_name=$mq5_enum_name; out_file=$out_file; rust_enum_name=${rust_enum_name}; local_page=$local_page"
+
+cat << END  > "/tmp/lua.script"
+
+  function prefix(enum_comment)
+    print("/// "..enum_comment.."/")
+    print("/// auto-generated from ${page}")
+    print("${RUST_QUALIFIERS}")
+    print("enum ${rust_enum_name} {")
+  end
+
+  first_variant = 1
+  function for_variant(variant, comment)
+    if first_variant then
+      variant = variant .. " = 0i32"
+      first_variant = nil
+    end
+    comment = string.gsub(comment, "&nbsp;", " ")
+    comment = string.gsub(comment, "\r?\n", "/\n\t/// ")
+    comment = string.gsub(comment, "</[Pp]>", "/\n\t/// ")
+    comment = string.gsub(comment, "<[Bb][Rr][^>]*>", "/\n\t/// ")
+    comment = string.gsub(comment, "<[^>]*>", "")
+    print("\t/// "..comment)
+    -- Snake upper case (MQL5 enum variant style) to Camel case (Rust enum variant style)
+    variant = string.gsub(string.lower(variant), "_(.)", string.upper)
+    variant = string.gsub(variant, "^(.)", string.upper)
+    print("\t"..variant..",")
+  end
+
+  function suffix()
+    print("}\n")
+  end
+
+  type_replacements={${MQ5_TYPES_TO_RUST}}
+  site_enum_name="${mq5_enum_name}"
+  ${ENUM_PARSING_LUA_SCRIPT}
+
+END
+
+  echo -en "${ident}enum '${mq5_enum_name}'..."
+  lua /tmp/lua.script <"$local_page" >>"$out_file" && echo " OK" || echo " FAILURE"
+}
+
+# MT5 doc pages used by this script
+# (local versions are kept in the './local' directory with all subdirectories removed from the path)
+
+# Properties exposed to MQL5 & Rust
+###################################
+# (MT5 part calls several functions to build its own structure, which is, then, shared with Rust)
+
+# Symbols Info
+# (integer properties)
+struct='SymbolInfoBridge'
+echo "Auto-generating '${struct}' (warning: very, very slow process ahead -- sadly, 10+ minutes):"
+page='https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants'
+site_structs=(               \
+  'ENUM_SYMBOL_INFO_INTEGER' \
+  'ENUM_SYMBOL_INFO_DOUBLE'  \
+  'ENUM_SYMBOL_INFO_STRING'  \
+)
+mq5_values_query_function_templates=(                          \
+  'SymbolInfoInteger(_Symbol, %name%, instance.%name_lower%);' \
+  'SymbolInfoDouble(_Symbol, %name%, instance.%name_lower%);'  \
+  'SymbolInfoString(_Symbol, %name%, instance.%name_lower%);'  \
+)
+mq5_file="${struct}.mqh"
+mq5_type_replacements='' #ENUM_SYMBOL_SECTOR="int", ENUM_SYMBOL_INDUSTRY="int", ENUM_SYMBOL_CHART_MODE="int", ENUM_SYMBOL_CALC_MODE="int", ENUM_SYMBOL_TRADE_MODE="int", ENUM_SYMBOL_TRADE_EXECUTION="int", ENUM_SYMBOL_ORDER_GTC_MODE="int", ENUM_SYMBOL_OPTION_MODE="int", ENUM_SYMBOL_OPTION_RIGHT="int", ENUM_SYMBOL_SWAP_MODE="int", ENUM_DAY_OF_WEEK="int"'
+echo -en "\tMQL5 struct..."
+echo -en "struct ${struct} {\n" >>"${mq5_file}"
+for i in `seq 0 $((${#site_structs[@]}-1))`; do
+  append_struct_field_definitions_to_mq5_file "${page}" "${site_structs[i]}" "${mq5_file}" "${mq5_type_replacements}"
+done
+echo -en "}\n\n\tlet instance = new ${struct}();\n" >>"${mq5_file}"
+for i in `seq 0 $((${#site_structs[@]}-1))`; do
+  append_struct_fields_instantiation_to_mq5_file "${page}" "${site_structs[i]}" "${struct}" "${mq5_file}" "${mq5_values_query_function_templates[i]}"
+done
+echo ' OK'
+
+rust_file="mq5_std_lib.rs"
+rust_type_replacements="ENUM_SYMBOL_SECTOR         = 'EnumSymbolSector',       ENUM_SYMBOL_INDUSTRY    = 'EnumSymbolIndustry',   ENUM_SYMBOL_CHART_MODE      = 'EnumSymbolChartMode',       \
+                        ENUM_SYMBOL_CALC_MODE      = 'EnumSymbolCalcMode',     ENUM_SYMBOL_TRADE_MODE  = 'EnumSymbolTradeMode',  ENUM_SYMBOL_TRADE_EXECUTION = 'EnumSymbolTradeExecution',  \
+                        ENUM_SYMBOL_ORDER_GTC_MODE = 'EnumSymbolOrderGtcMode', ENUM_SYMBOL_OPTION_MODE = 'EnumSymbolOptionMode', ENUM_SYMBOL_OPTION_RIGHT    = 'EnumSymbolOptionRight',     \
+                        ENUM_SYMBOL_SWAP_MODE      = 'EnumSymbolSwapMode',     ENUM_DAY_OF_WEEK        = 'EnumDayOfWeek'"
+echo -en "\tRust struct..."
+echo -en '\n/// Holds all symbol information -- struct crafted from MT5'"'"'s `SymbolInfoInteger()`, `SymbolInfoDouble()` and `SymbolInfoString()`\n' >>"${rust_file}"
+echo -en "${RUST_QUALIFIERS}\n" >>"${rust_file}"
+echo -en "struct ${struct} {\n" >>"${rust_file}"
+for i in `seq 0 $((${#site_structs[@]}-1))`; do
+  append_struct_field_definitions_to_rust_file "${page}" "${site_structs[i]}" "${rust_file}" "${rust_type_replacements}"
+done
+echo -en "}\n\n" >>"${rust_file}"
+echo ' OK'
+
+# export the enums above to Rust
+mq5_enums=(`lua -e "type_replacements={${rust_type_replacements}} for k,v in pairs(type_replacements) do print(k) end" | sort`)
+rust_enums=(`lua -e "type_replacements={${rust_type_replacements}} for k,v in pairs(type_replacements) do print(v) end" | sort`)
+((n=`lua -e "n=0 type_replacements={${rust_type_replacements}} for k,v in pairs(type_replacements) do n=n+1 end print(n)"`))
+for i in `seq 0 $((n-1))`; do
+  append_enum_definition_to_rust_file "${page}" "${mq5_enums[i]}" "${rust_file}" "${rust_enums[i]}" "\t"
+done
+
+
+# MQL5 structs to Rust
+######################
+
+# MqlBookInfo
+append_struct_definition_to_rust_file                             \
+  'https://www.mql5.com/en/docs/constants/structures/mqlbookinfo' \
+  'MqlBookInfo'                                                   \
+  'mq5_std_lib.rs'                                                \
+  'ENUM_BOOK_TYPE="EnumBookType"'
+append_enum_definition_to_rust_file "https://www.mql5.com/en/docs/constants/tradingconstants/enum_book_type" "ENUM_BOOK_TYPE" "mq5_std_lib.rs" "EnumBookType"
+
+# MqlTick
+append_struct_definition_to_rust_file                         \
+  'https://www.mql5.com/en/docs/constants/structures/mqltick' \
+  'MqlTick'                                                   \
+  'mq5_std_lib.rs'                                            \
+
+
+# MQL5 enums to Rust
+####################
+
+# ENUM_BOOK_TYPE -> EnumBookType
+
+
+# MQL5 constants to Rust
+########################
+
+
+
+# heads-up: the last page contains some constant definitions. On the page we may get their names, but we require an MQ5
+# program to get their values. Lets look for more site elements in which other constants like this appear before automating this
+
+
+
+#append_struct_fields_to_rust_file
+
+
+
+# for account & runtime information on the MT side
+# https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants#enum_symbol_info_integer & co
+
+# MT script information
+# https://www.mql5.com/en/docs/constants/namedconstants/compilemacros
+
+# for symbol information
+# https://www.mql5.com/en/docs/marketinformation/symbolinfointeger & co
+
+# param values for OnDeinit()
+# (Rust constants are generated for the given values -- no MT5 counter-part is needed here)
+# https://www.mql5.com/en/docs/constants/namedconstants/uninit
+
+# `MqlBookInfo` structure
+# (Rust structure is generated straight from the docs -- the MT5 counter-part is already on the language's library,
+#  therefore should not be generated)
+# https://www.mql5.com/en/docs/constants/structures/mqlbookinfo
+
+# for the other constants not present in the documentation, please see the MT5 scripts present in this directory,
+# which will generate the Rust sources counterpart for them -- they should be compiled and run into the Metatrader
+# 5 Terminal and instructions should be followed regarding where to put the generated sources
+
+# order issueing
+# https://www.mql5.com/en/docs/constants/structures/mqltraderequest
+# https://www.mql5.com/en/docs/constants/structures/mqltradecheckresult
+
+# for the trades events
+# https://www.mql5.com/en/docs/constants/structures/mqltradetransaction
+# https://www.mql5.com/en/docs/constants/structures/mqltraderesult
+
+# economic calendar -- brings in events for indicators from all the world... realtime, they say
+# https://www.mql5.com/en/docs/constants/structures/mqlcalendar#enum_calendar_event_impact
+
+echo -en "\n\nDONE\n"

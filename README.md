@@ -20,6 +20,7 @@ Contents:
 
     Rust 2021:
         web-backend-rocket -- a JSON backend using Rocket for HTML 5 applications
+        rust-mt5-bridge -- an example of how to generate DLLs for use in MetaTrader 5
 
 
 # Amusements

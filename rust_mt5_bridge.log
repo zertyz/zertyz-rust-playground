@@ -1,0 +1,42 @@
+[00:00:00.000] (7f334f040780) INFO   'rust_mt5_bridge.dll' was loaded and started -- allowing up to 1024 handles (Expert Advisors, Indicators, Testers, etc.) to be created -- removing them won't free resources (restarting Metatrader will)
+[00:00:00.000] (7f334f040780) INFO   DllMain() called for reason 1: DLL_PROCESS_ATTACH -- DLL was loaded!
+[00:00:00.000] (7f334f040780) INFO   OnInit: registering trading expert advisor for PRODUCTION: Handle { client_type: ProductionExpertAdvisor, account_token: "coco?", algorithm: "coco?", symbol: "coco?" } -- attributed handle_id: 0
+[00:00:00.000] (7f334f040780) INFO   OnTick(0): coco?:    MqlTick { time: 2, bid: 3.0, ask: 4.0, last: 5.0, volume: 6, time_msc: 7, flags: 255, volume_real: 8.0 }
+[00:00:00.000] (7f334f040780) INFO   OnTick(0): coco?: TradeEvent { time: 1970-01-01T00:00:02.007, aggressor: Ambiguous, quantity: 6, price: 5.0 }
+[00:00:00.000] (7f334f040780) INFO   OnTick(0): coco?:    MqlTick { time: 2, bid: 3.0, ask: 4.0, last: 5.0, volume: 6, time_msc: 7, flags: 255, volume_real: 8.0 }
+[00:00:00.001] (7f334f040780) INFO   OnTick(0): coco?: TradeEvent { time: 1970-01-01T00:00:02.007, aggressor: Ambiguous, quantity: 6, price: 5.0 }
+[00:00:00.000] (7ff0afefb780) INFO   'rust_mt5_bridge.dll' was loaded and started -- allowing up to 1024 handles (Expert Advisors, Indicators, Testers, etc.) to be created -- removing them won't free resources (restarting Metatrader will)
+[00:00:00.000] (7ff0afefb780) INFO   DllMain() called for reason 1: DLL_PROCESS_ATTACH -- DLL was loaded!
+[00:00:00.000] (7ff0afefb780) INFO   OnInit: registering trading expert advisor for PRODUCTION: Handle { client_type: ProductionExpertAdvisor, account_token: "coco?", algorithm: "coco?", symbol: "coco?" } -- attributed handle_id: 0
+[00:00:00.001] (7ff0afefb780) INFO   OnTick(0): coco?:    MqlTick { time: 2, bid: 3.0, ask: 4.0, last: 5.0, volume: 6, time_msc: 7, flags: 255, volume_real: 8.0 }
+[00:00:00.001] (7ff0afefb780) INFO   OnTick(0): coco?: Some(TradeEvent { time: 1970-01-01T00:00:02.007, aggressor: Ambiguous, quantity: 6, price: 5.0 })
+[00:00:00.001] (7ff0afefb780) INFO   OnTick(0): coco?:    MqlTick { time: 2, bid: 3.0, ask: 4.0, last: 5.0, volume: 6, time_msc: 7, flags: 255, volume_real: 8.0 }
+[00:00:00.002] (7ff0afefb780) INFO   OnTick(0): coco?: Some(TradeEvent { time: 1970-01-01T00:00:02.007, aggressor: Ambiguous, quantity: 6, price: 5.0 })
+[00:00:00.000] (7f0e3c1dd780) INFO   'rust_mt5_bridge.dll' was loaded and started -- allowing up to 1024 handles (Expert Advisors, Indicators, Testers, etc.) to be created -- removing them won't free resources (restarting Metatrader will)
+[00:00:00.000] (7f0e3c1dd780) INFO   DllMain() called for reason 1: DLL_PROCESS_ATTACH -- DLL was loaded!
+[00:00:00.000] (7f0e3c1dd780) INFO   OnInit: registering trading expert advisor for PRODUCTION: Handle { client_type: ProductionExpertAdvisor, account_token: "coco?", algorithm: "coco?", symbol: "coco?" } -- attributed handle_id: 0
+[00:00:00.000] (7f0e3c1dd780) INFO   OnTick(0): coco?:    MqlTick { time: 2, bid: 3.0, ask: 4.0, last: 5.0, volume: 6, time_msc: 7, flags: 255, volume_real: 8.0 }
+[00:00:00.001] (7f0e3c1dd780) INFO   OnTick(0): coco?: TradeEvent { time: 1970-01-01T00:00:02.007, aggressor: Ambiguous, quantity: 6, price: 5.0 }
+[00:00:00.001] (7f0e3c1dd780) INFO   OnTick(0): coco?:    MqlTick { time: 2, bid: 3.0, ask: 4.0, last: 5.0, volume: 6, time_msc: 7, flags: 255, volume_real: 8.0 }
+[00:00:00.001] (7f0e3c1dd780) INFO   OnTick(0): coco?: TradeEvent { time: 1970-01-01T00:00:02.007, aggressor: Ambiguous, quantity: 6, price: 5.0 }
+[00:00:00.000] (7f621e114780) INFO   'rust_mt5_bridge.dll' was loaded and started -- allowing up to 1024 handles (Expert Advisors, Indicators, Testers, etc.) to be created -- removing them won't free resources (restarting Metatrader will)
+[00:00:00.000] (7f621e114780) INFO   DllMain() called for reason 1: DLL_PROCESS_ATTACH -- DLL was loaded!
+[00:00:00.000] (7f621e114780) INFO   OnInit: registering trading expert advisor for PRODUCTION: Handle { client_type: ProductionExpertAdvisor, account_token: "coco?", algorithm: "coco?", symbol: "coco?" } -- attributed handle_id: 0
+[00:00:00.000] (7f621e114780) INFO   OnTick(0): coco?:    MqlTick { time: 2, bid: 3.0, ask: 4.0, last: 5.0, volume: 6, time_msc: 7, flags: 255, volume_real: 8.0 }
+[00:00:00.000] (7f621e114780) INFO   OnTick(0): coco?: TradeEvent { time: 1970-01-01T00:00:02.007, aggressor: Ambiguous, quantity: 6, price: 5.0 }
+[00:00:00.000] (7f621e114780) INFO   OnTick(0): coco?:    MqlTick { time: 2, bid: 3.0, ask: 4.0, last: 5.0, volume: 6, time_msc: 7, flags: 255, volume_real: 8.0 }
+[00:00:00.000] (7f621e114780) INFO   OnTick(0): coco?: TradeEvent { time: 1970-01-01T00:00:02.007, aggressor: Ambiguous, quantity: 6, price: 5.0 }
+[00:00:00.000] (7f8da885b780) INFO   'rust_mt5_bridge.dll' was loaded and started -- allowing up to 1024 handles (Expert Advisors, Indicators, Testers, etc.) to be created -- removing them won't free resources (restarting Metatrader will)
+[00:00:00.000] (7f8da885b780) INFO   DllMain() called for reason 1: DLL_PROCESS_ATTACH -- DLL was loaded!
+[00:00:00.000] (7f8da885b780) INFO   OnInit: registering trading expert advisor for PRODUCTION: Handle { client_type: ProductionExpertAdvisor, account_token: "coco?", algorithm: "coco?", symbol: "coco?" } -- attributed handle_id: 0
+[00:00:00.000] (7f8da885b780) INFO   OnTick(0): coco?:    MqlTick { time: 2, bid: 3.0, ask: 4.0, last: 5.0, volume: 6, time_msc: 7, flags: 255, volume_real: 8.0 }
+[00:00:00.001] (7f8da885b780) INFO   OnTick(0): coco?: TradeEvent { time: 1970-01-01T00:00:02.007, aggressor: Ambiguous, quantity: 6, price: 5.0 }
+[00:00:00.001] (7f8da885b780) INFO   OnTick(0): coco?:    MqlTick { time: 2, bid: 3.0, ask: 4.0, last: 5.0, volume: 6, time_msc: 7, flags: 255, volume_real: 8.0 }
+[00:00:00.001] (7f8da885b780) INFO   OnTick(0): coco?: TradeEvent { time: 1970-01-01T00:00:02.007, aggressor: Ambiguous, quantity: 6, price: 5.0 }
+[00:00:00.000] (7f759dd50780) INFO   'rust_mt5_bridge.dll' was loaded and started -- allowing up to 1024 handles (Expert Advisors, Indicators, Testers, etc.) to be created -- removing them won't free resources (restarting Metatrader will)
+[00:00:00.000] (7f759dd50780) INFO   DllMain() called for reason 1: DLL_PROCESS_ATTACH -- DLL was loaded!
+[00:00:00.000] (7f759dd50780) INFO   OnInit: registering trading expert advisor for PRODUCTION: Handle { client_type: ProductionExpertAdvisor, account_token: "coco?", algorithm: "coco?", symbol: "coco?" } -- attributed handle_id: 0
+[00:00:00.000] (7f759dd50780) INFO   OnTick(0): coco?:    MqlTick { time: 2, bid: 3.0, ask: 4.0, last: 5.0, volume: 6, time_msc: 7, flags: 255, volume_real: 8.0 }
+[00:00:00.000] (7f759dd50780) INFO   OnTick(0): coco?: TradeEvent { time: 1970-01-01T00:00:02.007, aggressor: Ambiguous { bid: 3.0, ask: 4.0 }, quantity: 6, price: 5.0 }
+[00:00:00.000] (7f759dd50780) INFO   OnTick(0): coco?:    MqlTick { time: 2, bid: 3.0, ask: 4.0, last: 5.0, volume: 6, time_msc: 7, flags: 255, volume_real: 8.0 }
+[00:00:00.001] (7f759dd50780) INFO   OnTick(0): coco?: TradeEvent { time: 1970-01-01T00:00:02.007, aggressor: Ambiguous { bid: 3.0, ask: 4.0 }, quantity: 6, price: 5.0 }
