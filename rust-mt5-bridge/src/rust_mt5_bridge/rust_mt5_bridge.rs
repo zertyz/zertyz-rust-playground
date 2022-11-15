@@ -8,9 +8,9 @@ use std::mem::MaybeUninit;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering::Relaxed;
 
-use log::{error, info};
 use once_cell::sync::Lazy;
 use widestring::{U16CString, WideCStr, WideCString, WideString};
+use log::{error, info, LevelFilter};
 
 
 const MAX_HANDLES: i32 = 1024;
@@ -29,9 +29,17 @@ pub extern "system" fn DllMain(_: *const (), fdw_reason: u32, _: *const ()) -> u
         0 => info!("DllMain() called for reason 0: DLL_PROCESS_DETACH -- loading failed and the DLL is being completely unloaded"),
         1 => {
             let log_file_path = "rust_mt5_bridge.log";
-            let log_file = fs::File::options().create(true).append(true)
-                .open(log_file_path).expect("open log file for appending");
-            let logsetup_result = simple_logging::log_to(log_file, LOG_LEVEL);
+            let config = simple_log::LogConfigBuilder::builder()
+                .path(log_file_path)
+                .size(MAX_LOG_FILE_SIZE_MB)
+                .roll_count(MAX_LOG_FILES)
+                .time_format("%H:%M:%S.%f")
+                .level(LOG_LEVEL)
+                .output_file()
+                .build();
+
+            simple_log::new(config)
+                .expect("instantiating simplelog file writer");
             info!("'rust_mt5_bridge.dll' was loaded and started -- allowing up to {MAX_HANDLES} handles (Expert Advisors, Indicators, Testers, etc.) to be created -- removing them won't free resources (restarting Metatrader will)");
             info!("DllMain() called for reason 1: DLL_PROCESS_ATTACH -- DLL was loaded!");
             unsafe {
@@ -123,12 +131,13 @@ pub extern fn register_trading_expert_advisor_for_testing(account_token: *const 
 /// Called when there are new Quotes available.\
 /// This function should return as fast as possible, or else new ticks will be lost (they are not enqueued).
 /// See the docs https://www.mql5.com/en/docs/event_handlers/ontick
-pub extern fn on_tick(handle_id: u32, tick: *const MqlTick) {
+pub extern fn on_tick(handle_id: i32, tick: *const MqlTick) {
     let handle = unsafe { &HANDLES[handle_id as usize] };
     let tick = unsafe { &*tick };
-info!("OnTick({handle_id}): {}:    {:?}", handle.symbol, tick);
-    if let Some(trade_event) = tick.to_trade_event() {
-        info!("OnTick({handle_id}): {}: {:?}", handle.symbol, trade_event);
+info!("OnTick({handle_id}): {}: {:?}", handle.symbol, tick);
+    match tick.to_event() {
+        TickEvent::Trade(trade_event)    => info!("OnTick({handle_id}): {}:   {:?}", handle.symbol, trade_event),
+        TickEvent::Spread(spread_event) => info!("OnTick({handle_id}): {}:  {:?}", handle.symbol, spread_event),
     }
 }
 
@@ -195,11 +204,13 @@ pub const DEBUG: bool = false;
 
 /// Keep those levels in sync with Cargo.toml's `log` crate levels defined in features.
 /// Example: features = ["max_level_debug", "release_max_level_info"]
-const LOG_LEVEL: log::LevelFilter = if DEBUG {
-    log::LevelFilter::Debug
+const LOG_LEVEL: &str = if DEBUG {
+    "debug"
 } else {
-    log::LevelFilter::Info
+    "info"
 };
+const MAX_LOG_FILE_SIZE_MB: u64 = 2*1024;
+const MAX_LOG_FILES: u32 = 22;
 
 /// to be called when debugging logging issues
 fn internal_logger(path: &str, contents: &str) {

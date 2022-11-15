@@ -20,14 +20,14 @@ pub enum ClientType {
 
 #[derive(Debug)]
 pub enum Party {
-    Ambiguous {bid: f64, ask: f64},
-    Buyer,
-    Seller,
+    Ambiguous   {bid: f64, ask: f64},
+    Buyer       {bid: f64, ask: f64},
+    Seller      {bid: f64, ask: f64},
     Unspecified {bid: f64, ask: f64},
 }
 
 #[derive(Debug)]
-pub struct TradeEvent {
+pub struct Trade {
     pub time:      NaiveDateTime,
     pub aggressor: Party,
     pub quantity:  u32,
@@ -35,13 +35,16 @@ pub struct TradeEvent {
 }
 
 #[derive(Debug)]
-pub struct BookEvent {
+pub struct Spread {
     pub time:             NaiveDateTime,
-    pub ask_price_update: OptionNonZeroF64,
-    pub bid_price_update: OptionNonZeroF64,
-    pub volume_update:    Option<NonZeroU64>,
+    pub best_bid: f64,
+    pub best_ask: f64,
 }
 
+pub enum TickEvent {
+    Trade(Trade),
+    Spread(Spread),
+}
 
 ///////////////////////////
 // Metatrader 5 mappings //
@@ -100,56 +103,67 @@ pub const TICK_FLAG_SELL: u32 = 64;
 #[derive(Debug)]
 pub struct MqlTick {
     /// Time of the last prices update
-    time: MT5DateTime,
+    pub time: MT5DateTime,
     /// Current Bid price
-    bid: f64,
+    pub bid: f64,
     /// Current Ask price
-    ask: f64,
+    pub ask: f64,
     /// Price of the last deal (Last)
-    last: f64,
+    pub last: f64,
     /// Volume for the current Last price
-    volume: u64,
+    pub volume: u64,
     /// Time of a price last update in milliseconds
-    time_msc: i64,
+    pub time_msc: i64,
     /// Tick flags
-    flags: u32,
+    pub flags: u32,
     /// Volume for the current Last price with greater accuracy
-    volume_real: f64,
+    pub volume_real: f64,
 }
 impl MqlTick {
 
-    pub fn to_trade_event(&self) -> Option<TradeEvent> {
-        if self.flags > 0 && self.flags & (TICK_FLAG_BID|TICK_FLAG_ASK|TICK_FLAG_VOLUME) == self.flags {
-            // book event only
-            //     Some(BookEvent {
-            //         time:             datetime,
-            //         ask_price_update: if self.flags & TICK_FLAG_ASK > 0    { OptionNonZeroF64::Some(self.ask) } else { OptionNonZeroF64::None() },
-            //         bid_price_update: if self.flags & TICK_FLAG_BID > 0    { OptionNonZeroF64::Some(self.bid) } else { OptionNonZeroF64::None() },
-            //         volume_update:    NonZeroU64::new(self.volume),     // Volume exists for BID & ASK even if MT5 don't sent the VOLUME flag
-            //     })
-            None
-        } else {
-            // trade event
-            // `NaiveDateTime` with millisecond precision from the fields `time` and `time_msc`
-            let datetime = NaiveDateTime::from_timestamp(self.time as i64, 1000_000 * (self.time_msc % 1000) as u32);
-            Some(TradeEvent {
+    /// Extracts events from the Metatrader 5 `OnTick()` event./
+    /// The provided information is tricky and rather poorly documented -- it is most likely that it is dependent on the broker being used./
+    /// For instance, on the "Clear broker (for B3)", flags are known to come zeroed out for legitimate trades --
+    /// other discrepancies also happen, like a tick event having the information of both Buying and Selling flags as well as, some times, even bids > asks./
+    /// For that particular broker, some trades misses the event completely, but, fortunately, only when there isn't a price change.
+    pub fn to_event(&self) -> TickEvent {
+
+        // `NaiveDateTime` with millisecond precision from the fields `time` and `time_msc`
+        let datetime = NaiveDateTime::from_timestamp(self.time as i64, 1000_000 * (self.time_msc % 1000) as u32);
+
+        // trade event?
+        if self.flags == 0 || self.flags & (TICK_FLAG_BID|TICK_FLAG_ASK|TICK_FLAG_VOLUME) != self.flags {
+            let trade = Trade {
                 time:      datetime,
+                // NOTE: According to production data (see tests), the aggressor determination is not always accurate. Further analysis
+                //       may improve the classification -- for instance, by keeping track of the last bid and ask price points
                 aggressor: if (self.flags & TICK_FLAG_BUY > 0 && self.flags & TICK_FLAG_SELL > 0) ||
-                    (self.last == self.ask && self.last == self.bid) {
-                    Party::Ambiguous {bid: self.bid, ask: self.ask}
-                } else if self.flags & TICK_FLAG_BUY > 0 || self.last == self.ask {
-                    Party::Buyer
-                } else if self.flags & TICK_FLAG_SELL > 0 || self.last == self.bid {
-                    Party::Seller
-                } else {
-                    Party::Unspecified {bid: self.bid, ask: self.ask}
-                },
+                              (self.last == self.ask && self.last == self.bid) {
+                               Party::Ambiguous {bid: self.bid, ask: self.ask}
+                           } else if self.flags & TICK_FLAG_BUY > 0 || self.last >= self.ask {
+                               Party::Buyer {bid: self.bid, ask: self.ask}
+                           } else if self.flags & TICK_FLAG_SELL > 0 || self.last <= self.bid {
+                               Party::Seller {bid: self.bid, ask: self.ask}
+                           } else {
+                               Party::Unspecified {bid: self.bid, ask: self.ask}
+                           },
                 quantity: self.volume as u32,
                 price:    self.last,
-            })
+            };
+            TickEvent::Trade(trade)
+        } else {
+            // spread event (book top)
+            let spread = Spread {
+                time:     datetime,
+                best_bid: self.bid,
+                best_ask: self.ask,
+            };
+            TickEvent::Spread(spread)
         }
+
     }
 }
+
 impl Default for MqlTick {
     fn default() -> Self {
         Self {

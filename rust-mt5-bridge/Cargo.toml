@@ -30,9 +30,11 @@ path = "src/rust_mt5_bridge/mod.rs"
 [dependencies]
 
 log            = { version = "0.4", features = ["max_level_debug", "release_max_level_info"] }
-simple-logging = "2"
+simple-log     = "1.6"    # Much, much faster than 'simple-logging' and 'simplelog' for file writing (possibly buffered?)
 widestring     = "1.0"    # MetaTrader 5 Strings (UTF-16) to Rust Strings utilities
 
 once_cell      = "1.16"   # oficial replacer for lazy_static?
 
 chrono         = "0.4"
+
+regex          = "1"
