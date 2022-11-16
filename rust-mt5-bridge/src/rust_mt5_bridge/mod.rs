@@ -1,4 +1,4 @@
-mod mq5_std_lib;
+mod mq5_lib;
 pub mod types;
 
 mod rust_mt5_bridge;

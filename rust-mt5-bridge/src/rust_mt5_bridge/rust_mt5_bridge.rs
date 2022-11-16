@@ -131,8 +131,7 @@ pub extern fn register_trading_expert_advisor_for_testing(account_token: *const 
 #[no_mangle]
 pub extern fn report_symbol_info(handle_id: i32, symbol_info: *const SymbolInfoBridge) {
     let handle = unsafe { &HANDLES[handle_id as usize] };
-    let symbol_info = unsafe { &*symbol_info };
-    let symbol_info = SymbolInfoRust::from(symbol_info);
+    let symbol_info = SymbolInfoBridge::from_ptr_to_internal(symbol_info);
     info!("report_symbol_info({handle_id}): {}: {:#?}", handle.symbol, symbol_info);
 }
 
