@@ -412,6 +412,16 @@ pub struct SymbolInfoRust {
 }
 impl SymbolInfoRust {
     pub fn from(symbol_info_bridge: &SymbolInfoBridge) -> Self {
+
+        // note: this code was built to work in both 32 & 64bit compilations, even if the MQLString offers only a 32bit pointer
+        let string_from_mql_string = |mql_string: &MQ5String| -> String {
+            let base_ptr = std::ptr::addr_of!(symbol_info_bridge.symbol_basis) as u64 & (0xFFFFFFFF00000000 as u64);
+            let ptr_64bit: *const u16 = (base_ptr | (mql_string.1 as u64)) as *const u16;
+            unsafe { U16CString::from_ptr_str(ptr_64bit) }
+                .to_string()
+                .unwrap_or_else(|_| String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED»»"))
+        };
+
         Self {
             symbol_sector: symbol_info_bridge.symbol_sector,
             symbol_industry: symbol_info_bridge.symbol_industry,
@@ -501,36 +511,21 @@ impl SymbolInfoRust {
             symbol_price_rho: symbol_info_bridge.symbol_price_rho,
             symbol_price_omega: symbol_info_bridge.symbol_price_omega,
             symbol_price_sensitivity: symbol_info_bridge.symbol_price_sensitivity,
-            // symbol_basis: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_basis) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for 'symbol_basis'»»")),
-            // symbol_category: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_category) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for '????'»»")),
-            // symbol_country: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_country) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for '????'»»")),
-            // symbol_sector_name: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_sector_name) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for '????'»»")),
-            // symbol_industry_name: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_industry_name) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for '????'»»")),
-            // symbol_currency_base: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_currency_base) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for '????'»»")),
-            // symbol_currency_profit: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_currency_profit) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for '????'»»")),
-            // symbol_currency_margin: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_currency_margin) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for '????'»»")),
-            // symbol_bank: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_bank) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for '????'»»")),
-            // symbol_description: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_description) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for '????'»»")),
-            // symbol_exchange: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_exchange) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for '????'»»")),
-            // symbol_formula: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_formula) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for '????'»»")),
-            // symbol_isin: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_isin) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for '????'»»")),
-            // symbol_page: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_page) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for '????'»»")),
-            // symbol_path: unsafe { U16CString::from_ptr_str(std::ptr::addr_of!(symbol_info_bridge.symbol_path) as *const u16) }.to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for '????'»»")),
-            symbol_basis: String::from("fix MT5 strings...."),
-            symbol_category: String::from("fix MT5 strings...."),
-            symbol_country: String::from("fix MT5 strings...."),
-            symbol_sector_name: String::from("fix MT5 strings...."),
-            symbol_industry_name: String::from("fix MT5 strings...."),
-            symbol_currency_base: String::from("fix MT5 strings...."),
-            symbol_currency_profit: String::from("fix MT5 strings...."),
-            symbol_currency_margin: String::from("fix MT5 strings...."),
-            symbol_bank: String::from("fix MT5 strings...."),
-            symbol_description: String::from("fix MT5 strings...."),
-            symbol_exchange: String::from("fix MT5 strings...."),
-            symbol_formula: String::from("fix MT5 strings...."),
-            symbol_isin: String::from("fix MT5 strings...."),
-            symbol_page: String::from("fix MT5 strings...."),
-            symbol_path: String::from("fix MT5 strings...."),
+            symbol_basis: string_from_mql_string(&symbol_info_bridge.symbol_basis),
+            symbol_category: string_from_mql_string(&symbol_info_bridge.symbol_category),
+            symbol_country: string_from_mql_string(&symbol_info_bridge.symbol_country),
+            symbol_sector_name: string_from_mql_string(&symbol_info_bridge.symbol_sector_name),
+            symbol_industry_name: string_from_mql_string(&symbol_info_bridge.symbol_industry_name),
+            symbol_currency_base: string_from_mql_string(&symbol_info_bridge.symbol_currency_base),
+            symbol_currency_profit: string_from_mql_string(&symbol_info_bridge.symbol_currency_profit),
+            symbol_currency_margin: string_from_mql_string(&symbol_info_bridge.symbol_currency_margin),
+            symbol_bank: string_from_mql_string(&symbol_info_bridge.symbol_bank),
+            symbol_description: string_from_mql_string(&symbol_info_bridge.symbol_description),
+            symbol_exchange: string_from_mql_string(&symbol_info_bridge.symbol_exchange),
+            symbol_formula: string_from_mql_string(&symbol_info_bridge.symbol_formula),
+            symbol_isin: string_from_mql_string(&symbol_info_bridge.symbol_isin),
+            symbol_page: string_from_mql_string(&symbol_info_bridge.symbol_page),
+            symbol_path: string_from_mql_string(&symbol_info_bridge.symbol_path),
             symbol_subscription_delay: symbol_info_bridge.symbol_subscription_delay,
             symbol_custom: symbol_info_bridge.symbol_custom,
             symbol_exist: symbol_info_bridge.symbol_exist,

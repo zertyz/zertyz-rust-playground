@@ -93,35 +93,20 @@ struct SymbolInfoBridge {
 	                        double                symbol_price_omega;      // Option/warrant omega. Option elasticity shows a relative percentage change of the option price by the percentage change of the underlying asset price
 	                        double          symbol_price_sensitivity;      // Option/warrant sensitivity shows by how many points the price of the option's underlying asset should change so that the price of the option changes by one point
 	                        string                      symbol_basis;      // The underlying asset of a derivative
-	                           int                                _4;
 	                        string                   symbol_category;      // The name of the sector or category to which the financial symbol belongs
-	                           int                                _5;
 	                        string                    symbol_country;      // The country to which the financial symbol belongs
-	                           int                                _6;
 	                        string                symbol_sector_name;      // The sector of the economy to which the financial symbol belongs
-	                           int                                _7;
 	                        string              symbol_industry_name;      // The industry branch or the industry to which the financial symbol belongs
-	                           int                                _8;
 	                        string              symbol_currency_base;      // Basic currency of a symbol
-	                           int                                _9;
 	                        string            symbol_currency_profit;      // Profit currency
-	                           int                               _10;
 	                        string            symbol_currency_margin;      // Margin currency
-	                           int                               _11;
 	                        string                       symbol_bank;      // Feeder of the current quote
-	                           int                               _12;
 	                        string                symbol_description;      // Symbol description
-	                           int                               _13;
 	                        string                   symbol_exchange;      // The name of the exchange in which the financial symbol is traded
-	                           int                               _14;
 	                        string                    symbol_formula;      // The formula used for the custom symbol pricing. If the name of a financial symbol used in the formula starts with a digit or contains a special character (&quot;&gt;&quot; &quot;, &quot;.&quot;, &quot;-&quot;, &quot;&amp;&quot;, &quot;#&quot; and so on) quotation marks should be used around this symbol name.
-	                           int                               _15;
 	                        string                       symbol_isin;      // The name of a symbol in the ISIN system (International Securities Identification Number). The International Securities Identification Number is a 12-digit alphanumeric code that uniquely identifies a security. The presence of this symbol property is determined on the side of a trade server.
-	                           int                               _16;
 	                        string                       symbol_page;      // The address of the web page containing symbol information. This address will be displayed as a link when viewing symbol properties in the terminal
-	                           int                               _17;
 	                        string                       symbol_path;      // Path in the symbol tree
-	                           int                               _18;
 	                          bool         symbol_subscription_delay;      // Symbol data arrives with a delay. The property can be requested only for symbols selected in MarketWatch (SYMBOL_SELECT = true). The ERR_MARKET_NOT_SELECTED (4302) error is generated for other symbols
 	                          bool                     symbol_custom;      // It is a custom symbol – the symbol has been created synthetically based on other symbols from the Market Watch and/or external data sources
 	                          bool                      symbol_exist;      // Symbol with this name exists
@@ -136,21 +121,6 @@ SymbolInfoBridge InstantiateSymbolInfoBridge(string symbol) {
    // set the alignment markers with easy to spot values -- 08080808 hex
    instance._1                                = 252645135;
    instance._2                                = 252645135;
-   instance._4                                = 252645135;
-   instance._5                                = 252645135;
-   instance._6                                = 252645135;
-   instance._7                                = 252645135;
-   instance._8                                = 252645135;
-   instance._9                                = 252645135;
-   instance._10                                = 252645135;
-   instance._11                                = 252645135;
-   instance._12                                = 252645135;
-   instance._13                                = 252645135;
-   instance._14                                = 252645135;
-   instance._15                                = 252645135;
-   instance._16                                = 252645135;
-   instance._17                                = 252645135;
-   instance._18                                = 252645135;
 	instance.symbol_subscription_delay         = SymbolInfoInteger(symbol, SYMBOL_SUBSCRIPTION_DELAY);
 	instance.symbol_sector                     = SymbolInfoInteger(symbol, SYMBOL_SECTOR);
 	instance.symbol_industry                   = SymbolInfoInteger(symbol, SYMBOL_INDUSTRY);
