@@ -2,7 +2,7 @@
 # 1) Make sure you can compile for Windows by adding the cross compiler:
 #    rustup target add x86_64-pc-windows-gnu        # x86_64-pc-windows-msvc only works inside Windows
 # 2) Build for release:
-#    cargo build --target x86_64-pc-windows-gnu --release -p rust-RustMT5Bridge-bridge
+#     RUSTFLAGS="-C target-feature=+crt-static" cargo build --target x86_64-pc-windows-gnu --release -p rust-RustMT5Bridge-bridge
 #
 # NOTE: I noticed the produced .DLL to be quite big... maybe this is due to using x86_64-pc-windows-gnu runtime
 #       -- which, probably, is statically linked there.
@@ -25,6 +25,7 @@ path = "src/main.rs"
 [lib]
 crate-type = ["cdylib"]
 path = "src/rust_mt5_bridge/mod.rs"
+rustflags = ["-C", "target-feature=+crt-static"]    # force statically linking the C runtime, which solved problems after using several crates when compiling with GNU crosscompiler and running in Wine
 
 
 [dependencies]

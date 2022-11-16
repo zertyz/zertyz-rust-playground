@@ -127,10 +127,20 @@ pub extern fn register_trading_expert_advisor_for_testing(account_token: *const 
     }
 }
 
+/// Called to inform details over the symbol under negotiation. Typically done once per session, at the start.
 #[no_mangle]
+pub extern fn report_symbol_info(handle_id: i32, symbol_info: *const SymbolInfoBridge) {
+    let handle = unsafe { &HANDLES[handle_id as usize] };
+    let symbol_info = unsafe { &*symbol_info };
+    let symbol_info = SymbolInfoRust::from(symbol_info);
+    info!("report_symbol_info({handle_id}): {}: {:#?}", handle.symbol, symbol_info);
+}
+
+
 /// Called when there are new Quotes available.\
 /// This function should return as fast as possible, or else new ticks will be lost (they are not enqueued).
 /// See the docs https://www.mql5.com/en/docs/event_handlers/ontick
+#[no_mangle]
 pub extern fn on_tick(handle_id: i32, tick: *const MqlTick) {
     let handle = unsafe { &HANDLES[handle_id as usize] };
     let tick = unsafe { &*tick };
