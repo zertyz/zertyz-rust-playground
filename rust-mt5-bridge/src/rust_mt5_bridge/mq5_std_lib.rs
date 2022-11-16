@@ -16,11 +16,11 @@ pub type MQ5Color = i32;
 ///     .to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for 'param1' »»"));
 pub type MQ5StringRef = *const u16;
 
-/// According to the Metatrader documentation https://docs.mql4.com/basis/types/stringconst (available for MT4 but useful for MT5 as well),
-/// an MT5 String (named `MqlString`) consists of 12 bytes / 4 integers: (size, buffer, reserved). Please refer to [MQ5StringRef] for details
-/// on how the bytes are encoded... but, anyway, you may copy & convert this string to Rust with:
+/// According to the Metatrader documentation at https://docs.mql4.com/basis/types/stringconst (available for MT4 but useful for MT5 as well),
+/// an MT5 String (named `MqlString`) consists of 12 bytes / 3 integers: `(size, buffer_ptr, reserved)`. Please refer to [MQ5StringRef] for details
+/// on how the bytes in `buffer_ptr` are encoded... but, anyway, you may copy & convert this string to Rust with:
 /// ```
-/// // note: this code was built to work in both 32 & 64bit compilations, even if the MQLString offers only a 32bit pointer
+/// // note: this code was built to work in both 32 & 64bit binaries, even if the MQLString offers only a 32bit pointer
 /// let string_from_mql_string = |mql_string: &MQ5String| -> String {
 ///     let base_ptr = std::ptr::addr_of!(symbol_info_bridge.symbol_basis) as u64 & (0xFFFFFFFF00000000 as u64);
 ///     let ptr_64bit: *const u16 = (base_ptr | (mql_string.1 as u64)) as *const u16;
@@ -280,12 +280,12 @@ pub enum EnumDayOfWeek {
 	Saturday,
 
 	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped0A, Unmapped0B, Unmapped0C, Unmapped0D, Unmapped0E, Unmapped0F, Unmapped0G, Unmapped0H, Unmapped0I, Unmapped0J, Unmapped0K, Unmapped0L, Unmapped0M,
-	Unmapped0N, Unmapped0O, Unmapped0P, Unmapped0Q, Unmapped0R, Unmapped0S, Unmapped0T, Unmapped0U, Unmapped0V, Unmapped0W, Unmapped0X, Unmapped0Y, Unmapped0Z,
-	Unmapped1A, Unmapped1B, Unmapped1C, Unmapped1D, Unmapped1E, Unmapped1F, Unmapped1G, Unmapped1H, Unmapped1I, Unmapped1J, Unmapped1K, Unmapped1L, Unmapped1M,
-	Unmapped1N, Unmapped1O, Unmapped1P, Unmapped1Q, Unmapped1R, Unmapped1S, Unmapped1T, Unmapped1U, Unmapped1V, Unmapped1W, Unmapped1X, Unmapped1Y, Unmapped1Z,
-	Unmapped2A, Unmapped2B, Unmapped2C, Unmapped2D, Unmapped2E, Unmapped2F, Unmapped2G, Unmapped2H, Unmapped2I, Unmapped2J, Unmapped2K, Unmapped2L, Unmapped2M,
-	Unmapped2N, Unmapped2O, Unmapped2P, Unmapped2Q, Unmapped2R, Unmapped2S, Unmapped2T, Unmapped2U, Unmapped2V, Unmapped2W, Unmapped2X, Unmapped2Y, Unmapped2Z,
+	Unmapped7,  Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
+	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
+	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
+	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
+	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
+	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
 }
 
 /// The ENUM_SYMBOL_CALC_MODE enumeration is used for obtaining information about how the margin requirements for a symbol are calculated./
@@ -342,12 +342,12 @@ pub enum EnumSymbolCalcMode {
 	SymbolCalcModeServCollateral,
 
 	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped0A, Unmapped0B, Unmapped0C, Unmapped0D, Unmapped0E, Unmapped0F, Unmapped0G, Unmapped0H, Unmapped0I, Unmapped0J, Unmapped0K, Unmapped0L, Unmapped0M,
-	Unmapped0N, Unmapped0O, Unmapped0P, Unmapped0Q, Unmapped0R, Unmapped0S, Unmapped0T, Unmapped0U, Unmapped0V, Unmapped0W, Unmapped0X, Unmapped0Y, Unmapped0Z,
-	Unmapped1A, Unmapped1B, Unmapped1C, Unmapped1D, Unmapped1E, Unmapped1F, Unmapped1G, Unmapped1H, Unmapped1I, Unmapped1J, Unmapped1K, Unmapped1L, Unmapped1M,
-	Unmapped1N, Unmapped1O, Unmapped1P, Unmapped1Q, Unmapped1R, Unmapped1S, Unmapped1T, Unmapped1U, Unmapped1V, Unmapped1W, Unmapped1X, Unmapped1Y, Unmapped1Z,
-	Unmapped2A, Unmapped2B, Unmapped2C, Unmapped2D, Unmapped2E, Unmapped2F, Unmapped2G, Unmapped2H, Unmapped2I, Unmapped2J, Unmapped2K, Unmapped2L, Unmapped2M,
-	Unmapped2N, Unmapped2O, Unmapped2P, Unmapped2Q, Unmapped2R, Unmapped2S, Unmapped2T, Unmapped2U, Unmapped2V, Unmapped2W, Unmapped2X, Unmapped2Y, Unmapped2Z,
+	Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
+	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
+	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
+	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
+	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
+	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
 }
 
 /// A symbol price chart can be based on Bid or Last prices. The price selected for symbol charts also affects the generation and display of bars in the terminal. Possible values of the SYMBOL_CHART_MODE property are described in ENUM_SYMBOL_CHART_MODE/
@@ -361,12 +361,13 @@ pub enum EnumSymbolChartMode {
 	SymbolChartModeLast,
 
 	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped0A, Unmapped0B, Unmapped0C, Unmapped0D, Unmapped0E, Unmapped0F, Unmapped0G, Unmapped0H, Unmapped0I, Unmapped0J, Unmapped0K, Unmapped0L, Unmapped0M,
-	Unmapped0N, Unmapped0O, Unmapped0P, Unmapped0Q, Unmapped0R, Unmapped0S, Unmapped0T, Unmapped0U, Unmapped0V, Unmapped0W, Unmapped0X, Unmapped0Y, Unmapped0Z,
-	Unmapped1A, Unmapped1B, Unmapped1C, Unmapped1D, Unmapped1E, Unmapped1F, Unmapped1G, Unmapped1H, Unmapped1I, Unmapped1J, Unmapped1K, Unmapped1L, Unmapped1M,
-	Unmapped1N, Unmapped1O, Unmapped1P, Unmapped1Q, Unmapped1R, Unmapped1S, Unmapped1T, Unmapped1U, Unmapped1V, Unmapped1W, Unmapped1X, Unmapped1Y, Unmapped1Z,
-	Unmapped2A, Unmapped2B, Unmapped2C, Unmapped2D, Unmapped2E, Unmapped2F, Unmapped2G, Unmapped2H, Unmapped2I, Unmapped2J, Unmapped2K, Unmapped2L, Unmapped2M,
-	Unmapped2N, Unmapped2O, Unmapped2P, Unmapped2Q, Unmapped2R, Unmapped2S, Unmapped2T, Unmapped2U, Unmapped2V, Unmapped2W, Unmapped2X, Unmapped2Y, Unmapped2Z,
+	Unmapped2,  Unmapped3,   Unmapped4,  Unmapped5,  Unmapped6, Unmapped7,
+	Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
+	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
+	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
+	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
+	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
+	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
 }
 
 /// Each financial instrument can be assigned to a specific type of industry or economy branch. An industry is a branch of an economy that produces a closely related set of raw materials, goods, or services. ENUM_SYMBOL_INDUSTRY lists industries which a trading instrument can belong to./
@@ -680,12 +681,11 @@ pub enum EnumSymbolIndustry {
 	IndustryUtilitiesLast,
 
 	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped0A, Unmapped0B, Unmapped0C, Unmapped0D, Unmapped0E, Unmapped0F, Unmapped0G, Unmapped0H, Unmapped0I, Unmapped0J, Unmapped0K, Unmapped0L, Unmapped0M,
-	Unmapped0N, Unmapped0O, Unmapped0P, Unmapped0Q, Unmapped0R, Unmapped0S, Unmapped0T, Unmapped0U, Unmapped0V, Unmapped0W, Unmapped0X, Unmapped0Y, Unmapped0Z,
-	Unmapped1A, Unmapped1B, Unmapped1C, Unmapped1D, Unmapped1E, Unmapped1F, Unmapped1G, Unmapped1H, Unmapped1I, Unmapped1J, Unmapped1K, Unmapped1L, Unmapped1M,
-	Unmapped1N, Unmapped1O, Unmapped1P, Unmapped1Q, Unmapped1R, Unmapped1S, Unmapped1T, Unmapped1U, Unmapped1V, Unmapped1W, Unmapped1X, Unmapped1Y, Unmapped1Z,
-	Unmapped2A, Unmapped2B, Unmapped2C, Unmapped2D, Unmapped2E, Unmapped2F, Unmapped2G, Unmapped2H, Unmapped2I, Unmapped2J, Unmapped2K, Unmapped2L, Unmapped2M,
-	Unmapped2N, Unmapped2O, Unmapped2P, Unmapped2Q, Unmapped2R, Unmapped2S, Unmapped2T, Unmapped2U, Unmapped2V, Unmapped2W, Unmapped2X, Unmapped2Y, Unmapped2Z,
+	Unmapped151, Unmapped152, Unmapped153, Unmapped154, Unmapped155, Unmapped156, Unmapped157, Unmapped158, Unmapped159,
+	Unmapped160, Unmapped161, Unmapped162, Unmapped163, Unmapped164, Unmapped165, Unmapped166, Unmapped167, Unmapped168, Unmapped169, Unmapped170, Unmapped171, Unmapped172,
+	Unmapped173, Unmapped174, Unmapped175, Unmapped176, Unmapped177, Unmapped178, Unmapped179, Unmapped180, Unmapped181, Unmapped182, Unmapped183, Unmapped184, Unmapped185,
+	Unmapped186, Unmapped187, Unmapped188, Unmapped189, Unmapped190, Unmapped191, Unmapped192, Unmapped193, Unmapped194, Unmapped195, Unmapped196, Unmapped197, Unmapped198,
+
 }
 
 /// /
@@ -699,12 +699,13 @@ pub enum EnumSymbolOptionMode {
 	SymbolOptionModeAmerican ,
 
 	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped0A, Unmapped0B, Unmapped0C, Unmapped0D, Unmapped0E, Unmapped0F, Unmapped0G, Unmapped0H, Unmapped0I, Unmapped0J, Unmapped0K, Unmapped0L, Unmapped0M,
-	Unmapped0N, Unmapped0O, Unmapped0P, Unmapped0Q, Unmapped0R, Unmapped0S, Unmapped0T, Unmapped0U, Unmapped0V, Unmapped0W, Unmapped0X, Unmapped0Y, Unmapped0Z,
-	Unmapped1A, Unmapped1B, Unmapped1C, Unmapped1D, Unmapped1E, Unmapped1F, Unmapped1G, Unmapped1H, Unmapped1I, Unmapped1J, Unmapped1K, Unmapped1L, Unmapped1M,
-	Unmapped1N, Unmapped1O, Unmapped1P, Unmapped1Q, Unmapped1R, Unmapped1S, Unmapped1T, Unmapped1U, Unmapped1V, Unmapped1W, Unmapped1X, Unmapped1Y, Unmapped1Z,
-	Unmapped2A, Unmapped2B, Unmapped2C, Unmapped2D, Unmapped2E, Unmapped2F, Unmapped2G, Unmapped2H, Unmapped2I, Unmapped2J, Unmapped2K, Unmapped2L, Unmapped2M,
-	Unmapped2N, Unmapped2O, Unmapped2P, Unmapped2Q, Unmapped2R, Unmapped2S, Unmapped2T, Unmapped2U, Unmapped2V, Unmapped2W, Unmapped2X, Unmapped2Y, Unmapped2Z,
+	Unmapped2,  Unmapped3,   Unmapped4,  Unmapped5,  Unmapped6, Unmapped7,
+	Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
+	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
+	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
+	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
+	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
+	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
 }
 
 /// An option is a contract, which gives the right, but not the obligation, to buy or sell an underlying asset (goods, stocks, futures, etc.) at a specified price on or before a specific date. The following enumerations describe option properties, including the option type and the right arising from it. /
@@ -718,12 +719,13 @@ pub enum EnumSymbolOptionRight {
 	SymbolOptionRightPut,
 
 	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped0A, Unmapped0B, Unmapped0C, Unmapped0D, Unmapped0E, Unmapped0F, Unmapped0G, Unmapped0H, Unmapped0I, Unmapped0J, Unmapped0K, Unmapped0L, Unmapped0M,
-	Unmapped0N, Unmapped0O, Unmapped0P, Unmapped0Q, Unmapped0R, Unmapped0S, Unmapped0T, Unmapped0U, Unmapped0V, Unmapped0W, Unmapped0X, Unmapped0Y, Unmapped0Z,
-	Unmapped1A, Unmapped1B, Unmapped1C, Unmapped1D, Unmapped1E, Unmapped1F, Unmapped1G, Unmapped1H, Unmapped1I, Unmapped1J, Unmapped1K, Unmapped1L, Unmapped1M,
-	Unmapped1N, Unmapped1O, Unmapped1P, Unmapped1Q, Unmapped1R, Unmapped1S, Unmapped1T, Unmapped1U, Unmapped1V, Unmapped1W, Unmapped1X, Unmapped1Y, Unmapped1Z,
-	Unmapped2A, Unmapped2B, Unmapped2C, Unmapped2D, Unmapped2E, Unmapped2F, Unmapped2G, Unmapped2H, Unmapped2I, Unmapped2J, Unmapped2K, Unmapped2L, Unmapped2M,
-	Unmapped2N, Unmapped2O, Unmapped2P, Unmapped2Q, Unmapped2R, Unmapped2S, Unmapped2T, Unmapped2U, Unmapped2V, Unmapped2W, Unmapped2X, Unmapped2Y, Unmapped2Z,
+	Unmapped2,  Unmapped3,   Unmapped4,  Unmapped5,  Unmapped6, Unmapped7,
+	Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
+	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
+	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
+	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
+	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
+	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
 }
 
 /// If the SYMBOL_EXPIRATION_MODE property is set to SYMBOL_EXPIRATION_GTC (good till canceled), the expiration of pending orders, as well as of Stop Loss/Take Profit orders should be additionally set using the ENUM_SYMBOL_ORDER_GTC_MODE enumeration./
@@ -739,12 +741,13 @@ pub enum EnumSymbolOrderGtcMode {
 	SymbolOrdersDailyExcludingStops,
 
 	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped0A, Unmapped0B, Unmapped0C, Unmapped0D, Unmapped0E, Unmapped0F, Unmapped0G, Unmapped0H, Unmapped0I, Unmapped0J, Unmapped0K, Unmapped0L, Unmapped0M,
-	Unmapped0N, Unmapped0O, Unmapped0P, Unmapped0Q, Unmapped0R, Unmapped0S, Unmapped0T, Unmapped0U, Unmapped0V, Unmapped0W, Unmapped0X, Unmapped0Y, Unmapped0Z,
-	Unmapped1A, Unmapped1B, Unmapped1C, Unmapped1D, Unmapped1E, Unmapped1F, Unmapped1G, Unmapped1H, Unmapped1I, Unmapped1J, Unmapped1K, Unmapped1L, Unmapped1M,
-	Unmapped1N, Unmapped1O, Unmapped1P, Unmapped1Q, Unmapped1R, Unmapped1S, Unmapped1T, Unmapped1U, Unmapped1V, Unmapped1W, Unmapped1X, Unmapped1Y, Unmapped1Z,
-	Unmapped2A, Unmapped2B, Unmapped2C, Unmapped2D, Unmapped2E, Unmapped2F, Unmapped2G, Unmapped2H, Unmapped2I, Unmapped2J, Unmapped2K, Unmapped2L, Unmapped2M,
-	Unmapped2N, Unmapped2O, Unmapped2P, Unmapped2Q, Unmapped2R, Unmapped2S, Unmapped2T, Unmapped2U, Unmapped2V, Unmapped2W, Unmapped2X, Unmapped2Y, Unmapped2Z,
+	Unmapped3,   Unmapped4,  Unmapped5,  Unmapped6, Unmapped7,
+	Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
+	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
+	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
+	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
+	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
+	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
 }
 
 /// Financial instruments are categorized by sectors of the economy. An economic sector is a part of economic activity which has specific characteristics, economic goals, functions and behavior, which allow separating this sector from other parts of the economy. ENUM_SYMBOL_SECTOR lists the economic sectors which a trading instruments can belong to./
@@ -782,12 +785,13 @@ pub enum EnumSymbolSector {
 	SectorUtilities,
 
 	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped0A, Unmapped0B, Unmapped0C, Unmapped0D, Unmapped0E, Unmapped0F, Unmapped0G, Unmapped0H, Unmapped0I, Unmapped0J, Unmapped0K, Unmapped0L, Unmapped0M,
-	Unmapped0N, Unmapped0O, Unmapped0P, Unmapped0Q, Unmapped0R, Unmapped0S, Unmapped0T, Unmapped0U, Unmapped0V, Unmapped0W, Unmapped0X, Unmapped0Y, Unmapped0Z,
-	Unmapped1A, Unmapped1B, Unmapped1C, Unmapped1D, Unmapped1E, Unmapped1F, Unmapped1G, Unmapped1H, Unmapped1I, Unmapped1J, Unmapped1K, Unmapped1L, Unmapped1M,
-	Unmapped1N, Unmapped1O, Unmapped1P, Unmapped1Q, Unmapped1R, Unmapped1S, Unmapped1T, Unmapped1U, Unmapped1V, Unmapped1W, Unmapped1X, Unmapped1Y, Unmapped1Z,
-	Unmapped2A, Unmapped2B, Unmapped2C, Unmapped2D, Unmapped2E, Unmapped2F, Unmapped2G, Unmapped2H, Unmapped2I, Unmapped2J, Unmapped2K, Unmapped2L, Unmapped2M,
-	Unmapped2N, Unmapped2O, Unmapped2P, Unmapped2Q, Unmapped2R, Unmapped2S, Unmapped2T, Unmapped2U, Unmapped2V, Unmapped2W, Unmapped2X, Unmapped2Y, Unmapped2Z,
+	Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
+	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
+	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
+	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
+	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
+	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+
 }
 
 /// Methods of swap calculation at position transfer are specified in enumeration ENUM_SYMBOL_SWAP_MODE. The method of swap calculation determines the units of measure of the SYMBOL_SWAP_LONG and SYMBOL_SWAP_SHORT parameters. For example, if swaps are charged in the client deposit currency, then the values of those parameters are specified as an amount of money in the client deposit currency./
@@ -815,12 +819,13 @@ pub enum EnumSymbolSwapMode {
 	SymbolSwapModeReopenBid,
 
 	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped0A, Unmapped0B, Unmapped0C, Unmapped0D, Unmapped0E, Unmapped0F, Unmapped0G, Unmapped0H, Unmapped0I, Unmapped0J, Unmapped0K, Unmapped0L, Unmapped0M,
-	Unmapped0N, Unmapped0O, Unmapped0P, Unmapped0Q, Unmapped0R, Unmapped0S, Unmapped0T, Unmapped0U, Unmapped0V, Unmapped0W, Unmapped0X, Unmapped0Y, Unmapped0Z,
-	Unmapped1A, Unmapped1B, Unmapped1C, Unmapped1D, Unmapped1E, Unmapped1F, Unmapped1G, Unmapped1H, Unmapped1I, Unmapped1J, Unmapped1K, Unmapped1L, Unmapped1M,
-	Unmapped1N, Unmapped1O, Unmapped1P, Unmapped1Q, Unmapped1R, Unmapped1S, Unmapped1T, Unmapped1U, Unmapped1V, Unmapped1W, Unmapped1X, Unmapped1Y, Unmapped1Z,
-	Unmapped2A, Unmapped2B, Unmapped2C, Unmapped2D, Unmapped2E, Unmapped2F, Unmapped2G, Unmapped2H, Unmapped2I, Unmapped2J, Unmapped2K, Unmapped2L, Unmapped2M,
-	Unmapped2N, Unmapped2O, Unmapped2P, Unmapped2Q, Unmapped2R, Unmapped2S, Unmapped2T, Unmapped2U, Unmapped2V, Unmapped2W, Unmapped2X, Unmapped2Y, Unmapped2Z,
+	Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
+	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
+	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
+	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
+	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
+	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+
 }
 
 /// Possible deal execution modes for a certain symbol are defined in enumeration ENUM_SYMBOL_TRADE_EXECUTION./
@@ -838,12 +843,14 @@ pub enum EnumSymbolTradeExecution {
 	SymbolTradeExecutionExchange,
 
 	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped0A, Unmapped0B, Unmapped0C, Unmapped0D, Unmapped0E, Unmapped0F, Unmapped0G, Unmapped0H, Unmapped0I, Unmapped0J, Unmapped0K, Unmapped0L, Unmapped0M,
-	Unmapped0N, Unmapped0O, Unmapped0P, Unmapped0Q, Unmapped0R, Unmapped0S, Unmapped0T, Unmapped0U, Unmapped0V, Unmapped0W, Unmapped0X, Unmapped0Y, Unmapped0Z,
-	Unmapped1A, Unmapped1B, Unmapped1C, Unmapped1D, Unmapped1E, Unmapped1F, Unmapped1G, Unmapped1H, Unmapped1I, Unmapped1J, Unmapped1K, Unmapped1L, Unmapped1M,
-	Unmapped1N, Unmapped1O, Unmapped1P, Unmapped1Q, Unmapped1R, Unmapped1S, Unmapped1T, Unmapped1U, Unmapped1V, Unmapped1W, Unmapped1X, Unmapped1Y, Unmapped1Z,
-	Unmapped2A, Unmapped2B, Unmapped2C, Unmapped2D, Unmapped2E, Unmapped2F, Unmapped2G, Unmapped2H, Unmapped2I, Unmapped2J, Unmapped2K, Unmapped2L, Unmapped2M,
-	Unmapped2N, Unmapped2O, Unmapped2P, Unmapped2Q, Unmapped2R, Unmapped2S, Unmapped2T, Unmapped2U, Unmapped2V, Unmapped2W, Unmapped2X, Unmapped2Y, Unmapped2Z,
+	Unmapped4,  Unmapped5,  Unmapped6,  Unmapped7,
+	Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
+	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
+	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
+	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
+	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
+	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+
 }
 
 /// There are several symbol trading modes. Information about trading modes of a certain symbol is reflected in the values of enumeration ENUM_SYMBOL_TRADE_MODE./
@@ -863,12 +870,14 @@ pub enum EnumSymbolTradeMode {
 	SymbolTradeModeFull,
 
 	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped0A, Unmapped0B, Unmapped0C, Unmapped0D, Unmapped0E, Unmapped0F, Unmapped0G, Unmapped0H, Unmapped0I, Unmapped0J, Unmapped0K, Unmapped0L, Unmapped0M,
-	Unmapped0N, Unmapped0O, Unmapped0P, Unmapped0Q, Unmapped0R, Unmapped0S, Unmapped0T, Unmapped0U, Unmapped0V, Unmapped0W, Unmapped0X, Unmapped0Y, Unmapped0Z,
-	Unmapped1A, Unmapped1B, Unmapped1C, Unmapped1D, Unmapped1E, Unmapped1F, Unmapped1G, Unmapped1H, Unmapped1I, Unmapped1J, Unmapped1K, Unmapped1L, Unmapped1M,
-	Unmapped1N, Unmapped1O, Unmapped1P, Unmapped1Q, Unmapped1R, Unmapped1S, Unmapped1T, Unmapped1U, Unmapped1V, Unmapped1W, Unmapped1X, Unmapped1Y, Unmapped1Z,
-	Unmapped2A, Unmapped2B, Unmapped2C, Unmapped2D, Unmapped2E, Unmapped2F, Unmapped2G, Unmapped2H, Unmapped2I, Unmapped2J, Unmapped2K, Unmapped2L, Unmapped2M,
-	Unmapped2N, Unmapped2O, Unmapped2P, Unmapped2Q, Unmapped2R, Unmapped2S, Unmapped2T, Unmapped2U, Unmapped2V, Unmapped2W, Unmapped2X, Unmapped2Y, Unmapped2Z,
+	Unmapped5,  Unmapped6,  Unmapped7,
+	Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
+	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
+	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
+	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
+	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
+	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+
 }
 
 /// It provides information about the market depth data.\
@@ -901,12 +910,14 @@ pub enum EnumBookType {
 	BookTypeBuyMarket,
 
 	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped0A, Unmapped0B, Unmapped0C, Unmapped0D, Unmapped0E, Unmapped0F, Unmapped0G, Unmapped0H, Unmapped0I, Unmapped0J, Unmapped0K, Unmapped0L, Unmapped0M,
-	Unmapped0N, Unmapped0O, Unmapped0P, Unmapped0Q, Unmapped0R, Unmapped0S, Unmapped0T, Unmapped0U, Unmapped0V, Unmapped0W, Unmapped0X, Unmapped0Y, Unmapped0Z,
-	Unmapped1A, Unmapped1B, Unmapped1C, Unmapped1D, Unmapped1E, Unmapped1F, Unmapped1G, Unmapped1H, Unmapped1I, Unmapped1J, Unmapped1K, Unmapped1L, Unmapped1M,
-	Unmapped1N, Unmapped1O, Unmapped1P, Unmapped1Q, Unmapped1R, Unmapped1S, Unmapped1T, Unmapped1U, Unmapped1V, Unmapped1W, Unmapped1X, Unmapped1Y, Unmapped1Z,
-	Unmapped2A, Unmapped2B, Unmapped2C, Unmapped2D, Unmapped2E, Unmapped2F, Unmapped2G, Unmapped2H, Unmapped2I, Unmapped2J, Unmapped2K, Unmapped2L, Unmapped2M,
-	Unmapped2N, Unmapped2O, Unmapped2P, Unmapped2Q, Unmapped2R, Unmapped2S, Unmapped2T, Unmapped2U, Unmapped2V, Unmapped2W, Unmapped2X, Unmapped2Y, Unmapped2Z,
+	Unmapped4,  Unmapped5,  Unmapped6,  Unmapped7,
+	Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
+	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
+	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
+	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
+	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
+	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+
 }
 
 /// Rust version of the Metatrader 5 `MqlTick` structure. From the site:/

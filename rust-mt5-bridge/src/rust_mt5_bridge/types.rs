@@ -413,7 +413,7 @@ pub struct SymbolInfoRust {
 impl SymbolInfoRust {
     pub fn from(symbol_info_bridge: &SymbolInfoBridge) -> Self {
 
-        // note: this code was built to work in both 32 & 64bit compilations, even if the MQLString offers only a 32bit pointer
+        // note: this code was built to work in both 32 & 64bit binaries, even if the MQLString offers only a 32bit pointer
         let string_from_mql_string = |mql_string: &MQ5String| -> String {
             let base_ptr = std::ptr::addr_of!(symbol_info_bridge.symbol_basis) as u64 & (0xFFFFFFFF00000000 as u64);
             let ptr_64bit: *const u16 = (base_ptr | (mql_string.1 as u64)) as *const u16;
