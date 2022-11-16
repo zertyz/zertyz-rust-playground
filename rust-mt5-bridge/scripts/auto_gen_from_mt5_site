@@ -349,7 +349,6 @@ END
 # (MT5 part calls several functions to build its own structure, which is, then, shared with Rust)
 
 # Symbols Info
-# (integer properties)
 struct='SymbolInfoBridge'
 echo "Auto-generating '${struct}' (warning: very, very slow process ahead -- sadly, 10+ minutes):"
 page='https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants'
@@ -358,7 +357,7 @@ site_structs=(               \
   'ENUM_SYMBOL_INFO_DOUBLE'  \
   'ENUM_SYMBOL_INFO_STRING'  \
 )
-mq5_values_query_function_templates=(                               \
+mq5_values_query_function_templates=(                                  \
   'instance.%postpad_lower_name% = SymbolInfoInteger(symbol, %name%);' \
   'instance.%postpad_lower_name% = SymbolInfoDouble(symbol, %name%);'  \
   'instance.%postpad_lower_name% = SymbolInfoString(symbol, %name%);'  \
@@ -380,11 +379,10 @@ done
 echo -en "\treturn instance;\n" >>"${mq5_file}"
 echo -en "}\n\n"                >>"${mq5_file}"
 echo ' OK'
-
-rust_file="../src/rust_mt5_bridge/mq5_std_lib.rs"
+rust_file="../src/rust_mt5_bridge/mq5_lib/symbol_info_bridge.rs"
+echo -en "//! Mapping of ${page} to Rust\n\n\nuse super::types::*;\n\n\n" >"${rust_file}"
 echo -en '//! This file maps Metatrader 5 structures to Rust -- both internal and the ones defined by our script\n\n' >"${rust_file}"
 echo -en "${RUST_TYPES_PRELUDE}\n\n" >>"${rust_file}"
-
 rust_type_replacements="ENUM_SYMBOL_SECTOR         = 'EnumSymbolSector',       ENUM_SYMBOL_INDUSTRY    = 'EnumSymbolIndustry',   ENUM_SYMBOL_CHART_MODE      = 'EnumSymbolChartMode',       \
                         ENUM_SYMBOL_CALC_MODE      = 'EnumSymbolCalcMode',     ENUM_SYMBOL_TRADE_MODE  = 'EnumSymbolTradeMode',  ENUM_SYMBOL_TRADE_EXECUTION = 'EnumSymbolTradeExecution',  \
                         ENUM_SYMBOL_ORDER_GTC_MODE = 'EnumSymbolOrderGtcMode', ENUM_SYMBOL_OPTION_MODE = 'EnumSymbolOptionMode', ENUM_SYMBOL_OPTION_RIGHT    = 'EnumSymbolOptionRight',     \
@@ -412,19 +410,18 @@ done
 ######################
 
 # MqlBookInfo
-append_struct_definition_to_rust_file                             \
-  'https://www.mql5.com/en/docs/constants/structures/mqlbookinfo' \
-  'MqlBookInfo'                                                   \
-  "${rust_file}"                                                  \
-  'ENUM_BOOK_TYPE="EnumBookType"'
+page='https://www.mql5.com/en/docs/constants/structures/mqlbookinfo'
+rust_file="../src/rust_mt5_bridge/mq5_lib/mql_book_info.rs"
+echo -en "//! Mapping of ${page} to Rust\n\n\nuse super::types::*;\n\n\n" >"${rust_file}"
+append_struct_definition_to_rust_file "${page}" 'MqlBookInfo' "${rust_file}" 'ENUM_BOOK_TYPE="EnumBookType"'
 append_enum_definition_to_rust_file "https://www.mql5.com/en/docs/constants/tradingconstants/enum_book_type" "ENUM_BOOK_TYPE" "${rust_file}" "EnumBookType"
 
 # MqlTick
+page='https://www.mql5.com/en/docs/constants/structures/mqltick'
+rust_file="../src/rust_mt5_bridge/mq5_lib/mql_tick.rs"
+echo -en "//! Mapping of ${page} to Rust\n\n\nuse super::types::*;\n\n\n" >"${rust_file}"
 echo '/// Rust version of the Metatrader 5 `MqlTick` structure. From the site:/' >>"${rust_file}"
-append_struct_definition_to_rust_file                         \
-  'https://www.mql5.com/en/docs/constants/structures/mqltick' \
-  'MqlTick'                                                   \
-  "${rust_file}"                                              \
+append_struct_definition_to_rust_file "${page}" 'MqlTick' "${rust_file}"
 
 
 # MQL5 enums to Rust
