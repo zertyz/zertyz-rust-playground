@@ -79,11 +79,29 @@ pub extern fn register_trading_expert_advisor_for_production(account_token: *con
     };
 
     let handle_id = HANDLE_COUNT.fetch_add(1, Relaxed);
+
+    // Metatrader 5 seem to have a kind of concurrency bug: when it starts and the EA is started for several different symbols
+    // at the same time, this causes undefined access in this DLL -- the current theory (still not fully investigated) is that
+    // Metatrader have trouble allocating in parallel -- we allocate several structs passed on to the subsequent functions
+    // of this DLL... and, specially, strings, for the various get*StringProperty(...) calls -- which happens ~10 times for
+    // each allocated struct. BTW, the "invalid memory access" failure does not happen in this function.
+    // The following measure is able to overcome the error: we sleep a bit, based on the given `handler_id`.
+    // A second theory is that our mutex-free logic is messing up with the values of neighbor slots, causing an access to...
+    // lets say... `HANDLES[handle_id].symbol` to fail. To overcome that, lets wrap the writing call (at the end of this function)
+    // in raw mutexes.
+    // Anyway, lets keep an eye on the first theory, because concurrent string allocation is likely to happen during the
+    // normal operation (not just at MT5 start)
+    std::thread::sleep(std::time::Duration::from_millis(100 * handle_id as u64));
+
     if handle_id >= MAX_HANDLES {
         error!("OnInit: FAILED registering trading expert advisor for PRODUCTION: {:?} -- exhausted handles {handle_id} where the max is {MAX_HANDLES}", handle);
         -1
     } else {
         info!("OnInit: registering trading expert advisor for PRODUCTION: {:?} -- attributed handle_id: {handle_id}", handle);
+        // TODO: this code is better wrapped up by a raw mutex. Even if the same region isn't written twice?
+        //       on some hardware it may always work without it... but are we sure it will work everywhere?
+        //       Since this is not the hot path, it is better to wrap it.
+        //       (see the bug description in the big comment earlier in this function)
         unsafe { HANDLES[handle_id as usize] = handle; }
         handle_id
     }
