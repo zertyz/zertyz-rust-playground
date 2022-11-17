@@ -9,3 +9,5 @@ pub use mql_book_info::*;
 mod mql_tick;
 pub use mql_tick::*;
 
+mod account_info_bridge;
+pub use account_info_bridge::*;

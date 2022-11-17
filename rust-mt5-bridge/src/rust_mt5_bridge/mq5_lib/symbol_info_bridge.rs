@@ -239,15 +239,6 @@ impl SymbolInfoBridge {
 
         let symbol_info_bridge = unsafe { &*symbol_info_bridge };
 
-        // note: this code was built to work in both 32 & 64bit binaries, even if the MQLString offers only a 32bit pointer
-        let string_from_mql_string = |mql_string: &MQ5String| -> String {
-            let base_ptr = std::ptr::addr_of!(symbol_info_bridge.symbol_basis) as u64 & (0xFFFFFFFF00000000 as u64);
-            let ptr_64bit: *const u16 = (base_ptr | (mql_string.1 as u64)) as *const u16;
-            unsafe { U16CString::from_ptr_str(ptr_64bit) }
-                .to_string()
-                .unwrap_or_else(|_| String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED»»"))
-        };
-
         SymbolInfoRust {
             symbol_sector: symbol_info_bridge.symbol_sector,
             symbol_industry: symbol_info_bridge.symbol_industry,

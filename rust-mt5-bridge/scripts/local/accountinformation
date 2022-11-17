@@ -1,0 +1,776 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="x-dns-prefetch-control" content="on">
+  <link rel="dns-prefetch" href="https://c.mql5.com">
+      <meta name="description" content="Account Properties - Environment State - Constants, Enumerations and Structures - MQL5 Reference - Reference on algorithmic/automated trading language for MetaTrader 5">
+      <meta property="og:url" content="https://www.mql5.com/en/docs/constants/environment_state/accountinformation">
+      <meta property="og:title" content="Documentation on MQL5: Constants, Enumerations and Structures / Environment State / Account Properties">
+      <meta property="og:image" content="https://c.mql5.com/i/og/mql5-logo-fb-2.png">
+      <meta property="og:image:width" content="1200">
+      <meta property="og:image:height" content="630">
+      <meta property="og:type" content="article">
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content="@mql5com">
+      <meta name="twitter:image" content="https://c.mql5.com/i/og/mql5-logo-fb-2.png">
+  <meta name="theme-color" content="#4a76b8">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="shortcut icon" href="https://c.mql5.com/i/favicon.ico">
+  <meta name="msapplication-config" content="none" />
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  <meta property="qc:admins" content="36367170677651456375" />
+  <meta property="wb:webmaster" content="073d7690269bcd81" />
+  <link href="https://c.mql5.com/styles/core.af2a51391ee23058b2bae6c43f4d615f.css" type="text/css" rel="stylesheet" media="all">
+  <link href="https://c.mql5.com/styles/all.24b960e8cbe464e415d5c93a4d4c0ebb.css" type="text/css" rel="stylesheet" media="all">
+  <link href="https://c.mql5.com/styles/help.992cda14919bfebcb5db890ba262596e.css" type="text/css" rel="stylesheet" media="all">
+      <link rel="canonical" href="https://www.mql5.com/en/docs/constants/environment_state/accountinformation">
+      <link rel="alternate" hreflang="en" href="https://www.mql5.com/en/docs/constants/environment_state/accountinformation">
+      <link rel="alternate" hreflang="ru" href="https://www.mql5.com/ru/docs/constants/environment_state/accountinformation">
+      <link rel="alternate" hreflang="zh" href="https://www.mql5.com/zh/docs/constants/environment_state/accountinformation">
+      <link rel="alternate" hreflang="es" href="https://www.mql5.com/es/docs/constants/environment_state/accountinformation">
+      <link rel="alternate" hreflang="pt" href="https://www.mql5.com/pt/docs/constants/environment_state/accountinformation">
+      <link rel="alternate" hreflang="ja" href="https://www.mql5.com/ja/docs/constants/environment_state/accountinformation">
+      <link rel="alternate" hreflang="de" href="https://www.mql5.com/de/docs/constants/environment_state/accountinformation">
+      <link rel="alternate" hreflang="ko" href="https://www.mql5.com/ko/docs/constants/environment_state/accountinformation">
+      <link rel="alternate" hreflang="fr" href="https://www.mql5.com/fr/docs/constants/environment_state/accountinformation">
+      <link rel="alternate" hreflang="it" href="https://www.mql5.com/it/docs/constants/environment_state/accountinformation">
+      <link rel="alternate" hreflang="tr" href="https://www.mql5.com/tr/docs/constants/environment_state/accountinformation">
+  <title>Account Properties - Environment State - Constants, Enumerations and Structures - MQL5 Reference - Reference on algorithmic/automated trading language for MetaTrader 5</title>
+
+
+<script type="text/javascript">
+  !function(){window.mqGlobal={};var t=!1,n=!1,e=[],o=[],i=[];function d(t){var n;for(n=0;n<t.length;n+=1)t[n]()}function c(){t||(t=!0,d(e),d(o),o=[],e=[])}function a(){c(),n||(n=!0,d(i),i=[])}if(mqGlobal.AddOnReady=function(n,i){t?n(document):i?e.push(n):o.push(n)},mqGlobal.AddOnLoad=function(t){n?t(document):i.push(t)},mqGlobal.AddOnActiveWindowChange=function(t){this._onvisibility||(this._onvisibility=[]),this._onvisibility[this._onvisibility.length]=t},document.addEventListener)document.addEventListener("DOMContentLoaded",c,!1),window.addEventListener("load",a,!1);else if(document.attachEvent&&(document.attachEvent("onreadystatechange",(function(){switch(document.readyState){case"interactive":c();break;case"complete":a()}})),window.attachEvent("onload",a),document.documentElement.doScroll&&window==window.top)){!function n(){if(!t&&document.body)try{document.documentElement.doScroll("left"),c()}catch(t){setTimeout(n,0)}}()}}();
+  mqGlobal.CookieDomain = ".mql5.com";
+  mqGlobal.Language = 'en';
+  mqGlobal.IsMobile = false;
+  mqGlobal.ClearRteStorage = function (e) { if (window.GStorage || (window.GStorage = globalStorage()), window.GStorage.supported) try { var o = e; window.GStorage.getItem("rte_autosave_uid", function (e, t) { t == o && (window.GStorage.removeItem("rte_autosave_text"), window.GStorage.removeItem("rte_autosave_date"), window.GStorage.removeItem("rte_autosave_uid")) }) } catch (e) { } };
+</script>
+  
+
+        <script type='text/javascript'>
+        
+        </script>
+
+    <script src="https://c.mql5.com/js/all.8d523832fe30a4de5cb78ab9613fb8fd.js" type="text/javascript" defer="defer"></script>
+
+
+</head>
+
+<body>
+
+  <div class="cover" id="cover">
+
+    <header>
+      <div class="head">
+      <a href="https://www.mql5.com" class="head__logo" title="MQL5 - Language of trade strategies built-in the MetaTrader 5 client terminal"></a>
+        <ul id="mainmenu" class="menu dropdown" style="padding-right: 0;margin-right: 140px;">
+          <li class="selected">
+                    <a id="mainMenuSelected" href="#">
+                      <span class="on">Documentation</span><span class="off">Sections</span>
+                    </a>
+            <nav>
+              <ul id="mainmenuItems">
+                
+                    <li><a href="/en/forum" data-fz-event="MQL5+Menu+Forum"><span>Forum</span></a></li>
+                    <li><a href="/en/market" data-fz-event="MQL5+Menu+Market"><span>Market</span></a></li>
+                    <li><a href="/en/signals" data-fz-event="MQL5+Menu+Signals"><span>Signals</span></a></li>
+                    <li><a href="/en/job" data-fz-event="MQL5+Menu+Job"><span>Freelance</span></a></li>
+                    <li><a href="/en/quotes/overview" data-fz-event="MQL5+Menu+Overview"><span>Quotes</span></a></li>
+                    <li><a href="https://trade.metatrader5.com/" target="_blank" data-fz-event="MQL5+Menu+Trading"><span>WebTerminal</span></a></li>
+                    <li><a href="/en/economic-calendar" data-fz-event="MQL5+Menu+Economic+Calendar"><span>Calendar</span></a></li>
+                    <li><a href="/en/vps" data-fz-event="MQL5+Menu+VPS"><span>VPS</span></a></li>
+                    <li><a href="/en/articles" data-fz-event="MQL5+Menu+Articles"><span>Articles</span></a></li>
+                    <li><a href="/en/code" data-fz-event="MQL5+Menu+CodeBase"><span>CodeBase</span></a></li>
+                    <li class="selected"><a href="/en/docs" data-fz-event="MQL5+Menu+Docs"><span>Documentation</span></a></li>
+                    <li class="main-menu__about-link"><a href="/en/about"><span>About</span></a></li>
+              </ul>
+            </nav>
+          </li>
+          <li><input class="blurHandler" id="mainMenuBlurHandler" type="checkbox"></li>
+        </ul>
+      <div class="head__toolbar" id="headerToolbar">
+          <div class="container loginRegister"><nav><ul id="loginRegisterButtons"><li><a class="login" title="Please sign in. OpenID supported" href="https://www.mql5.com/en/auth_login" data-fz-event="MQL5+Menu+Siginin">Log in</a></li><li><a class="registration en" title="Please register" href="https://www.mql5.com/en/auth_register" data-fz-event="MQL5+Menu+Register" onclick="window.fpush('MQL5+Button+Click');">Create an account</a></li></ul></nav></div>
+        <div class="container"><div class="toggle-button" id="sidebarToggleButton"><i></i><i></i><i></i></div></div>
+
+        <div class="group-menu" id="groupMenu">
+
+ 
+            <div class="container lang-menu-container">
+              <div id="langMenuContainer" class="lang-menu">
+                <input class="blurHandler" id="langmenuBlurHandler" type="checkbox">
+                <nav>
+                  <ul class="lang-menu__list" id="langmenu">
+                    <li class="lang-menu__list-item lang-menu__list-item_selected"><a href="/en/docs/constants/environment_state/accountinformation"><i class="icons-languages icons-languages_en"></i><span>English</span></a></li>
+<li class="lang-menu__list-item"><a href="/ru/docs/constants/environment_state/accountinformation"><i class="icons-languages icons-languages_ru"></i><span>Русский</span></a></li>
+<li class="lang-menu__list-item"><a href="/zh/docs/constants/environment_state/accountinformation"><i class="icons-languages icons-languages_zh"></i><span>中文</span></a></li>
+<li class="lang-menu__list-item"><a href="/es/docs/constants/environment_state/accountinformation"><i class="icons-languages icons-languages_es"></i><span>Español</span></a></li>
+<li class="lang-menu__list-item"><a href="/pt/docs/constants/environment_state/accountinformation"><i class="icons-languages icons-languages_pt"></i><span>Português</span></a></li>
+<li class="lang-menu__list-item"><a href="/ja/docs/constants/environment_state/accountinformation"><i class="icons-languages icons-languages_ja"></i><span>日本語</span></a></li>
+<li class="lang-menu__list-item"><a href="/de/docs/constants/environment_state/accountinformation"><i class="icons-languages icons-languages_de"></i><span>Deutsch</span></a></li>
+<li class="lang-menu__list-item"><a href="/ko/docs/constants/environment_state/accountinformation"><i class="icons-languages icons-languages_ko"></i><span>한국어</span></a></li>
+<li class="lang-menu__list-item"><a href="/fr/docs/constants/environment_state/accountinformation"><i class="icons-languages icons-languages_fr"></i><span>Français</span></a></li>
+<li class="lang-menu__list-item"><a href="/it/docs/constants/environment_state/accountinformation"><i class="icons-languages icons-languages_it"></i><span>Italiano</span></a></li>
+<li class="lang-menu__list-item"><a href="/tr/docs/constants/environment_state/accountinformation"><i class="icons-languages icons-languages_tr"></i><span>Türkçe</span></a></li>
+
+                  </ul>
+                </nav>
+              </div>
+            </div>
+ 
+
+          <div class="container search-box-container">
+            <div id="searchBoxContainer" class="search-box">
+
+<form action='https://www.mql5.com/en/search' onsubmit='window.fpush("MQL5+Menu+Search"); document.location.assign(("https://www.mql5.com/en/search") + ($("keyword").value.length>0?("#!keyword="+encodeURIComponent($("keyword").value)):"")); if(document.location.href.indexOf("/en/search#")>=0)setTimeout(function(){document.location.reload(true);},10);return false;' id='main_search_form' class='header-search' method='post'>
+<div class="header-search__box"><div class="header-search__input-wrapper"><input name="keyword" type="text" title="Enter search text" id="keyword" /></div></div><input type="submit" value="" class="header-search__hidden-submit" /><div class="header-search__submit" id="searchSubmit"></div></form>            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sub-nav__container" style="right: 282px; display: none;" id="subNavContainer">
+        <div class="sub-nav__toggle" id="subNavToggle">...</div>
+        <ul id="subNavList"></ul>
+        <input class="blurHandler" id="blurHandlerSubNav" type="checkbox">
+      </div>
+    </div>
+    </header>
+
+    <main>
+      <aside>
+<div id='bfogggabsofabcpxuzmgaibarmaxasdrj' class="r3lj6kxnpu44n1vzb ff"></div>      </aside>
+
+      <article>
+        <div class="body" id="bodyContent">
+          <header>
+            <div class="top-band">
+              
+  <div><a href="/en/docs" class="boldenPath" title="MQL5 Reference">MQL5 Reference</a><span class="arrow_right" style="margin: 0 6px;"></span><a href="/en/docs/constants" class="boldenPath" title="Constants, Enumerations and Structures">Constants, Enumerations and Structures</a><span class="arrow_right" style="margin: 0 6px;"></span><a href="/en/docs/constants/environment_state" class="boldenPath" title="Environment State">Environment State</a><span class="arrow_right" style="margin: 0 6px;"></span><span class="boldenPath">Account Properties</span>&nbsp;</div>
+
+            </div>
+          </header>
+
+          
+
+
+
+<div style="overflow: hidden;">
+    <div class="left-panel docsTree" style="width: 253px;">
+      <ul class="docsMenu"><li class="docsMenuNode"><a href="/en/docs/constants/environment_state/terminalstatus" title="Client Terminal Properties">Client Terminal Properties</a></li><li class="docsMenuNode"><a href="/en/docs/constants/environment_state/mql5_programm_info" title="Running MQL5 Program Properties">Running MQL5 Program Properties</a></li><li class="docsMenuNode"><a href="/en/docs/constants/environment_state/marketinfoconstants" title="Symbol Properties">Symbol Properties</a></li><li class="docsMenuNode"><span class="boldenPath">Account Properties</span></li><li class="docsMenuNode"><a href="/en/docs/constants/environment_state/statistics" title="Testing Statistics">Testing Statistics</a></li></ul>
+      
+
+      
+      
+
+      <div class="directHelp">
+      </div>
+    </div>
+
+
+<div class="docsContainer">
+  <div id="help">
+<H1>Account Properties</H1>
+<p class="p_Text"><span class="f_Text">To obtain information about the current account there are several functions: <a href="/en/docs/account/accountinfointeger" class="topiclink">AccountInfoInteger()</a>, <a href="/en/docs/account/accountinfodouble" class="topiclink">AccountInfoDouble()</a> and <a href="/en/docs/account/accountinfostring" class="topiclink">AccountInfoString()</a>. The function parameter values can accept values from the corresponding ENUM_ACCOUNT_INFO enumerations.</span></p>
+<p class="p_Text"><span class="f_Text">For the function <a href="/en/docs/account/accountinfointeger" class="topiclink">AccountInfoInteger()</a></span></p>
+<p class="p_Text"><a id="enum_account_info_integer" class="hmanchor"></a><span class="f_Text" style="font-weight: bold;">ENUM_ACCOUNT_INFO_INTEGER</span></p>
+<div style="text-align: justify; text-indent: 0; padding: 0 0 0 0; margin: 2px 17px 2px 17px;"><table class="EnumTable" cellpadding="5" border="1">
+<thead>
+<tr class="EnumTable">
+<th class="EnumTable" style="width:300px;"><p class="p_EnumHeader"><span class="f_EnumHeader">Identifier</span></p>
+</th>
+<th class="EnumTable"><p class="p_EnumHeader"><span class="f_EnumHeader">Description</span></p>
+</th>
+<th class="EnumTable" style="width:220px;"><p class="p_EnumHeader"><span class="f_EnumHeader">Type</span></p>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_LOGIN</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Account number</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">long</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_TRADE_MODE</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Account trade mode</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType"><a href="/en/docs/constants/environment_state/accountinformation#enum_account_trade_mode" class="topiclink">ENUM_ACCOUNT_TRADE_MODE</a></span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_LEVERAGE</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Account leverage</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">long</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_LIMIT_ORDERS</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Maximum allowed number of active pending orders</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">int</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_MARGIN_SO_MODE</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Mode for setting the minimal allowed margin</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType"><a href="/en/docs/constants/environment_state/accountinformation#enum_account_stopout_mode" class="topiclink">ENUM_ACCOUNT_STOPOUT_MODE</a></span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_TRADE_ALLOWED</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc"><a href="/en/docs/runtime/tradepermission" class="topiclink">Allowed trade</a> for the current account</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">bool</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_TRADE_EXPERT</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc"><a href="/en/docs/runtime/tradepermission" class="topiclink">Allowed trade</a> for an Expert Advisor</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">bool</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_MARGIN_MODE</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Margin calculation mode</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType"><a href="/en/docs/constants/environment_state/accountinformation#enum_account_margin_mode" class="topiclink">ENUM_ACCOUNT_MARGIN_MODE</a></span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_CURRENCY_DIGITS</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">The number of decimal places in the account currency, which are required for an accurate display of trading results</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">int</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_FIFO_CLOSE</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">An indication showing that positions can only be closed by FIFO rule. If the property value is set to </span><span class="f_EnumDesc" style="color: #0000ff;">true</span><span class="f_EnumDesc">, then each symbol positions will be closed in the same order, in which they are opened, starting with the oldest one. In case of an attempt to close positions in a different order, the trader will receive an appropriate error.</span></p>
+<p class="p_EnumDesc"><span class="f_EnumDesc">&nbsp;</span></p>
+<p class="p_EnumDesc"><span class="f_EnumDesc">For accounts with the non-hedging position accounting mode (<a href="/en/docs/constants/environment_state/accountinformation#enum_account_info_integer" class="topiclink">ACCOUNT_MARGIN_MODE</a>!=<a href="/en/docs/constants/environment_state/accountinformation#enum_account_margin_mode" class="topiclink">ACCOUNT_MARGIN_MODE_RETAIL_HEDGING</a>), the property value is always </span><span class="f_EnumDesc" style="color: #0000ff;">false</span><span class="f_EnumDesc">.</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">bool</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_HEDGE_ALLOWED</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Allowed opposite positions on a single symbol</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">bool</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p_Text"><span class="f_Text">For the function <a href="/en/docs/account/accountinfodouble" class="topiclink">AccountInfoDouble()</a></span></p>
+<p class="p_Text"><a id="enum_account_info_double" class="hmanchor"></a><span class="f_Text" style="font-weight: bold;">ENUM_ACCOUNT_INFO_DOUBLE</span></p>
+<div style="text-align: justify; text-indent: 0; padding: 0 0 0 0; margin: 2px 17px 2px 17px;"><table class="EnumTable" cellpadding="5" border="1">
+<thead>
+<tr class="EnumTable">
+<th class="EnumTable" style="width:300px;"><p class="p_EnumHeader"><span class="f_EnumHeader">Identifier</span></p>
+</th>
+<th class="EnumTable"><p class="p_EnumHeader"><span class="f_EnumHeader">Description</span></p>
+</th>
+<th class="EnumTable" style="width:220px;"><p class="p_EnumHeader"><span class="f_EnumHeader">Type</span></p>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_BALANCE</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Account balance in the deposit currency</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">double</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_CREDIT</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Account credit in the deposit currency</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">double</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_PROFIT</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Current profit of an account in the deposit currency</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">double</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_EQUITY</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Account equity in the deposit currency</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">double</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_MARGIN</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Account margin used in the deposit currency</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">double</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_MARGIN_FREE</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Free margin of an account in the deposit currency</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">double</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_MARGIN_LEVEL</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Account margin level in percents</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">double</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_MARGIN_SO_CALL</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Margin call level. Depending on the set ACCOUNT_MARGIN_SO_MODE is expressed in percents or in the deposit currency</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">double</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_MARGIN_SO_SO</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Margin stop out level. Depending on the set ACCOUNT_MARGIN_SO_MODE is expressed in percents or in the deposit currency</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">double</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_MARGIN_INITIAL</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Initial margin. The amount reserved on an account to cover the margin of all pending orders </span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">double</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_MARGIN_MAINTENANCE</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Maintenance margin. The minimum equity reserved on an account to cover the minimum amount of all open positions</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">double</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_ASSETS</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">The current assets of an account</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">double</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_LIABILITIES</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">The current liabilities on an account</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">double</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_COMMISSION_BLOCKED</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">The current blocked commission amount on an account</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumType"><span class="f_EnumType">double</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p_Text"><span class="f_Text">For function <a href="/en/docs/account/accountinfostring" class="topiclink">AccountInfoString()</a></span></p>
+<p class="p_Text"><a id="enum_account_info_string" class="hmanchor"></a><span class="f_Text" style="font-weight: bold;">ENUM_ACCOUNT_INFO_STRING</span></p>
+<div style="text-align: justify; text-indent: 0; padding: 0 0 0 0; margin: 2px 17px 2px 17px;"><table class="EnumTable" cellpadding="5" border="1">
+<thead>
+<tr class="EnumTable">
+<th class="EnumTable" style="width:300px;"><p class="p_EnumHeader"><span class="f_EnumHeader">Identifier</span></p>
+</th>
+<th class="EnumTable"><p class="p_EnumHeader"><span class="f_EnumHeader">Description</span></p>
+</th>
+<th class="EnumTable" style="width:220px;"><p class="p_EnumHeader"><span class="f_EnumHeader">Type</span></p>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumDesc"><span class="f_EnumDesc">ACCOUNT_NAME</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Client name</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumDesc"><span class="f_EnumDesc">string</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumDesc"><span class="f_EnumDesc">ACCOUNT_SERVER</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Trade server name</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumDesc"><span class="f_EnumDesc">string</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumDesc"><span class="f_EnumDesc">ACCOUNT_CURRENCY</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Account currency</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumDesc"><span class="f_EnumDesc">string</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumDesc"><span class="f_EnumDesc">ACCOUNT_COMPANY</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Name of a company that serves the account</span></p>
+</td>
+<td class="EnumTable" style="width:220px;"><p class="p_EnumDesc"><span class="f_EnumDesc">string</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p_Text"><span class="f_Text">There are several types of accounts that can be opened on a trade server. The type of account on which an MQL5 program is running can be found out using the ENUM_ACCOUNT_TRADE_MODE enumeration.</span></p>
+<p class="p_Text"><a id="enum_account_trade_mode" class="hmanchor"></a><span class="f_Text" style="font-weight: bold;">ENUM_ACCOUNT_TRADE_MODE</span></p>
+<div style="text-align: justify; text-indent: 0; padding: 0 0 0 0; margin: 2px 17px 2px 17px;"><table class="EnumTable" cellpadding="5" border="1">
+<thead>
+<tr class="EnumTable">
+<th class="EnumTable" style="width:300px;"><p class="p_EnumHeader"><span class="f_EnumHeader">Identifier</span></p>
+</th>
+<th class="EnumTable"><p class="p_EnumHeader"><span class="f_EnumHeader">Description</span></p>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_TRADE_MODE_DEMO</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Demo account</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_TRADE_MODE_CONTEST</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Contest account</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_TRADE_MODE_REAL</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Real account</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p_Text"><span class="f_Text">In case equity is not enough for maintaining open positions, the Stop Out situation, i.e. forced closing occurs. The minimum margin level at which Stop Out occurs can be set in percentage or in monetary terms. To find out the mode set for the account use the ENUM_ACCOUNT_STOPOUT_MODE enumeration.</span></p>
+<p class="p_Text"><a id="enum_account_stopout_mode" class="hmanchor"></a><span class="f_Text" style="font-weight: bold;">ENUM_ACCOUNT_STOPOUT_MODE</span></p>
+<div style="text-align: justify; text-indent: 0; padding: 0 0 0 0; margin: 2px 17px 2px 17px;"><table class="EnumTable" cellpadding="5" border="1">
+<thead>
+<tr class="EnumTable">
+<th class="EnumTable" style="width:300px;"><p class="p_EnumHeader"><span class="f_EnumHeader">Identifier</span></p>
+</th>
+<th class="EnumTable"><p class="p_EnumHeader"><span class="f_EnumHeader">Description</span></p>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_STOPOUT_MODE_PERCENT</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Account stop out mode in percents</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_STOPOUT_MODE_MONEY</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Account stop out mode in money</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p_Text"><a id="enum_account_margin_mode" class="hmanchor"></a><span class="f_Text" style="font-weight: bold;">ENUM_ACCOUNT_MARGIN_MODE</span></p>
+<div style="text-align: justify; text-indent: 0; padding: 0 0 0 0; margin: 2px 17px 2px 17px;"><table class="EnumTable" cellpadding="5" border="1">
+<thead>
+<tr class="EnumTable">
+<th class="EnumTable" style="width:300px;"><p class="p_EnumHeader"><span class="f_EnumHeader">Identifier</span></p>
+</th>
+<th class="EnumTable"><p class="p_EnumHeader"><span class="f_EnumHeader">Description</span></p>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_MARGIN_MODE_RETAIL_NETTING</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Used for the OTC markets to interpret positions in the &quot;netting&quot; mode (only one position can exist for one symbol). The margin is calculated based on the symbol type (<a href="/en/docs/constants/environment_state/marketinfoconstants#enum_symbol_info_integer" class="topiclink">SYMBOL_TRADE_CALC_MODE</a>).</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_MARGIN_MODE_EXCHANGE</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Used for the exchange markets. Margin is calculated based on the discounts specified in symbol settings. Discounts are set by the broker, but not less than the values set by the exchange.</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:300px;"><p class="p_EnumID"><span class="f_EnumID">ACCOUNT_MARGIN_MODE_RETAIL_HEDGING</span></p>
+</td>
+<td class="EnumTable"><p class="p_EnumDesc"><span class="f_EnumDesc">Used for the exchange markets where individual positions are possible (hedging, multiple positions can exist for one symbol). The margin is calculated based on the symbol type (<a href="/en/docs/constants/environment_state/marketinfoconstants#enum_symbol_info_integer" class="topiclink">SYMBOL_TRADE_CALC_MODE</a>) taking into account the hedged margin (<a href="/en/docs/constants/environment_state/marketinfoconstants#enum_symbol_info_double" class="topiclink">SYMBOL_MARGIN_HEDGED</a>).</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p_Text"><span class="f_Text">An example of the script that outputs a brief account information.</span></p>
+<div style="text-align: left; text-indent: 0; line-height: 1.0; page-break-inside: avoid; border-color: #b3b3b3; border-style: solid; border-width: thin; background: #fbf9f5; padding: 0 0 0 0; margin: 2px 17px 2px 17px;"><table class="help" cellpadding="3" style="border:none; border-spacing:0;">
+<tr>
+<td style="vertical-align:top; padding:3px; border:none"><p class="p_CodeExample" style="page-break-inside: avoid;"><span class="f_CodeExample" style="color: #808080;">//+------------------------------------------------------------------+</span>
+<br><span class="f_CodeExample" style="color: #808080;">//|&nbsp;Script&nbsp;program&nbsp;start&nbsp;function&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|</span>
+<br><span class="f_CodeExample" style="color: #808080;">//+------------------------------------------------------------------+</span>
+<br><span class="f_CodeExample" style="color: #0000ff;">void</span><span class="f_CodeExample">&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">OnStart</span><span class="f_CodeExample">()</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;{</span>
+<br><span class="f_CodeExample" style="color: #808080;">//---&nbsp;Name&nbsp;of&nbsp;the&nbsp;company</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">string</span><span class="f_CodeExample">&nbsp;company=</span><span class="f_CodeExample" style="color: #0000ff;">AccountInfoString</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #0000ff;">ACCOUNT_COMPANY</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample" style="color: #808080;">//---&nbsp;Name&nbsp;of&nbsp;the&nbsp;client</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">string</span><span class="f_CodeExample">&nbsp;name=</span><span class="f_CodeExample" style="color: #0000ff;">AccountInfoString</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #0000ff;">ACCOUNT_NAME</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample" style="color: #808080;">//---&nbsp;Account&nbsp;number</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">long</span><span class="f_CodeExample">&nbsp;login=</span><span class="f_CodeExample" style="color: #0000ff;">AccountInfoInteger</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #0000ff;">ACCOUNT_LOGIN</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample" style="color: #808080;">//---&nbsp;Name&nbsp;of&nbsp;the&nbsp;server</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">string</span><span class="f_CodeExample">&nbsp;server=</span><span class="f_CodeExample" style="color: #0000ff;">AccountInfoString</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #0000ff;">ACCOUNT_SERVER</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample" style="color: #808080;">//---&nbsp;Account&nbsp;currency</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">string</span><span class="f_CodeExample">&nbsp;currency=</span><span class="f_CodeExample" style="color: #0000ff;">AccountInfoString</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #0000ff;">ACCOUNT_CURRENCY</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample" style="color: #808080;">//---&nbsp;Demo,&nbsp;contest&nbsp;or&nbsp;real&nbsp;account</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">ENUM_ACCOUNT_TRADE_MODE</span><span class="f_CodeExample">&nbsp;account_type=(</span><span class="f_CodeExample" style="color: #0000ff;">ENUM_ACCOUNT_TRADE_MODE</span><span class="f_CodeExample">)</span><span class="f_CodeExample" style="color: #0000ff;">AccountInfoInteger</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #0000ff;">ACCOUNT_TRADE_MODE</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample" style="color: #808080;">//---&nbsp;Now&nbsp;transform&nbsp;the&nbsp;value&nbsp;of&nbsp;&nbsp;the&nbsp;enumeration&nbsp;into&nbsp;an&nbsp;understandable&nbsp;form</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">string</span><span class="f_CodeExample">&nbsp;trade_mode;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">switch</span><span class="f_CodeExample">(account_type)</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">case</span><span class="f_CodeExample">&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">ACCOUNT_TRADE_MODE_DEMO</span><span class="f_CodeExample">:</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trade_mode=</span><span class="f_CodeExample" style="color: #008080;">&quot;demo&quot;</span><span class="f_CodeExample">;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">break</span><span class="f_CodeExample">;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">case</span><span class="f_CodeExample">&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">ACCOUNT_TRADE_MODE_CONTEST</span><span class="f_CodeExample">:</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trade_mode=</span><span class="f_CodeExample" style="color: #008080;">&quot;contest&quot;</span><span class="f_CodeExample">;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">break</span><span class="f_CodeExample">;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">default</span><span class="f_CodeExample">:</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trade_mode=</span><span class="f_CodeExample" style="color: #008080;">&quot;real&quot;</span><span class="f_CodeExample">;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">break</span><span class="f_CodeExample">;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+<br><span class="f_CodeExample" style="color: #808080;">//---&nbsp;Stop&nbsp;Out&nbsp;is&nbsp;set&nbsp;in&nbsp;percentage&nbsp;or&nbsp;money</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">ENUM_ACCOUNT_STOPOUT_MODE</span><span class="f_CodeExample">&nbsp;stop_out_mode=(</span><span class="f_CodeExample" style="color: #0000ff;">ENUM_ACCOUNT_STOPOUT_MODE</span><span class="f_CodeExample">)</span><span class="f_CodeExample" style="color: #0000ff;">AccountInfoInteger</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #0000ff;">ACCOUNT_MARGIN_SO_MODE</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample" style="color: #808080;">//---&nbsp;Get&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;levels&nbsp;when&nbsp;Margin&nbsp;Call&nbsp;and&nbsp;Stop&nbsp;Out&nbsp;occur</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">double</span><span class="f_CodeExample">&nbsp;margin_call=</span><span class="f_CodeExample" style="color: #0000ff;">AccountInfoDouble</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #0000ff;">ACCOUNT_MARGIN_SO_CALL</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">double</span><span class="f_CodeExample">&nbsp;stop_out=</span><span class="f_CodeExample" style="color: #0000ff;">AccountInfoDouble</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #0000ff;">ACCOUNT_MARGIN_SO_SO</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample" style="color: #808080;">//---&nbsp;Show&nbsp;brief&nbsp;account&nbsp;information</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">PrintFormat</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;The&nbsp;account&nbsp;of&nbsp;the&nbsp;client&nbsp;'%s'&nbsp;#%d&nbsp;%s&nbsp;opened&nbsp;in&nbsp;'%s'&nbsp;on&nbsp;the&nbsp;server&nbsp;'%s'&quot;</span><span class="f_CodeExample">,</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name,login,trade_mode,company,server);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">PrintFormat</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;Account&nbsp;currency&nbsp;-&nbsp;%s,&nbsp;MarginCall&nbsp;and&nbsp;StopOut&nbsp;levels&nbsp;are&nbsp;set&nbsp;in&nbsp;%s&quot;</span><span class="f_CodeExample">,</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;currency,(stop_out_mode==</span><span class="f_CodeExample" style="color: #0000ff;">ACCOUNT_STOPOUT_MODE_PERCENT</span><span class="f_CodeExample">)?</span><span class="f_CodeExample" style="color: #008080;">&quot;percentage&quot;</span><span class="f_CodeExample">:</span><span class="f_CodeExample" style="color: #008080;">&quot;&nbsp;money&quot;</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">PrintFormat</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;MarginCall=%G,&nbsp;StopOut=%G&quot;</span><span class="f_CodeExample">,margin_call,stop_out);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;}</span></p>
+</td>
+</tr>
+</table>
+</div>
+
+</div>
+
+    
+  <div style="height: 1px; overflow: hidden; clear: both;"></div>
+</div>
+
+
+  <div class="docsNav">
+        <div style="float: left;">
+          <span class="arrow_left" style="margin-right: 4px;"></span><a href="/en/docs/constants/environment_state/marketinfoconstants" title="Symbol Properties">Symbol Properties</a>
+        </div>
+        <div style="float: right; margin-right: 4px;">
+          <a href="/en/docs/constants/environment_state/statistics" title="Testing Statistics">Testing Statistics</a><span class="arrow_right" style="margin-left: 4px;"></span>
+        </div>
+  </div>
+
+  <div class="docsNav docsNav__sub">
+    
+
+<div id='wdausxxqrpvhekbwjrjlhqjghyhesrqqau' class="rwheuyukh9gzxpgnz rwheuyukh9gzxpgnz_docs ff"></div>  </div>
+
+
+</div>
+<!-- Docs file updated: 2022.11.10 -->
+
+        </div>
+      </article>
+    </main>
+
+      <footer>
+
+
+<div class="footer  desktop" id="footer">
+  <ul class="links  links_desktop">
+      <li id="navFooterCommunity">
+        <b>MQL5.community</b>
+        <nav>
+          <ul>
+            <li><a href="https://trade.metatrader5.com/" target="_blank" data-fz-event="MQL5+Footer+Trading">Online trading / WebTerminal</a></li>
+            <li><a href="/en/code" data-fz-event="MQL5+Footer+CodeBase">Free technical indicators and robots</a></li>
+            <li><a href="/en/articles" data-fz-event="MQL5+Footer+Articles">Articles about programming and trading</a></li>
+            <li><a href="/en/job" data-fz-event="MQL5+Footer+Job">Order trading robots on the Freelance</a></li>
+            <li><a href="/en/market" data-fz-event="MQL5+Footer+Market">Market of Expert Advisors and applications&#x9;</a></li>
+            <li><a href="/en/signals" data-fz-event="MQL5+Footer+Signals">Follow forex signals</a></li>
+            <li><a href="/en/vps" data-fz-event="MQL5+Footer+VPS">Low latency forex VPS</a></li>
+            <li><a href="/en/forum" data-fz-event="MQL5+Footer+Forum">Traders forum</a></li>
+            <li><a href="/en/blogs" data-fz-event="MQL5+Footer+Blogs">Trading blogs</a></li>
+            <li><a href="/en/charts" data-fz-event="MQL5+Footer+Charts">Charts</a></li>
+          </ul>
+        </nav>
+      </li>
+      <li id="navFooterMt5">
+        <b>MetaTrader 5</b>
+        <nav>
+          <ul>
+            <li><a href="https://www.metatrader5.com" data-fz-event="MQL5+Footer+MetaTrader+5"><span class="nobr">MetaTrader 5</span> Trading Platform</a></li>
+            <li><a href="https://www.metatrader5.com/en/releasenotes" data-fz-event="MQL5+Footer+MetaTrader+5"><span class="nobr">MetaTrader 5</span> latest updates</a></li>
+            <li><a href="https://www.metatrader5.com/en/news" data-fz-event="MQL5+Footer+MetaTrader+5">News, implementations and technology</a></li>
+            <li><a href="https://www.metatrader5.com/en/terminal/help" data-fz-event="MQL5+Footer+MetaTrader+5"><span class="nobr">MetaTrader 5</span> User Manual</a></li>
+            <li><a href="/en/docs" data-fz-event="MQL5+Footer+Docs">MQL5 language of trading strategies</a></li>
+            <li><a href="https://cloud.mql5.com" data-fz-event="MQL5+Footer+Cloud">MQL5 Cloud Network</a></li>
+            <li><a href="https://www.finteza.com/?utm_source=www.mql5.com&utm_medium=cpc&utm_term=cross-link&utm_content=visit.finteza.com&utm_campaign=0791.finteza.cross-link" data-fz-event="MQL5+Footer+Finteza" target="_blank">End-to-End Analytics</a></li>
+              <li><a href="https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe?utm_source=www.mql5.com&amp;utm_campaign=download" data-fz-event="MetaTrader+5+Desktop+Download">Download <span class="nobr">MetaTrader 5</span></a></li>
+              <li><a href="https://www.metatrader5.com/en/terminal/help/start_advanced/installation" data-fz-event="MQL5+Footer+MetaTrader+5">Install Platform</a></li>
+              <li><a href="https://www.metatrader5.com/en/terminal/help/start_advanced/deinstallation" data-fz-event="MQL5+Footer+MetaTrader+5">Uninstall Platform</a></li>
+          </ul>
+        </nav>
+
+      </li>
+    <li id="navFooterWebsite">
+        <b >Website</b>
+        <nav>
+          <ul>
+            <li><a href="/en/about" data-fz-event="MQL5+Footer+About">About</a></li>
+              <li><a href="/en/wall" data-fz-event="MQL5+Footer+Wall">Timeline</a></li>
+            <li><a href="/en/about/terms" data-fz-event="MQL5+Footer+About">Terms and Conditions</a></li>
+            <li><a href="/en/about/autopayments" data-fz-event="MQL5+Footer+About">Recurring Payment Agreement</a></li>
+            <li><a href="/en/about/agencyagreement" data-fz-event="MQL5+Footer+About">Agency Agreement – Offer</a></li>
+            <li><a href="/en/about/privacy" data-fz-event="MQL5+Footer+About">Privacy and Data Protection Policy</a></li>
+            <li><a href="/en/about/cookies" data-fz-event="MQL5+Footer+About">Cookies Policy</a></li>
+            <li>
+                <a href="/en/contact" data-fz-event="MQL5+Footer+Contacts">Contacts and requests</a>
+            </li>
+          </ul>
+        </nav>
+    </li>
+
+      <li id="navFooterDownload">
+        <b>Join us — download <span class="nobr">MetaTrader 5!</span></b>
+        <ul>
+            <li class="icon windows"><a href="https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe?utm_source=www.mql5.com&amp;utm_campaign=download" data-fz-event="MetaTrader+5+Desktop+Download" title="Download MetaTrader 5 for Windows Free!">Windows</a></li>
+            <li class="icon ios"><a href="https://download.mql5.com/cdn/mobile/mt5/ios?utm_source=www.mql5.com&amp;utm_campaign=install.metaquotes" data-fz-event="MetaTrader+5+iOS+Download" target="_blank" rel="nofollow noopener" title="Download MetaTrader 5 for iPhone Free!">iPhone/iPad</a></li>
+            <li class="icon macos"><a href="https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/MetaTrader5.dmg?utm_source=www.mql5.com&amp;utm_campaign=download" data-fz-event="MetaTrader+5+Desktop+Download" title="Download MetaTrader 5 for Mac OS Free!">Mac OS</a></li>
+            <li class="icon android"><a href="https://download.mql5.com/cdn/mobile/mt5/android?utm_source=www.mql5.com&amp;utm_campaign=install.metaquotes" data-fz-event="MetaTrader+5+Android+Download" target="_blank" rel="nofollow noopener" title="Download MetaTrader 5 Android from Google Play Free!"><span>Android</span></a></li>
+            <li class="icon huawei"><a href="https://download.mql5.com/cdn/mobile/mt5/android/app-gallery?utm_source=www.mql5.com&amp;utm_campaign=install.metaquotes" data-fz-event="MetaTrader+5+Android+Download" target="_blank" rel="nofollow noopener" title="MetaTrader 5 Android (Huawei AppGallery)"><span>Huawei</span></a></li>
+            <li class="icon linux"><a href="/en/articles/625" data-fz-event="MetaTrader+5+Desktop+Download" target="_blank" title="MetaTrader 5 on Linux"><span>Linux</span></a></li>
+          <li class="icon tradays"><a href="https://www.tradays.com/en/download?utm_source=www.mql5.com&amp;utm_campaign=download" data-fz-event="MQL5+Footer+Download+Tradays" target="_blank" title="Tradays Economic Calendar"><span>Tradays Economic Calendar</span></a></li>
+        </ul>
+
+        <div class="footer__other">
+          <div class="footer__not-a-broker">Not a broker, no real trading accounts</div>
+          <div class="copyright">13 Anastasi Sioukri, 3105, Limassol, Cyprus</div>
+          <div class="copyright">Copyright 2000-2022, <span class="nobr">MetaQuotes Ltd</span></div>
+        </div>
+      </li>
+  </ul>
+</div>
+
+
+      </footer>
+
+    <div class="shadow-layer" id="layer"></div>
+        
+  </div>
+  
+
+  <script type='text/javascript'>
+  (function(a,e,f,g,b,c,d){a[b]||(a.FintezaCoreObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=!0,c.defer=!0,c.src=g,d&&d.parentNode&&d.parentNode.insertBefore(c,d))})
+    (window,document,"script","/tz/core.js","fz");
+  window.fz("register", "website", {
+    id: "sqjxkxkswybhifrohpyooonwgbvsfzmayq",
+    trackLinks: true
+  });
+  </script>
+
+  <script type="text/javascript">
+mqGlobal.AddOnLoad(function () {
+        new TrackScrollPosition('Docs');
+      });window.fz("show","wdausxxqrpvhekbwjrjlhqjghyhesrqqau");mqGlobal.AddOnLoad(function(){window.keywordMainFormSuggests = new Suggestions("keyword","https://search.mql5.com/api/suggest","en",function(){$('main_search_form').onsubmit();});});window.fz("show","bfogggabsofabcpxuzmgaibarmaxasdrj");mqGlobal.AddOnReady(function ()
+      {
+        window.floatVerticalPanelNode = FloatVerticalPanel('This website uses cookies. Learn more about our <a href="/en/about/cookies">Cookies Policy</a>.','cookie_accept');
+      });       mqGlobal.AddOnLoad(function () { Mql5Cookie.init('mql5.com','5048080040551574100'); });
+      if (typeof Attach !== "undefined")
+        Attach.setAcceptFilter(".zip, .txt, .log, .mqh, .ex5, .mq5, .mq4, .mqproj, .ex4, .mt5, .set, .tpl, .cl, .py, .sqlite, .csv, .ipynb, .gif, .png, .jpg, .jpeg");
+  </script>
+
+    <div class="b-fixed-mt" id="bFixedMt" style="display: none;">
+      <div id='jjyeyqenuvuvgqlpjjrqigjthhcgagwglu' class="bfb ff"><script type='text/javascript'>window.fz("show","jjyeyqenuvuvgqlpjjrqigjthhcgagwglu");</script></div>
+    </div>
+
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "url": "https://www.mql5.com",
+      "logo": "https://c.mql5.com/i/community/logo_mql5-2.png",
+      "sameAs": [
+        "https://www.facebook.com/mql5.community",
+        "https://www.twitter.com/mql5com",
+        "https://www.youtube.com/user/MetaQuotesOfficial"
+       ]
+    }
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "MQL5 Community",
+  "url": "https://www.mql5.com",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://www.mql5.com/en/search?keyword={keyword}",
+    "query-input": "required name=keyword"
+  }
+}
+  </script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ItemList","itemListElement":[{"@type":"SiteNavigationElement","position":1,"name":"Forum","description":"Discussions of trading strategies and algorithmic trading. MQL5.community  the largest forex forum","url":"https://www.mql5.com/en/forum"},{"@type":"SiteNavigationElement","position":2,"name":"Market","description":"MetaTrader Market - a Market of trading robots, indicators, trading books and magazines","url":"https://www.mql5.com/en/market"},{"@type":"SiteNavigationElement","position":3,"name":"Signals","description":"Social trading, copy trading and account monitoring with MetaTrader - Trading Signals on MQL5.com","url":"https://www.mql5.com/en/signals"},{"@type":"SiteNavigationElement","position":4,"name":"Freelance","description":"Order trading robots, technical indicators and algorithmic trading applications. Forex jobs. Freelance on MQL5.com","url":"https://www.mql5.com/en/job"},{"@type":"SiteNavigationElement","position":5,"name":"Quotes","description":"","url":"https://www.mql5.com/en/quotes/overview"},{"@type":"SiteNavigationElement","position":6,"name":"WebTerminal","description":"WebTerminal for the MetaTrader trading platform. Online forex trading.","url":"https://trade.metatrader5.com/"},{"@type":"SiteNavigationElement","position":7,"name":"Calendar","description":"","url":"https://www.mql5.com/en/economic-calendar"},{"@type":"SiteNavigationElement","position":8,"name":"VPS","description":"","url":"https://www.mql5.com/en/vps"},{"@type":"SiteNavigationElement","position":9,"name":"Articles","description":"","url":"https://www.mql5.com/en/articles"},{"@type":"SiteNavigationElement","position":10,"name":"CodeBase","description":"Download trading robots, technical indicators and scripts with source code - MQL5 Code Base for MetaTrader 5","url":"https://www.mql5.com/en/code"},{"@type":"SiteNavigationElement","position":11,"name":"Documentation","description":"MetaQuotes Language 5 (MQL5) Reference - Documentation on MQL5.com","url":"https://www.mql5.com/en/docs"}]}
+</script>
+</body>
+</html>

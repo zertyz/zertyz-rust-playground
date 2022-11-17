@@ -127,12 +127,22 @@ pub extern fn register_trading_expert_advisor_for_testing(account_token: *const 
     }
 }
 
-/// Called to inform details over the symbol under negotiation. Typically done once per session, at the start.
+/// Called to inform details over the symbol under negotiation./
+/// Typically consulted once per session per symbol, at the start.
 #[no_mangle]
 pub extern fn report_symbol_info(handle_id: i32, symbol_info: *const SymbolInfoBridge) {
     let handle = unsafe { &HANDLES[handle_id as usize] };
     let symbol_info = SymbolInfoBridge::from_ptr_to_internal(symbol_info);
     info!("report_symbol_info({handle_id}): {}: {:#?}", handle.symbol, symbol_info);
+}
+
+/// Called to inform details for the account used to make the negotiations./
+/// Typically consulted after every order issued / executed / edited / cancelled.
+#[no_mangle]
+pub extern fn report_account_info(handle_id: i32, account_info: *const AccountInfoBridge) {
+    let handle = unsafe { &HANDLES[handle_id as usize] };
+    let account_info = AccountInfoBridge::from_ptr_to_internal(account_info);
+    info!("report_account_info({handle_id}): {}: {:#?}", handle.symbol, account_info);
 }
 
 

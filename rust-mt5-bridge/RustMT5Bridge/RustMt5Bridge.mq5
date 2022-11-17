@@ -11,6 +11,7 @@ input double wakeup_spread     = 0.03;  // The spread between the last lower pri
 input double wakeup_grace_secs = 1.0;   // After the wakeup_spread has been reached, prices must not go down for (at least) that many seconds before a purchase can be done
 
 #include "SymbolInfoBridge.mqh"
+#include "AccountInfoBridge.mqh"
 
 // some possibly useful properties available for the program:
 //   * https://www.mql5.com/en/docs/constants/environment_state/mql5_programm_info
@@ -21,6 +22,7 @@ int    register_trading_expert_advisor_for_production(string account_token, stri
 void   unregister_trading_expert_advisor(int handle, int reason_id);
 void   on_tick(int handle, MqlTick& tick);
 void   report_symbol_info(int handle, SymbolInfoBridge& symbol_info);
+void   report_account_info(int handle, AccountInfoBridge& account_info);
 int    register_trading_expert_advisor_for_testing(string account_token, string rust_algorithm, string symbol);
 void   on_tester_pass(int handle);
 void   on_trade(int handle, int pending_orders_count, int open_positions_count);
@@ -47,6 +49,8 @@ int OnInit() {
                            _Symbol, rust_handle, rust_algorithm, account_token));
         SymbolInfoBridge symbol_info = InstantiateSymbolInfoBridge(_Symbol);
         report_symbol_info(rust_handle, symbol_info);
+        AccountInfoBridge account_info = InstantiateAccountInfoBridge();
+        report_account_info(rust_handle, account_info);
         return INIT_SUCCEEDED;
     } else {
         Print(StringFormat("RustMtBridge: FAILED registering PRODUCTION trading EA for symbol '%s' with Error Code #%d -- attempted Rust algorithm was '%s' and account token '%s'",
