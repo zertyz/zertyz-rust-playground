@@ -11,3 +11,6 @@ pub use mql_tick::*;
 
 mod account_info_bridge;
 pub use account_info_bridge::*;
+
+mod deal_properties_bridge;
+pub use deal_properties_bridge::*;

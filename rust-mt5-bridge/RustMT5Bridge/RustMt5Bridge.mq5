@@ -12,6 +12,7 @@ input double wakeup_grace_secs = 1.0;   // After the wakeup_spread has been reac
 
 #include "SymbolInfoBridge.mqh"
 #include "AccountInfoBridge.mqh"
+#include "DealPropertiesBridge.mqh"
 
 // some possibly useful properties available for the program:
 //   * https://www.mql5.com/en/docs/constants/environment_state/mql5_programm_info
@@ -23,6 +24,7 @@ void   unregister_trading_expert_advisor(int handle, int reason_id);
 void   on_tick(int handle, MqlTick& tick);
 void   report_symbol_info(int handle, SymbolInfoBridge& symbol_info);
 void   report_account_info(int handle, AccountInfoBridge& account_info);
+void   report_deal_properties(int handle, DealPropertiesBridge& deal_properties);
 int    register_trading_expert_advisor_for_testing(string account_token, string rust_algorithm, string symbol);
 void   on_tester_pass(int handle);
 void   on_trade(int handle, int pending_orders_count, int open_positions_count);
@@ -49,8 +51,20 @@ int OnInit() {
                            _Symbol, rust_handle, rust_algorithm, account_token));
         SymbolInfoBridge symbol_info = InstantiateSymbolInfoBridge(_Symbol);
         report_symbol_info(rust_handle, symbol_info);
-        AccountInfoBridge account_info = InstantiateAccountInfoBridge();
-        report_account_info(rust_handle, account_info);
+        // per-session information (reported only by the first expert advisor to start)
+        if (rust_handle == 0) {
+            AccountInfoBridge account_info = InstantiateAccountInfoBridge();
+            report_account_info(rust_handle, account_info);
+            // report all deals since time immemorial
+            HistorySelect(0, TimeCurrent());
+            for (uint i=0; i<HistoryDealsTotal(); i++) {
+                long ticket_number = HistoryDealGetTicket(i);
+                if (ticket_number > 0) {
+                    DealPropertiesBridge deal_properties = InstantiateDealPropertiesBridge(ticket_number);
+                    report_deal_properties(rust_handle, deal_properties);
+                }
+            }
+        }
         return INIT_SUCCEEDED;
     } else {
         Print(StringFormat("RustMtBridge: FAILED registering PRODUCTION trading EA for symbol '%s' with Error Code #%d -- attempted Rust algorithm was '%s' and account token '%s'",

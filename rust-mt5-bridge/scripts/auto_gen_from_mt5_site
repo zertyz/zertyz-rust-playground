@@ -405,7 +405,6 @@ for i in `seq 0 $((n-1))`; do
   append_enum_definition_to_rust_file "${page}" "${mq5_enums[i]}" "${rust_file}" "${rust_enums[i]}" "\t"
 done
 
-IGNORED
 
 # Account Info
 struct='AccountInfoBridge'
@@ -417,9 +416,9 @@ site_structs=(                \
   'ENUM_ACCOUNT_INFO_INTEGER' \
 )
 mq5_values_query_function_templates=(                                   \
-  'instance.%postpad_lower_name% = AccountInfoDouble(symbol, %name%);'  \
-  'instance.%postpad_lower_name% = AccountInfoString(symbol, %name%);'  \
-  'instance.%postpad_lower_name% = AccountInfoInteger(symbol, %name%);' \
+  'instance.%postpad_lower_name% = AccountInfoDouble(%name%);'  \
+  'instance.%postpad_lower_name% = AccountInfoString(%name%);'  \
+  'instance.%postpad_lower_name% = AccountInfoInteger(%name%);' \
 )
 mq5_file="../RustMT5Bridge/${struct}.mqh"
 mq5_type_replacements=''
@@ -429,9 +428,9 @@ echo -en "struct ${struct} {\n" >>"${mq5_file}"
 for i in `seq 0 $((${#site_structs[@]}-1))`; do
   append_struct_field_definitions_to_mq5_file "${page}" "${site_structs[i]}" "${mq5_file}" "${mq5_type_replacements}"
 done
-echo -en "};\n\n"                                                   >>"${mq5_file}"
-echo -en "${struct} InstantiateAccountInfoBridge(string symbol) {\n" >>"${mq5_file}"
-echo -en "\t${struct} instance;\n"                                  >>"${mq5_file}"
+echo -en "};\n\n"                                       >>"${mq5_file}"
+echo -en "${struct} InstantiateAccountInfoBridge() {\n" >>"${mq5_file}"
+echo -en "\t${struct} instance;\n"                      >>"${mq5_file}"
 for i in `seq 0 $((${#site_structs[@]}-1))`; do
   append_struct_fields_instantiation_to_mq5_file "${page}" "${site_structs[i]}" "${struct}" "${mq5_file}" "${mq5_values_query_function_templates[i]}"
 done
@@ -445,7 +444,7 @@ echo -en "${RUST_TYPES_PRELUDE}\n\n" >>"${rust_file}"
 rust_type_replacements="ENUM_ACCOUNT_TRADE_MODE='EnumAccountTradeMode',      ENUM_ACCOUNT_STOPOUT_MODE='EnumAccountStopoutMode', \
                         ENUM_ACCOUNT_MARGIN_MODE='EnumAccountMarginMode'"
 echo -en "\tRust struct..."
-echo -en '\n/// Holds all symbol information -- struct crafted from MT5'"'"'s `AccountInfoInteger()`, `AccountInfoDouble()` and `AccountInfoString()`\n' >>"${rust_file}"
+echo -en '\n/// Holds all account information -- struct crafted from MT5'"'"'s `AccountInfoInteger()`, `AccountInfoDouble()` and `AccountInfoString()`\n' >>"${rust_file}"
 echo -en "${RUST_STRUCT_QUALIFIERS}\n" >>"${rust_file}"
 echo -en "pub struct ${struct} {\n" >>"${rust_file}"
 for i in `seq 0 $((${#site_structs[@]}-1))`; do
@@ -460,6 +459,64 @@ rust_enums=(`lua -e "type_replacements={${rust_type_replacements}} for k,v in pa
 for i in `seq 0 $((n-1))`; do
   append_enum_definition_to_rust_file "${page}" "${mq5_enums[i]}" "${rust_file}" "${rust_enums[i]}" "\t"
 done
+
+
+IGNORED
+
+# Deal Properties
+struct='DealPropertiesBridge'
+echo "Auto-generating '${struct}' (warning: very, very slow process ahead -- sadly, 10+ minutes):"
+page='https://www.mql5.com/en/docs/constants/tradingconstants/dealproperties'
+site_structs=(                 \
+  'ENUM_DEAL_PROPERTY_DOUBLE'  \
+  'ENUM_DEAL_PROPERTY_STRING'  \
+  'ENUM_DEAL_PROPERTY_INTEGER' \
+)
+mq5_values_query_function_templates=(                                             \
+  'instance.%postpad_lower_name% = HistoryDealGetDouble(ticket_number, %name%);'  \
+  'instance.%postpad_lower_name% = HistoryDealGetString(ticket_number, %name%);'  \
+  'instance.%postpad_lower_name% = HistoryDealGetInteger(ticket_number, %name%);' \
+)
+mq5_file="../RustMT5Bridge/${struct}.mqh"
+mq5_type_replacements=''
+echo -en "\tMQL5 struct..."
+echo -en "// Defines a structure and function to retrieve past deals, which is, then, shared as-is with Rust\n\n" >"${mq5_file}"
+echo -en "struct ${struct} {\n" >>"${mq5_file}"
+for i in `seq 0 $((${#site_structs[@]}-1))`; do
+  append_struct_field_definitions_to_mq5_file "${page}" "${site_structs[i]}" "${mq5_file}" "${mq5_type_replacements}"
+done
+echo -en "};\n\n"                                                             >>"${mq5_file}"
+echo -en "${struct} InstantiateDealPropertiesBridge(ulong ticket_number) {\n" >>"${mq5_file}"
+echo -en "\t${struct} instance;\n"                                            >>"${mq5_file}"
+for i in `seq 0 $((${#site_structs[@]}-1))`; do
+  append_struct_fields_instantiation_to_mq5_file "${page}" "${site_structs[i]}" "${struct}" "${mq5_file}" "${mq5_values_query_function_templates[i]}"
+done
+echo -en "\treturn instance;\n" >>"${mq5_file}"
+echo -en "}\n\n"                >>"${mq5_file}"
+echo ' OK'
+rust_file="../src/rust_mt5_bridge/mq5_lib/deal_properties_bridge.rs"
+echo -en "//! Mapping of ${page} to Rust\n\n\nuse super::types::*;\n\n\n" >"${rust_file}"
+echo -en '//! This file maps Metatrader 5 structures to Rust -- both internal and the ones defined by our script\n\n' >>"${rust_file}"
+echo -en "${RUST_TYPES_PRELUDE}\n\n" >>"${rust_file}"
+rust_type_replacements="ENUM_DEAL_TYPE='EnumDealType',      ENUM_DEAL_ENTRY='EnumDealEntry', \
+                        ENUM_DEAL_REASON='EnumDealReason'"
+echo -en "\tRust struct..."
+echo -en '\n/// Holds all deals information -- struct crafted from MT5'"'"'s `HistoryDealGetDouble()`, `HistoryDealGetString()` and `HistoryDealGetInteger()`\n' >>"${rust_file}"
+echo -en "${RUST_STRUCT_QUALIFIERS}\n" >>"${rust_file}"
+echo -en "pub struct ${struct} {\n" >>"${rust_file}"
+for i in `seq 0 $((${#site_structs[@]}-1))`; do
+  append_struct_field_definitions_to_rust_file "${page}" "${site_structs[i]}" "${rust_file}" "${rust_type_replacements}"
+done
+echo -en "}\n\n" >>"${rust_file}"
+echo ' OK'
+# export the enums above to Rust
+mq5_enums=(`lua -e "type_replacements={${rust_type_replacements}} for k,v in pairs(type_replacements) do print(k) end" | sort`)
+rust_enums=(`lua -e "type_replacements={${rust_type_replacements}} for k,v in pairs(type_replacements) do print(v) end" | sort`)
+((n=`lua -e "n=0 type_replacements={${rust_type_replacements}} for k,v in pairs(type_replacements) do n=n+1 end print(n)"`))
+for i in `seq 0 $((n-1))`; do
+  append_enum_definition_to_rust_file "${page}" "${mq5_enums[i]}" "${rust_file}" "${rust_enums[i]}" "\t"
+done
+
 
 
 # MQL5 structs to Rust

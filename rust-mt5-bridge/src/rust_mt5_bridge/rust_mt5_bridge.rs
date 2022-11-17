@@ -145,6 +145,16 @@ pub extern fn report_account_info(handle_id: i32, account_info: *const AccountIn
     info!("report_account_info({handle_id}): {}: {:#?}", handle.symbol, account_info);
 }
 
+/// Called to inform details for a "deal" (an executed order)./
+/// Typically consulted after every order issued / executed / edited / cancelled and dumped (all deals)
+/// at the start of the session.
+#[no_mangle]
+pub extern fn report_deal_properties(handle_id: i32, deal_properties: *const DealPropertiesBridge) {
+    let handle = unsafe { &HANDLES[handle_id as usize] };
+    let deal_properties = DealPropertiesBridge::from_ptr_to_internal(deal_properties);
+    info!("report_deal_properties({handle_id}): {}: {:#?}", handle.symbol, deal_properties);
+}
+
 
 /// Called when there are new Quotes available.\
 /// This function should return as fast as possible, or else new ticks will be lost (they are not enqueued).
