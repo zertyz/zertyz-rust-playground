@@ -55,6 +55,8 @@ impl DealPropertiesBridge {
 	pub fn from_ptr_to_internal(deal_properties_bridge: *const DealPropertiesBridge) -> DealPropertiesRust {
 		let deal_properties_bridge = unsafe { &*deal_properties_bridge };
 
+		log::debug!("report_deal_properties(xx): _____: {:#?}", deal_properties_bridge);
+
 		DealPropertiesRust {
 			deal_volume: deal_properties_bridge.deal_volume,
 			deal_price: deal_properties_bridge.deal_price,

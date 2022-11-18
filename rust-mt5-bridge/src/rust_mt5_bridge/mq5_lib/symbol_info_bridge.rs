@@ -239,6 +239,8 @@ impl SymbolInfoBridge {
 
         let symbol_info_bridge = unsafe { &*symbol_info_bridge };
 
+        log::debug!("report_symbol_info(xx): _____: {:#?}", symbol_info_bridge);
+
         SymbolInfoRust {
             symbol_sector: symbol_info_bridge.symbol_sector,
             symbol_industry: symbol_info_bridge.symbol_industry,

@@ -3,13 +3,16 @@
 # Development cycle
 
 ## new binary released to MT5 staging:
-RUSTFLAGS="-C target-feature=+crt-static" cargo build --target x86_64-pc-windows-gnu --release -p rust-mt5-bridge && ls -l ./target/x86_64-pc-windows-gnu/release/ && echo NOT DOING cp -av rust-mt5-bridge/RustMT5Bridge/* /mnt/nfs/data/tmp/RustMT5Bridge.staging/ && cp -av target/x86_64-pc-windows-gnu/release/rust_mt5_bridge.dll /mnt/nfs/data/tmp/RustMT5Bridge.staging/
+build_type="debug"; build_flag="--${build_type}"; RUSTFLAGS="-C target-feature=+crt-static" cargo build --target x86_64-pc-windows-gnu ${build_flag/--debug/} -p rust-mt5-bridge && ls -l /mnt/nfs/data/tmp/RustMT5Bridge.staging/rust_mt5_bridge.dll target/x86_64-pc-windows-gnu/${build_type}/rust_mt5_bridge.dll && cp target/x86_64-pc-windows-gnu/${build_type}/rust_mt5_bridge.dll /mnt/nfs/data/tmp/RustMT5Bridge.staging/ && ls -l /mnt/nfs/data/tmp/RustMT5Bridge.staging/rust_mt5_bridge.dll
 
 ## diffing before incorporating changes (from remote to local or vice-versa)
 diff -Naur --strip-trailing-cr /mnt/nfs/data/tmp/RustMT5Bridge.staging/RustMt5Bridge.mq5 rust-mt5-bridge/RustMT5Bridge/RustMt5Bridge.mq5 | vim -
 
 # Maintaining a backup alongside the staging
 tar -cvJf /mnt/nfs/data/tmp/RustMT5Bridge.staging/source.backup.tar.xz rust-mt5-bridge/
+
+# Deploying from staging
+cp -av /mnt/nfs/data/tmp/RustMT5Bridge.staging/* /mnt/nfs/data/tmp/RustMT5Bridge/
 
 # Having a look at the local logs:
 cat rust_mt5_bridge.log ; rm rust_mt5_bridge.*

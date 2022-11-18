@@ -20,17 +20,17 @@ pub type MQ5Color = i32;
 pub type MQ5StringRef = *const u16;
 
 /// According to the Metatrader documentation at https://docs.mql4.com/basis/types/stringconst (available for MT4 but useful for MT5 as well),
-/// an MT5 String (named `MqlString`) consists of 12 bytes / 3 integers: `(size, buffer_ptr, reserved)`. Please refer to [MQ5StringRef] for details
+/// an MT5 String (named `MqlString`) consists of 12 bytes / 3 integers: `(allocated size, low_buffer_ptr, high_buffer_ptr)`. Please refer to [MQ5StringRef] for details
 /// on how the bytes in `buffer_ptr` are encoded... but, anyway, you may copy & convert this string to Rust with:
 /// ```
 /// // provided `mql_string` is defined as `mql_string: MQ5String`:
 /// let string = string_from_mql_string(&mql_string);
-pub type MQ5String = (/*size*/u32, /*32bit pointer to the buffer*/u32, /*reserved*/u32);
+pub type MQ5String = (/*allocated buffer size*/u32, /*least significant part of the 64bits pointer to the buffer*/u32, /*most significant part of the 64 bits pointer*/u32);
 
-// note: this code was built to work in both 32 & 64bit binaries, even if the MQLString offers only a 32bit pointer
 pub fn string_from_mql_string(mql_string: &MQ5String) -> String {
-    let base_ptr = std::ptr::addr_of!(*mql_string) as u64 & (0xFFFFFFFF00000000 as u64);
-    let ptr_64bit: *const u16 = (base_ptr | (mql_string.1 as u64)) as *const u16;
+    let ptr_64bit = (((mql_string.2 as u64) << 32) | mql_string.1 as u64) as *const u16;
+    // log::debug!("### mql_string ({:?}) -- ({:x}, {:x}, {:x}) was determined as having its buffer at pointer 0x{:x}",
+    //             mql_string, mql_string.0, mql_string.1, mql_string.2, alternative_pointer as u64);
     unsafe { U16CString::from_ptr_str(ptr_64bit) }
         .to_string()
         .unwrap_or_else(|_| String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED»»"))

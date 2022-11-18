@@ -72,6 +72,8 @@ impl AccountInfoBridge {
 	pub fn from_ptr_to_internal(account_info_bridge: *const AccountInfoBridge) -> AccountInfoRust {
 		let account_info_bridge = unsafe { &*account_info_bridge };
 
+		log::debug!("report_account_info(xx): _____: {:#?}", account_info_bridge);
+
 		AccountInfoRust {
 			account_balance: account_info_bridge.account_balance,
 			account_credit: account_info_bridge.account_credit,

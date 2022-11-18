@@ -39,3 +39,5 @@ once_cell      = "1.16"   # oficial replacer for lazy_static?
 chrono         = "0.4"
 
 regex          = "1"
+
+parking_lot    = "0.12"

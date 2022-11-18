@@ -2075,6 +2075,7 @@ dependencies = [
  "chrono",
  "log",
  "once_cell",
+ "parking_lot 0.12.0",
  "regex",
  "simple-log",
  "widestring",
