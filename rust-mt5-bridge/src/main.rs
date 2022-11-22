@@ -10,6 +10,8 @@ use std::io::{BufRead, Write};
 use std::process::{ExitCode, Termination};
 use widestring::{U16CString, WideCString, WideString};
 use regex::Regex;
+use rust_mt5_bridge::mq5_lib::Mq5MqlTick;
+
 
 fn main() -> Result<ExitCode, Box<dyn Error>> {
 
@@ -56,7 +58,7 @@ fn main() -> Result<ExitCode, Box<dyn Error>> {
 
             let symbol = captures.get(1).expect(r#"&format!("'symbol' wasn't captured for line #{line_number}: '{}'", line)"#).as_str();
             let handle = handle_for_symbol.get(symbol).expect(r#"&format!("handle not found for symbol '{symbol}' at line #{line_number}: '{}'", line)"#);
-            let mql_tick = MqlTick {
+            let mql_tick = Mq5MqlTick {
                 time: captures.get(2).expect(r#"&format!("'time' wasn't captured for line #{line_number}: '{}'", line)"#).as_str().parse::<u64>().expect(r#"&format!("could not parse 'time' as u64 at line #{line_number}: '{}'", line)"#),
                 bid:  captures.get(3).expect(r#"&format!("'bid' wasn't captured for line #{line_number}: '{}'", line)"#).as_str().parse::<f64>().expect(r#"&format!("could not parse 'bid' as f64 at line #{line_number}: '{}'", line)"#),
                 ask: captures.get(4).expect(r#"&format!("'ask' wasn't captured for line #{line_number}: '{}'", line)"#).as_str().parse::<f64>().expect(r#"&format!("could not parse 'ask' as f64 at line #{line_number}: '{}'", line)"#),
@@ -66,7 +68,7 @@ fn main() -> Result<ExitCode, Box<dyn Error>> {
                 flags: captures.get(8).expect(r#"&format!("'flags' wasn't captured for line #{line_number}: '{}'", line)"#).as_str().parse::<u32>().expect(r#"&format!("could not parse 'flags' as u32 at line #{line_number}: '{}'", line)"#),
                 volume_real: captures.get(9).expect(r#"&format!("'volume_real' wasn't captured for line #{line_number}: '{}'", line)"#).as_str().parse::<f64>().expect(r#"&format!("could not parse 'volume_real' as f64 at line #{line_number}: '{}'", line)"#),
             };
-            rust_mt5_bridge::on_tick(*handle, &mql_tick as *const MqlTick);
+            rust_mt5_bridge::on_tick(*handle, &mql_tick as *const Mq5MqlTick);
 
         }
 

@@ -64,6 +64,7 @@ AccountInfoBridge InstantiateAccountInfoBridge() {
 	instance.account_fifo_close                = AccountInfoInteger(ACCOUNT_FIFO_CLOSE);
 	instance.account_hedge_allowed             = AccountInfoInteger(ACCOUNT_HEDGE_ALLOWED);
 
+/*
 	Print("account_balance            = " + instance.account_balance);
     Print("account_credit             = " + instance.account_credit);
     Print("account_profit             = " + instance.account_profit);
@@ -93,6 +94,7 @@ AccountInfoBridge InstantiateAccountInfoBridge() {
     Print("account_currency_digits    = " + instance.account_currency_digits);
     Print("account_fifo_close         = " + instance.account_fifo_close);
     Print("account_hedge_allowed      = " + instance.account_hedge_allowed);
+*/
 
 	return instance;
 }

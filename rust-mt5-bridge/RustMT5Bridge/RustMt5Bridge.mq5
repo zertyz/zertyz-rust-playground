@@ -10,32 +10,11 @@ input double min_profit        = 0.03;  // The minimum profit at which the decis
 input double wakeup_spread     = 0.03;  // The spread between the last lower price and now that, when reached
 input double wakeup_grace_secs = 1.0;   // After the wakeup_spread has been reached, prices must not go down for (at least) that many seconds before a purchase can be done
 
-#include "SymbolInfoBridge.mqh"
-#include "AccountInfoBridge.mqh"
-#include "DealPropertiesBridge.mqh"
+#include "RustDll.mqh"
 
 // some possibly useful properties available for the program:
 //   * https://www.mql5.com/en/docs/constants/environment_state/mql5_programm_info
 //   * https://www.mql5.com/en/docs/marketinformation/symbolinfosessiontrade
-
-#import "rust_mt5_bridge.dll"
-int    register_trading_expert_advisor_for_production(string account_token, string rust_algorithm, string symbol);
-void   unregister_trading_expert_advisor(int handle, int reason_id);
-void   on_tick(int handle, MqlTick& tick);
-void   report_symbol_info(int handle, SymbolInfoBridge& symbol_info);
-void   report_account_info(int handle, AccountInfoBridge& account_info);
-void   report_deal_properties(int handle, DealPropertiesBridge& deal_properties);
-int    register_trading_expert_advisor_for_testing(string account_token, string rust_algorithm, string symbol);
-void   on_tester_pass(int handle);
-void   on_trade(int handle, int pending_orders_count, int open_positions_count);
-double on_tester(int handle);
-
-/*void report_buyer_initiated_trade(int handle, long date_time, double price, int volume);
-void report_seller_initiated_trade(int handle, long date_time, double price, int volume);
-void report_book_ask_update(int handle, long date_time, double ask_price, long volume);
-void report_book_bid_update(int handle, long date_time, double bid_price, long volume);
-void report_book_volume_update(int handle, long date_time, long volume);*/
-#import
 
 string account_token  = "SjDud7s53Hvx7643Gtta7352Jdgx7453Hfzt635";                  // The account for the one attempting to run the algorithm
 string rust_algorithm = StringFormat("Fictitious(min_profit: %G, wakeup_spread: %G, wakeup_grace_secs: )",
@@ -50,10 +29,12 @@ int OnInit() {
         Print(StringFormat("RustMtBridge: PRODUCTION trading EA for symbol '%s' was successfully registered with rust_handle=%d for using Rust algorithm '%s' and account token '%s'",
                            _Symbol, rust_handle, rust_algorithm, account_token));
         SymbolInfoBridge symbol_info = InstantiateSymbolInfoBridge(_Symbol);
+        //Print(StringFormat("RustMtBridge(%d): '%s': Reporting symbol info...", rust_handle, _Symbol));
         report_symbol_info(rust_handle, symbol_info);
         // per-session information (reported only by the first expert advisor to start)
         if (rust_handle == 0) {
             AccountInfoBridge account_info = InstantiateAccountInfoBridge();
+            //Print(StringFormat("RustMtBridge(%d): '%s': Reporting account info...", rust_handle, _Symbol));
             report_account_info(rust_handle, account_info);
             // report all deals since time immemorial
             HistorySelect(0, TimeCurrent());
@@ -61,10 +42,12 @@ int OnInit() {
                 long ticket_number = HistoryDealGetTicket(i);
                 if (ticket_number > 0) {
                     DealPropertiesBridge deal_properties = InstantiateDealPropertiesBridge(ticket_number);
+                    //Print(StringFormat("RustMtBridge(%d): '%s': Reporting deal properties...", rust_handle, _Symbol));
                     report_deal_properties(rust_handle, deal_properties);
                 }
             }
         }
+        //Print(StringFormat("RustMtBridge(%d): '%s': Initialization completed", rust_handle, _Symbol));
         return INIT_SUCCEEDED;
     } else {
         Print(StringFormat("RustMtBridge: FAILED registering PRODUCTION trading EA for symbol '%s' with Error Code #%d -- attempted Rust algorithm was '%s' and account token '%s'",
@@ -77,13 +60,6 @@ void OnDeinit(const int reason) {
     unregister_trading_expert_advisor(rust_handle, reason);
     Print(StringFormat("RustMtBridge: PRODUCTION trading EA for symbol '%s' (rust_handle=%d; rust_algorithm='%s'; account_token='%s') was unregistered due to MT5 request: reason #%d",
                        _Symbol, rust_handle, rust_algorithm, account_token, reason));
-}
-
-// any further tricks to get from https://www.mql5.com/en/docs/event_handlers/ontick ?
-void OnTick() {
-   MqlTick last_tick;
-   SymbolInfoTick(_Symbol, last_tick);
-   on_tick(rust_handle, last_tick);
 }
 
 /// TODO: get all tricks from https://www.mql5.com/en/docs/event_handlers/ontesterinit
@@ -122,6 +98,22 @@ void OnTesterPass() {
     on_tester_pass(rust_handle);
 }
 
+// TODO: learn more from https://www.mql5.com/en/docs/event_handlers/ontester
+double OnTester() {
+    double ignored_ret_for_now = on_tester(rust_handle);
+    return wakeup_spread * (min_profit - 1);
+}
+
+// any further tricks to get from https://www.mql5.com/en/docs/event_handlers/ontick ?
+void OnTick() {
+   MqlTick last_tick;
+   SymbolInfoTick(_Symbol, last_tick);
+   on_tick(rust_handle, last_tick);
+}
+
+// Events bellow this line are likely to be moved to other EAs, so not to interfere with the `OnTick()` events
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // any further tricks to get from https://www.mql5.com/en/docs/event_handlers/ontrade ?
 void OnTrade() {
     on_trade(rust_handle,
@@ -129,10 +121,10 @@ void OnTrade() {
              PositionsTotal());
 }
 
-// TODO: learn more from https://www.mql5.com/en/docs/event_handlers/ontester
-double OnTester() {
-    double ignored_ret_for_now = on_tester(rust_handle);
-    return wakeup_spread * (min_profit - 1);
+MqlBookInfo  book[];    // kept global to optimize allocations
+// A single EA may receive those events (for different symbols), without losing any one, as they are enqueued.
+// Subscribe with 'MarketBookAdd()'
+void OnBookEvent(const string&  symbol) {
+    MarketBookGet(symbol, book);
+    on_book(rust_handle, book);
 }
-
-// more events to consider: see on the DLL

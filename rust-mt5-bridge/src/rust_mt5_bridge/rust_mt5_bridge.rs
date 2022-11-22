@@ -1,6 +1,7 @@
 use super::types::*;
 
 use std::ffi::{c_char, CStr, CString, OsStr, OsString};
+use std::fmt::Debug;
 use std::fs;
 use std::io::Write;
 use std::iter::Iterator;
@@ -173,7 +174,7 @@ pub extern fn report_deal_properties(handle_id: i32, deal_properties: *const Dea
 /// This function should return as fast as possible, or else new ticks will be lost (they are not enqueued).
 /// See the docs https://www.mql5.com/en/docs/event_handlers/ontick
 #[no_mangle]
-pub extern fn on_tick(handle_id: i32, tick: *const MqlTick) {
+pub extern fn on_tick(handle_id: i32, tick: *const Mq5MqlTick) {
     let handle = unsafe { &HANDLES[handle_id as usize] };
     let tick = unsafe { &*tick };
 info!("OnTick({handle_id}): {}: {:?}", handle.symbol, tick);
@@ -237,6 +238,47 @@ pub extern fn on_tester_pass(handle_id: u32) {
 //    );
 //
 
+
+// Automated testing functions
+//////////////////////////////
+// the following functions are for tests executed on the MT5 side, whose purpose are to
+// validate that structs shared between the languages are right: alignment, data types and field order
+// must match
+
+/// Tests the correct reading of the [MqlTick] structure
+#[no_mangle]
+pub extern fn test_on_tick(buffer: *mut u16, tick: *const Mq5MqlTick) {
+    serialize_mql5_struct(buffer, tick);
+}
+/// Tests the correct reading of the [SymbolInfoBridge] structure
+#[no_mangle]
+pub extern fn test_report_symbol_info(buffer: *mut u16, symbol_info: *const SymbolInfoBridge) {
+    serialize_mql5_struct(buffer, symbol_info);
+}
+/// Tests the correct reading of the [AccountInfoBridge] structure
+#[no_mangle]
+pub extern fn test_report_account_info(buffer: *mut u16, account_info: *const AccountInfoBridge) {
+    serialize_mql5_struct(buffer, account_info);
+}
+/// Tests the correct reading of the [DealPropertiesBridge] structure
+#[no_mangle]
+pub extern fn test_report_deal_properties(buffer: *mut u16, deal_properties: *const DealPropertiesBridge) {
+    serialize_mql5_struct(buffer, deal_properties);
+}
+
+/// Puts the Debug output of `struct_ptr` into `pre_allocated_mql5_string` -- which should have enough size or else
+/// memory corruption will occur
+fn serialize_mql5_struct<StructType: Debug>(pre_allocated_mql5_string: *mut u16, struct_ptr: *const StructType) {
+    let strct = unsafe { &*struct_ptr };
+    let rust_string = format!("{:?}", strct);
+    let u16_string = U16CString::from_str(rust_string).unwrap();
+    let u16_string_ptr = u16_string.as_ptr();
+    unsafe {
+        std::ptr::copy_nonoverlapping(u16_string_ptr, pre_allocated_mql5_string, (u16_string.len()) * 2);
+        // write the end of the string char \0
+        std::ptr::write((pre_allocated_mql5_string as usize + u16_string.len()*2) as *mut u16, 0);
+    }
+}
 
 /// are we compiled in DEBUG or RELEASE mode?
 #[cfg(debug_assertions)]

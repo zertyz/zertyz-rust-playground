@@ -46,6 +46,7 @@ DealPropertiesBridge InstantiateDealPropertiesBridge(ulong ticket_number) {
 	instance.deal_reason                       = HistoryDealGetInteger(ticket_number, DEAL_REASON);
 	instance.deal_position_id                  = HistoryDealGetInteger(ticket_number, DEAL_POSITION_ID);
 
+/*
 	Print("deal_volume      = " + instance.deal_volume);
     Print("deal_price       = " + instance.deal_price);
     Print("deal_commission  = " + instance.deal_commission);
@@ -66,6 +67,7 @@ DealPropertiesBridge InstantiateDealPropertiesBridge(ulong ticket_number) {
     Print("deal_magic       = " + instance.deal_magic);
     Print("deal_reason      = " + instance.deal_reason);
     Print("deal_position_id = " + instance.deal_position_id);
+*/
 
 	return instance;
 }
