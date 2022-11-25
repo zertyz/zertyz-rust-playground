@@ -21,15 +21,15 @@ pub struct Handle {
 #[derive(Debug)]
 pub struct OrderBooks {
     /// keeps the selling intentions in ascending order (by price), with one entry for each price level
-    pub sell_orders: VecDeque<SimpleOrder>,
+    pub sell_orders: VecDeque<MqlBookInfo>,
     /// keeps the buying intentions in descending order (by price), with one entry for each price level
-    pub buy_orders:  VecDeque<SimpleOrder>,
+    pub buy_orders:  VecDeque<MqlBookInfo>,
 }
-
-#[derive(Debug)]
-pub struct SimpleOrder {
-    pub price:    f64,
-    pub quantity: f64,
+impl OrderBooks {
+    /// Iterates over the book entries in the same order as MetaTrader presents theirs: Sell orders (descending by price), spread, Buy orders (ascending by price)
+    pub fn iter(&self) -> impl Iterator<Item=&MqlBookInfo> {
+        self.sell_orders.iter().chain(self.buy_orders.iter())
+    }
 }
 
 #[derive(Debug,PartialEq)]
@@ -50,6 +50,12 @@ impl BookParties {
             EnumBookType::BookTypeSell | EnumBookType::BookTypeSellMarket=> Self::Sellers,
             EnumBookType::BookTypeBuy  | EnumBookType::BookTypeBuyMarket => Self::Buyers,
             _ => panic!("Unknown `EnumBookType`: {:?}", book_type)
+        }
+    }
+    pub fn to_mt5_enum_book(&self) -> EnumBookType {
+        match self {
+            BookParties::Sellers => EnumBookType::BookTypeSell,
+            BookParties::Buyers => EnumBookType::BookTypeBuy,
         }
     }
 }

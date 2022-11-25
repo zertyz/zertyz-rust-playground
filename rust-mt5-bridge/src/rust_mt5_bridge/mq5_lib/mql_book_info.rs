@@ -34,7 +34,7 @@ impl Mq5MqlBookInfo {
 
 
 /// Rust version of the internal Metatrader 5 struct [Mq5MqlBookInfo], with correct alignment and redundant fields removed
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub struct MqlBookInfo {
     /// Order type from ENUM_BOOK_TYPE enumeration
     pub book_type: EnumBookType,
