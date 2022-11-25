@@ -9,14 +9,15 @@
 #import "rust_mt5_bridge.dll"
 int    register_trading_expert_advisor_for_production(string account_token, string rust_algorithm, string symbol);
 void   unregister_trading_expert_advisor(int handle, int reason_id);
-void   on_tick(int handle, MqlTick& tick);
 void   report_symbol_info(int handle, SymbolInfoBridge& symbol_info);
 void   report_account_info(int handle, AccountInfoBridge& account_info);
 void   report_deal_properties(int handle, DealPropertiesBridge& deal_properties);
 int    register_trading_expert_advisor_for_testing(string account_token, string rust_algorithm, string symbol);
 void   on_tester_pass(int handle);
-void   on_trade(int handle, int pending_orders_count, int open_positions_count);
 double on_tester(int handle);
+void   on_tick(int handle, MqlTick& tick);
+void   on_trade(int handle, int pending_orders_count, int open_positions_count);
+void   on_book(int handle, MqlBookInfo& book_info[], int array_len);
 
 // variants of the above functions to allow some sort of automated testing
 // (actually, we care only for structs, whose alignment considerations and field positions may yield devastatingly wrong results)
@@ -26,6 +27,7 @@ void test_on_tick(string& buffer, MqlTick& tick);
 void test_report_symbol_info(string& buffer, SymbolInfoBridge& symbol_info);
 void test_report_account_info(string& buffer, AccountInfoBridge& account_info);
 void test_report_deal_properties(string& buffer, DealPropertiesBridge& deal_properties);
+void test_on_book(string& buffer, MqlBookInfo& book_info[], int array_len);
 //void test_
 
 

@@ -121,10 +121,11 @@ void OnTrade() {
              PositionsTotal());
 }
 
-MqlBookInfo  book[];    // kept global to optimize allocations
 // A single EA may receive those events (for different symbols), without losing any one, as they are enqueued.
 // Subscribe with 'MarketBookAdd()'
+MqlBookInfo  book_info[];    // kept global to optimize allocations
 void OnBookEvent(const string&  symbol) {
-    MarketBookGet(symbol, book);
-    on_book(rust_handle, book);
+    MarketBookGet(symbol, book_info);
+    // the Rust part will compute deltas to issue book additions / editions / removal events to subscribers
+    on_book(rust_handle, book_info, ArraySize(book_info));
 }

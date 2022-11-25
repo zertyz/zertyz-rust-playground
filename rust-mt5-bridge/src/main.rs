@@ -66,7 +66,7 @@ fn main() -> Result<ExitCode, Box<dyn Error>> {
                 volume: captures.get(6).expect(r#"&format!("'volume' wasn't captured for line #{line_number}: '{}'", line)"#).as_str().parse::<u64>().expect(r#"&format!("could not parse 'volume' as u64 at line #{line_number}: '{}'", line)"#),
                 time_msc: captures.get(7).expect(r#"&format!("'time_msc' wasn't captured for line #{line_number}: '{}'", line)"#).as_str().parse::<i64>().expect(r#"&format!("could not parse 'time_msc' as i64 at line #{line_number}: '{}'", line)"#),
                 flags: captures.get(8).expect(r#"&format!("'flags' wasn't captured for line #{line_number}: '{}'", line)"#).as_str().parse::<u32>().expect(r#"&format!("could not parse 'flags' as u32 at line #{line_number}: '{}'", line)"#),
-                volume_real: captures.get(9).expect(r#"&format!("'volume_real' wasn't captured for line #{line_number}: '{}'", line)"#).as_str().parse::<f64>().expect(r#"&format!("could not parse 'volume_real' as f64 at line #{line_number}: '{}'", line)"#),
+                volume_real: captures.get(9).expect(r#"&format!("'volume_real' wasn't captured for line #{line_number}: '{}'", line)"#).as_str().parse::<f64>().expect(r#"&format!("could not parse 'volume_real' as f64 at line #{line_number}: '{}'", line)"#).to_ne_bytes(),
             };
             rust_mt5_bridge::on_tick(*handle, &mql_tick as *const Mq5MqlTick);
 

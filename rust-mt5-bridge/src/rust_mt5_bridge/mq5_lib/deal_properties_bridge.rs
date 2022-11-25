@@ -189,7 +189,7 @@ pub enum EnumDealReason {
 #[derive(Debug,Clone,Copy)]
 pub enum EnumDealType {
 	/// Buy
-	DealTypeBuy ,
+	DealTypeBuy,
 	/// Sell
 	DealTypeSell,
 	/// Balance

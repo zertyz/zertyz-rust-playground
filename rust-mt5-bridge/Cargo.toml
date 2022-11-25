@@ -41,3 +41,7 @@ chrono         = "0.4"
 regex          = "1"
 
 parking_lot    = "0.12"
+
+
+[dev-dependencies]
+ctor = "0.1"            # setup and teardown for modules

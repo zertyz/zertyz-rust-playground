@@ -2073,6 +2073,7 @@ name = "rust-mt5-bridge"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "ctor",
  "log",
  "once_cell",
  "parking_lot 0.12.0",
