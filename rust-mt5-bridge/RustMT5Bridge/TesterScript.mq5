@@ -78,20 +78,39 @@ void OnStart() {
     Print("Returned string length is " + observed.Length());
     Print("    & buffer is " + observed.BufferSize());
     Print(observed);
-/*    
-[
-	MqlBookInfo { book_type: BookTypeBuy, price: 23.47, volume: 58400.0 }, 
-	MqlBookInfo { book_type: BookTypeBuy, price: 23.46, volume: 125400.0 }, 
-	MqlBookInfo { book_type: BookTypeBuy, price: 23.45, volume: 54200.0 }, 
-	MqlBookInfo { book_type: BookTypeBuy, price: 23.44, volume: 57700.0 }, 
-	MqlBookInfo { book_type: BookTypeBuy, price: 23.43, volume: 16700.0 }, 
-	MqlBookInfo { book_type: BookTypeSellMarket, price: 23.42, volume: 4100.0 }, 
-	MqlBookInfo { book_type: BookTypeSellMarket, price: 23.41, volume: 42300.0 }, 
-	MqlBookInfo { book_type: BookTypeSellMarket, price: 23.4, volume: 51700.0 }, 
-	MqlBookInfo { book_type: BookTypeSellMarket, price: 23.39, volume: 61300.0 }, 
-	MqlBookInfo { book_type: BookTypeSellMarket, price: 23.38, volume: 55900.0 }
-]
-*/
+    
+    Print("Verify ENUM values for 'ENUM_BOOK_TYPE'-- assure those values start with 0:");
+    Print("BOOK_TYPE_SELL="+BOOK_TYPE_SELL);
+    Print("BOOK_TYPE_BUY="+BOOK_TYPE_BUY);
+    Print("BOOK_TYPE_SELL_MARKET="+BOOK_TYPE_SELL_MARKET);
+    Print("BOOK_TYPE_BUY_MARKET="+BOOK_TYPE_BUY_MARKET);
+    
+    Print("ENUM_DAY_OF_THE_WEEK::SUNDAY = " + SUNDAY);
+    Print("ENUM_SYMBOL_CALC_MODE::SYMBOL_CALC_MODE_FOREX = " + SYMBOL_CALC_MODE_FOREX);
+    Print("ENUM_SYMBOL_CHART_MODE::SYMBOL_CHART_MODE_BID = " + SYMBOL_CHART_MODE_BID);
+    Print("ENUM_SYMBOL_INDUSTRY::INDUSTRY_UNDEFINED = " + INDUSTRY_UNDEFINED);
+    Print("ENUM_SYMBOL_OPTION_MODE::SYMBOL_OPTION_MODE_EUROPEAN = " + SYMBOL_OPTION_MODE_EUROPEAN);
+    Print("ENUM_SYMBOL_OPTION_RIGHT::SYMBOL_OPTION_RIGHT_CALL = " + SYMBOL_OPTION_RIGHT_CALL);
+    Print("ENUM_SYMBOL_ORDER_GTC_MODE::SYMBOL_ORDERS_GTC = " + SYMBOL_ORDERS_GTC);
+    Print("ENUM_SYMBOL_SECTOR::SECTOR_UNDEFINED = " + SECTOR_UNDEFINED);
+    Print("ENUM_SYMBOL_SWAP_MODE::SYMBOL_SWAP_MODE_DISABLED = " + SYMBOL_SWAP_MODE_DISABLED);
+    Print("ENUM_SYMBOL_TRADE_EXECUTION::SYMBOL_TRADE_EXECUTION_REQUEST = " + SYMBOL_TRADE_EXECUTION_REQUEST);
+    Print("ENUM_SYMBOL_TRADE_MODE::SYMBOL_TRADE_MODE_DISABLED = " + SYMBOL_TRADE_MODE_DISABLED);
+    Print("ENUM_ACCOUNT_MARGIN_MODE::ACCOUNT_MARGIN_MODE_RETAIL_NETTING = " + ACCOUNT_MARGIN_MODE_RETAIL_NETTING);
+    Print("ENUM_ACCOUNT_STOPOUT_MODE::ACCOUNT_STOPOUT_MODE_PERCENT = " + ACCOUNT_STOPOUT_MODE_PERCENT);
+    Print("ENUM_ACCOUNT_TRADE_MODE_DEMO::ACCOUNT_TRADE_MODE_DEMO = " + ACCOUNT_TRADE_MODE_DEMO);
+    Print("ENUM_DEAL_ENTRY::DEAL_ENTRY_IN = " + DEAL_ENTRY_IN);
+    Print("ENUM_DEAL_REASON::DEAL_REASON_CLIENT = " + DEAL_REASON_CLIENT);
+    Print("ENUM_DEAL_TYPE::DEAL_TYPE_BUY = " + DEAL_TYPE_BUY);
+
+    Print("EnumTradeTransactionType::TRADE_TRANSACTION_ORDER_ADD = " + TRADE_TRANSACTION_ORDER_ADD);
+    Print("EnumOrderType::ORDER_TYPE_BUY = " + ORDER_TYPE_BUY);
+    Print("EnumOrderState::ORDER_STATE_STARTED = " + ORDER_STATE_STARTED);
+    Print("EnumDealType::DEAL_TYPE_BUY = " + DEAL_TYPE_BUY);
+    Print("EnumOrderTypeTime::ORDER_TIME_GTC = " + ORDER_TIME_GTC);
+    Print("EnumOrderTypeFilling::ORDER_FILLING_FOK = " + ORDER_FILLING_FOK);
+    Print("EnumTradeRequestActions::TRADE_ACTION_DEAL = " + TRADE_ACTION_DEAL);
+
 }
 
 void expose_constant(string constant_name, long constant_value, string comment) {

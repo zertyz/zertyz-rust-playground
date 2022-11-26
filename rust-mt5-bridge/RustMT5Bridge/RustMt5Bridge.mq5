@@ -48,6 +48,7 @@ int OnInit() {
             }
         }
         //Print(StringFormat("RustMtBridge(%d): '%s': Initialization completed", rust_handle, _Symbol));
+        MarketBookAdd(_Symbol);
         return INIT_SUCCEEDED;
     } else {
         Print(StringFormat("RustMtBridge: FAILED registering PRODUCTION trading EA for symbol '%s' with Error Code #%d -- attempted Rust algorithm was '%s' and account token '%s'",
@@ -128,4 +129,9 @@ void OnBookEvent(const string&  symbol) {
     MarketBookGet(symbol, book_info);
     // the Rust part will compute deltas to issue book additions / editions / removal events to subscribers
     on_book(rust_handle, book_info, ArraySize(book_info));
+}
+
+// Called when an order issue by us gets processed by the exchange
+void OnTradeTransaction(const MqlTradeTransaction& transaction, const MqlTradeRequest&  request, const MqlTradeResult& result) {
+    on_trade_transaction(rust_handle, transaction, request, result);
 }

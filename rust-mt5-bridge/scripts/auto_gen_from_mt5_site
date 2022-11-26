@@ -52,7 +52,7 @@ END
 RUST_TYPES_PRELUDE=`cat /tmp/rust.excerpt`
 
 # Qualifiers for Rust structs and enums
-RUST_STRUCT_QUALIFIERS="#[repr(C)]\n#[derive(Debug)]"
+RUST_STRUCT_QUALIFIERS="#[repr(C, packed(4))]\n#[derive(/*disable debug on this structure for production since it will cause a copy due to 'packed(4)' above*/Debug,Copy,Clone)]"
 RUST_ENUM_QUALIFIERS="#[repr(i32)]\n#[derive(Debug)]"
 
 # lua script for parsing HTML tables in the MT5 site containing "queriable properties"
@@ -72,30 +72,6 @@ cat << "END" >/tmp/lua.script
   end)
 END
 PROPERTY_PARSING_LUA_SCRIPT=`cat /tmp/lua.script`
-
-# lua script for parsing HTML sections in the MT5 site containing "MQL5 struct definitions"
-cat << END >/tmp/lua.script
-  a=io.read("*a")
-  local pattern = ".*<H1>.-"..site_struct_name..".-</H1>.-<p .-><span .->(.-)</span></p>.-<table .->.-<tr>(.-<span .->struct.-</span>.-</p>).*"
-  struct_comment=string.gsub(a, pattern, "%1")
-  struct_comment=string.gsub(struct_comment, "&nbsp;", " ")
-  html_struct_definition=string.gsub(a, pattern, "%2")
-  plain_struct_definition=string.gsub(html_struct_definition, "<.->", "")
-  plain_struct_definition=string.gsub(plain_struct_definition, "&nbsp;", " ")
-  block=string.gsub(plain_struct_definition, ".-{(.*)}.*", "%1")
-
-  prefix(struct_comment)
-  string.gsub(block, "(.-[^%s].-)\n", function (field_declaration_line)
-    local pattern = "[%s]*([^%s]*)[%s]*([^;]*);[%s]*(.*)"
-    local type    = string.gsub(field_declaration_line, pattern, "%1")
-    type = type_replacements[type] or type
-    local name    = string.gsub(field_declaration_line, pattern, "%2")
-    local comment = string.gsub(field_declaration_line, pattern, "%3")
-    for_field(comment, name, type)
-  end)
-  suffix()
-END
-STRUCT_PARSING_LUA_SCRIPT=`cat /tmp/lua.script`
 
 # lua script for parsing HTML sections in the MT5 site containing "MQL5 enum definitions" -- allowing exporting, to Rust, enums present in the MQL5 stdlib
 cat << END >/tmp/lua.script
@@ -461,8 +437,6 @@ for i in `seq 0 $((n-1))`; do
 done
 
 
-IGNORED
-
 # Deal Properties
 struct='DealPropertiesBridge'
 echo "Auto-generating '${struct}' (warning: very, very slow process ahead -- sadly, 10+ minutes):"
@@ -518,6 +492,8 @@ for i in `seq 0 $((n-1))`; do
 done
 
 
+IGNORED
+
 
 # MQL5 structs to Rust
 ######################
@@ -538,7 +514,42 @@ echo -en "//! Mapping of ${page} to Rust\n\n\nuse super::types::*;\n\n\n" >"${ru
 echo '/// Rust version of the Metatrader 5 `MqlTick` structure. From the site:/' >>"${rust_file}"
 append_struct_definition_to_rust_file "${page}" 'MqlTick' "${rust_file}"
 
+# MqlTradeTransaction
+struct='MqlTradeTransaction'
+page='https://www.mql5.com/en/docs/constants/structures/mqltradetransaction'
+rust_file="../src/rust_mt5_bridge/mq5_lib/mql_trade_transaction.rs"
+echo -en "//! Mapping of ${page} to Rust\n\n\nuse super::types::*;\n\n\n" >"${rust_file}"
+echo "/// Rust version of the Metatrader 5 \`$struct\` structure. From the site:/" >>"${rust_file}"
+append_struct_definition_to_rust_file "${page}" "$struct" "${rust_file}" 'ENUM_TRADE_TRANSACTION_TYPE="EnumTradeTransactionType", ENUM_ORDER_TYPE="EnumOrderType", ENUM_ORDER_STATE="EnumOrderState", ENUM_DEAL_TYPE="EnumDealType", ENUM_ORDER_TYPE_TIME="EnumOrderTypeTime"'
+append_enum_definition_to_rust_file "https://www.mql5.com/en/docs/constants/tradingconstants/enum_trade_transaction_type" "ENUM_TRADE_TRANSACTION_TYPE" "${rust_file}" "EnumTradeTransactionType"
+append_enum_definition_to_rust_file "https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties"             "ENUM_ORDER_TYPE"             "${rust_file}" "EnumOrderType"
+append_enum_definition_to_rust_file "https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties"             "ENUM_ORDER_STATE"            "${rust_file}" "EnumOrderState"
+append_enum_definition_to_rust_file "https://www.mql5.com/en/docs/constants/tradingconstants/dealproperties"              "ENUM_DEAL_TYPE"              "${rust_file}" "EnumDealType"
+append_enum_definition_to_rust_file "https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties"             "ENUM_ORDER_TYPE_TIME"        "${rust_file}" "EnumOrderTypeTime"
+
 IGNORED
+
+# MqlTradeRequest
+struct='MqlTradeRequest'
+page='https://www.mql5.com/en/docs/constants/structures/mqltraderequest'
+rust_file="../src/rust_mt5_bridge/mq5_lib/mql_trade_request.rs"
+echo -en "//! Mapping of ${page} to Rust\n\n\nuse super::types::*;\n\n\n" >"${rust_file}"
+echo "/// Rust version of the Metatrader 5 \`$struct\` structure. From the site:/" >>"${rust_file}"
+append_struct_definition_to_rust_file "${page}" "$struct" "${rust_file}" 'ENUM_TRADE_REQUEST_ACTIONS="EnumTradeRequestActions", ENUM_ORDER_TYPE="EnumOrderType", ENUM_ORDER_TYPE_FILLING="EnumOrderTypeFilling", ENUM_ORDER_TYPE_TIME="EnumOrderTypeTime"'
+append_enum_definition_to_rust_file "https://www.mql5.com/en/docs/constants/tradingconstants/enum_trade_request_actions" "ENUM_TRADE_REQUEST_ACTIONS" "${rust_file}" "EnumTradeRequestActions"
+append_enum_definition_to_rust_file "https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties"            "ENUM_ORDER_TYPE" "${rust_file}" "EnumOrderType"
+append_enum_definition_to_rust_file "https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties"            "ENUM_ORDER_TYPE_FILLING" "${rust_file}" "EnumOrderTypeFilling"
+append_enum_definition_to_rust_file "https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties"            "ENUM_ORDER_TYPE_TIME" "${rust_file}" "EnumOrderTypeTime"
+
+# MqlTradeResult
+struct='MqlTradeResult'
+page='https://www.mql5.com/en/docs/constants/structures/mqltraderesult'
+rust_file="../src/rust_mt5_bridge/mq5_lib/mql_trade_result.rs"
+echo -en "//! Mapping of ${page} to Rust\n\n\nuse super::types::*;\n\n\n" >"${rust_file}"
+echo "/// Rust version of the Metatrader 5 \`$struct\` structure. From the site:/" >>"${rust_file}"
+append_struct_definition_to_rust_file "${page}" "$struct" "${rust_file}" ''
+
+
 
 # MQL5 enums to Rust
 ####################

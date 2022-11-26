@@ -14,3 +14,12 @@ pub use account_info_bridge::*;
 
 mod deal_properties_bridge;
 pub use deal_properties_bridge::*;
+
+mod mql_trade_transaction;
+pub use mql_trade_transaction::*;
+
+mod mql_trade_request;
+pub use mql_trade_request::*;
+
+mod mql_trade_result;
+pub use mql_trade_result::*;

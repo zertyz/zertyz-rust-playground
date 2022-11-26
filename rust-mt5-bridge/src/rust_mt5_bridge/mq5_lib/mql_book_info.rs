@@ -9,7 +9,7 @@ use super::types::*;
 /// It provides information about the market depth data.\
 /// auto-generated from https://www.mql5.com/en/docs/constants/structures/mqlbookinfo
 #[repr(C, packed(4))]
-#[derive(/*disable debug on this structure for production*/Debug,Copy,Clone)]
+#[derive(/*disable debug on this structure for production since it will cause a copy due to 'packed(4)' above*/Debug,Copy,Clone)]
 pub struct Mq5MqlBookInfo {
     /// Order type from ENUM_BOOK_TYPE enumeration
     pub book_type: EnumBookType,
