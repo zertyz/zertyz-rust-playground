@@ -160,7 +160,7 @@ pub extern fn on_tick(handle_id: i32, mt5_tick: *const Mq5MqlTick) {
 /// * `pending_orders_count` - the result of calling `OrdersTotal()`: the number of pending orders awaiting execution -- see https://www.mql5.com/en/docs/trading/orderstotal
 /// * `open_positions_count` - the result of calling `PositionsTotal()`: the number of symbols for which we may issue a sell order -- https://www.mql5.com/en/docs/trading/positionstotal
 #[no_mangle]
-pub extern fn on_trade(handle_id:            u32,
+pub extern fn on_trade(handle_id:            i32,
                        pending_orders_count: u32,
                        open_positions_count: u32) {
     let handle = unsafe { &HANDLES[handle_id as usize] };
@@ -169,54 +169,19 @@ pub extern fn on_trade(handle_id:            u32,
 }
 
 #[no_mangle]
-pub extern fn on_book(handle_id:       u32,
-                      book_info_array: *const Mq5MqlBookInfo,
-                      array_len:       i32) {
+pub extern fn on_book(handle_id:           i32,
+                      book_info_array_ptr: *const Mq5MqlBookInfo,
+                      array_len:           i32) {
 
-    // the algorithm:
-
-    // here I want to emit deltas between the current received book and the last known book.
-    // for that, of course, I must keep the copy of the received book when everything ends...
-    // so the main part of the algorithm is to compute the deltas.
-
-    // premisses:
-    //   1) the MQL array is expected to bring princes in ascending order for the SELL orders and descending orders for the BUY orders
-    //   2) our internal book will keep the same ordering
-    //   3) the MQL array have 2 order types (market or standard) for each party (buy or sell)... even so, (1) applies
-    //   4) the MQL array has, at most, 1 entry for each price level / order type pair
-
-    // delta algorithm:
-    //   a) Compute the first price levels for each of the old books, as well as the index they belong to (which, at start, will be 0)
-    //   b) Start the traversal of the MT5 books. If the next book order matches those of (a), the (a) index is increased and the (a) prices consulted
-    //   c) If the prices don't match, decide if a new price level should be inserted at the current (a) index or if that should be deleted -- and (a) indexes kept but (a) prices consulted again
-
-/*
-    let handle = unsafe { &HANDLES[handle_id as usize] };
-    // this will be enqueued
-    let mut book_info_cursor = book_info_array;
-    let mut last_buy_order = 0.0;
-    let mut last_sell_order = 0.0;
-    for _ in 0..array_len as usize {
-        let mt5_book_info = unsafe { &*book_info_cursor };
-        let rust_book_info = mt5_book_info.to_internal();
-        match mt5_book_info.book_type {
-            EnumBookType::BookTypeSell | EnumBookType::BookTypeSellMarket => {
-                //handle.books.sell_orders
-                last_sell_order = rust_book_info.price;
-            },
-            EnumBookType::BookTypeBuy  | EnumBookType::BookTypeBuyMarket  => {
-                last_buy_order = rust_book_info.price;
-            },
-            _ => {},
-        }
-        owned_book_info.push(rust_book_info);
-        book_info_cursor = (book_info_cursor as usize + std::mem::size_of::<Mq5MqlBookInfo>()) as *mut Mq5MqlBookInfo;
-    }
-    // log book deltas?
-    // log the whole book?
-    info!("OnBook({handle_id}): {}: {:?}", handle.symbol, owned_book_info);
-*/
-
+    let handle = unsafe { &mut HANDLES[handle_id as usize] };
+    let book_info_array = unsafe { std::slice::from_raw_parts(book_info_array_ptr, array_len as usize) };
+    // this should be logged
+    info!("OnBook({handle_id}): {}: {:?}", handle.symbol, book_info_array);
+    let delta_events = compute_book_delta_events(&handle.books, book_info_array);
+    // these will be enqueued for later processing
+    info!("OnBook({handle_id}): {}: {:?}", handle.symbol, delta_events);
+    apply_book_delta_events(&mut handle.books, &delta_events);
+    info!("OnBook({handle_id}): {}: {:?}", handle.symbol, handle.books);
 }
 
 /// Called when a testing session ends -- returns the genetic evaluation function result, for which the genetic engine (built into Metatrader)
@@ -385,7 +350,10 @@ fn register(account_token: String, algorithm: String, symbol: String) -> i32 {
     }
 }
 
-fn apply_book_delta_events(old_books: &mut OrderBooks, delta_events: &[BookEvents]) {
+/// applies `delta_events` to `rolling_books` in order to update the order books
+/// -- or, in other words, "reconstruct the book"./
+/// [compute_book_delta_events()] is the opposite operation
+fn apply_book_delta_events(rolling_books: &mut OrderBooks, delta_events: &[BookEvents]) {
 
     // if >= 0, the return value indicates that the price point was found at that index
     fn search(book: &VecDeque<MqlBookInfo>, price: f64) -> i32 {
@@ -398,7 +366,6 @@ fn apply_book_delta_events(old_books: &mut OrderBooks, delta_events: &[BookEvent
         }
         -1
     }
-
     let del = |book: &mut VecDeque<MqlBookInfo>, price: f64| {
         let i = search(book, price);
         book.remove(i as usize);
@@ -417,22 +384,22 @@ fn apply_book_delta_events(old_books: &mut OrderBooks, delta_events: &[BookEvent
         match delta_event {
             BookEvents::Add    { book, price, quantity } => {
                 let book_deque = match book {
-                    BookParties::Sellers => &mut old_books.sell_orders,
-                    BookParties::Buyers => &mut old_books.buy_orders,
+                    BookParties::Sellers => &mut rolling_books.sell_orders,
+                    BookParties::Buyers => &mut rolling_books.buy_orders,
                 };
                 add(book_deque, MqlBookInfo { book_type: book.to_mt5_enum_book(), price: *price, volume: *quantity })
             },
             BookEvents::Del    { book, price, quantity } => {
                 let book_deque = match book {
-                    BookParties::Sellers => &mut old_books.sell_orders,
-                    BookParties::Buyers => &mut old_books.buy_orders,
+                    BookParties::Sellers => &mut rolling_books.sell_orders,
+                    BookParties::Buyers => &mut rolling_books.buy_orders,
                 };
                 del(book_deque, *price)
             },
             BookEvents::Update { book, price, quantity } => {
                 let book_deque = match book {
-                    BookParties::Sellers => &mut old_books.sell_orders,
-                    BookParties::Buyers => &mut old_books.buy_orders,
+                    BookParties::Sellers => &mut rolling_books.sell_orders,
+                    BookParties::Buyers => &mut rolling_books.buy_orders,
                 };
                 update(book_deque, *price, *quantity)
             },
@@ -474,10 +441,10 @@ fn compute_book_delta_events(old_books: &OrderBooks, new_books: &[Mq5MqlBookInfo
                                      (Some(old), Some(new)) if old.book_type == new.book_type => old.book_type,
                                      (Some(old), Some(new)) /* if they are != */              => if old.book_type.is_sell() {
                                                                                                                                  peeked_new = None;
-                                                                                                                                 EnumBookType::BookTypeSell
+                                                                                                                                 old.book_type
                                                                                                                              } else {
                                                                                                                                  peeked_old = None;
-                                                                                                                                 EnumBookType::BookTypeBuy
+                                                                                                                                 new.book_type
                                                                                                                              },
                                      (Some(old), None) => old.book_type,
                                      (None, Some(new)) => new.book_type,
@@ -491,9 +458,10 @@ fn compute_book_delta_events(old_books: &OrderBooks, new_books: &[Mq5MqlBookInfo
                                                (None, None) => break,
                                            };
 
-        // info!("Book: old: {:?}", peeked_old);
-        // info!("Book: new: {:?}", peeked_new);
-        // info!("Book: book: {:?}, price: {price}, quantity: {quantity}", book);
+// when debugging...
+// info!("Book: old: {:?}", peeked_old);
+// info!("Book: new: {:?}", peeked_new);
+// info!("Book: book: {:?}, price: {price}, quantity: {quantity}", book);
 
         // compute the delta events
         if let (Some(old), Some(new)) = (peeked_old, peeked_new) {
@@ -759,6 +727,53 @@ mod tests {
                Vec::from(price_gaps.0),
                Vec::from(price_gaps.1));
 
+
+        // production cases
+        ///////////////////
+
+        assert("Production case 1 (a Buying price point moves to Selling)",
+               OrderBooks {
+                   sell_orders: VecDeque::from([
+                       MqlBookInfo { book_type: BookTypeSell, price: 23.76, volume: 39500.0 },
+                       MqlBookInfo { book_type: BookTypeSell, price: 23.75, volume: 34700.0 },
+                       MqlBookInfo { book_type: BookTypeSell, price: 23.74, volume: 32200.0 },
+                       MqlBookInfo { book_type: BookTypeSell, price: 23.73, volume: 27400.0 },
+                       MqlBookInfo { book_type: BookTypeSell, price: 23.72, volume: 10700.0 }
+                   ]), buy_orders: VecDeque::from([
+                       MqlBookInfo { book_type: BookTypeBuy, price: 23.71, volume: 9100.0 },
+                       MqlBookInfo { book_type: BookTypeBuy, price: 23.7, volume: 267800.0 },
+                       MqlBookInfo { book_type: BookTypeBuy, price: 23.69, volume: 29300.0 },
+                       MqlBookInfo { book_type: BookTypeBuy, price: 23.68, volume: 50700.0 },
+                       MqlBookInfo { book_type: BookTypeBuy, price: 23.67, volume: 31600.0 }
+                   ])
+               },
+               vec![
+                   Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.75, volume: 34600, volume_real: 34600.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.74, volume: 33000, volume_real: 33000.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.73, volume: 29700, volume_real: 29700.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.72, volume: 28200, volume_real: 28200.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.71, volume: 9900, volume_real: 9900.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.69, volume: 14900, volume_real: 14900.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.68, volume: 30700, volume_real: 30700.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.67, volume: 15100, volume_real: 15100.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.66, volume: 24500, volume_real: 24500.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.65, volume: 89500, volume_real: 89500.0 }
+               ],
+               vec![
+                   BookEvents::Del { book: BookParties::Sellers, price: 23.76, quantity: 39500.0 },
+                   BookEvents::Update { book: BookParties::Sellers, price: 23.75, quantity: 34600.0 },
+                   BookEvents::Update { book: BookParties::Sellers, price: 23.74, quantity: 33000.0 },
+                   BookEvents::Update { book: BookParties::Sellers, price: 23.73, quantity: 29700.0 },
+                   BookEvents::Update { book: BookParties::Sellers, price: 23.72, quantity: 28200.0 },
+                   BookEvents::Add { book: BookParties::Sellers, price: 23.71, quantity: 9900.0 },
+                   BookEvents::Del { book: BookParties::Buyers, price: 23.71, quantity: 9100.0 },
+                   BookEvents::Del { book: BookParties::Buyers, price: 23.7, quantity: 267800.0 },
+                   BookEvents::Update { book: BookParties::Buyers, price: 23.69, quantity: 14900.0 },
+                   BookEvents::Update { book: BookParties::Buyers, price: 23.68, quantity: 30700.0 },
+                   BookEvents::Update { book: BookParties::Buyers, price: 23.67, quantity: 15100.0 },
+                   BookEvents::Add { book: BookParties::Buyers, price: 23.66, quantity: 24500.0 },
+                   BookEvents::Add { book: BookParties::Buyers, price: 23.65, quantity: 89500.0 }
+               ]);
 
     }
 }
