@@ -244,7 +244,7 @@ impl SymbolInfoBridge {
         SymbolInfoRust {
             symbol_sector: symbol_info_bridge.symbol_sector,
             symbol_industry: symbol_info_bridge.symbol_industry,
-            symbol_background_color: ((symbol_info_bridge.symbol_background_color & 0x00FF0000) as u8, (symbol_info_bridge.symbol_background_color & 0x0000FF00) as u8, (symbol_info_bridge.symbol_background_color & 0x000000FF) as u8),
+            symbol_background_color: (((symbol_info_bridge.symbol_background_color & 0x00FF0000) >> 16) as u8, ((symbol_info_bridge.symbol_background_color & 0x0000FF00) >> 8) as u8, (symbol_info_bridge.symbol_background_color & 0x000000FF) as u8),
             symbol_chart_mode: symbol_info_bridge.symbol_chart_mode,
             symbol_session_deals: symbol_info_bridge.symbol_session_deals,
             symbol_session_buy_orders: symbol_info_bridge.symbol_session_buy_orders,

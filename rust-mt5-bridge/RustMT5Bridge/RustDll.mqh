@@ -18,6 +18,7 @@ double on_tester(int handle);
 void   on_tick(int handle, MqlTick& tick);
 void   on_trade(int handle, int pending_orders_count, int open_positions_count);
 void   on_book(int handle, MqlBookInfo& book_info[], int array_len);
+void   on_trade_transaction(int handle, const MqlTradeTransaction& transaction, const MqlTradeRequest& request, const MqlTradeResult& result);
 
 // variants of the above functions to allow some sort of automated testing
 // (actually, we care only for structs, whose alignment considerations and field positions may yield devastatingly wrong results)
@@ -28,6 +29,7 @@ void test_report_symbol_info(string& buffer, SymbolInfoBridge& symbol_info);
 void test_report_account_info(string& buffer, AccountInfoBridge& account_info);
 void test_report_deal_properties(string& buffer, DealPropertiesBridge& deal_properties);
 void test_on_book(string& buffer, MqlBookInfo& book_info[], int array_len);
+void test_on_trade_transaction(string& buffer, MqlTradeTransaction& transaction, MqlTradeRequest& request, MqlTradeResult& result);
 //void test_
 
 
