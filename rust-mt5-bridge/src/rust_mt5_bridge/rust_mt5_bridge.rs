@@ -45,15 +45,31 @@ pub extern "system" fn DllMain(_: *const (), fdw_reason: u32, _: *const ()) -> u
     1   // = TRUE: the DLL is good with the reported event
 }
 
+#[no_mangle]
+pub extern fn set_enum_variant_value(mql_enum_name: *const u16, mql_variant_name: *const u16, mql_variant_value: i32) {
+    let mql_enum_name     = unsafe { U16CString::from_ptr_str(    mql_enum_name) }.to_string().unwrap_or(String::from("ERROR CONVERTING `mql_enum_name` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
+    let mql_variant_name  = unsafe { U16CString::from_ptr_str( mql_variant_name) }.to_string().unwrap_or(String::from("ERROR CONVERTING `mql_variant_name` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
+    info!("set_enum_variant_value: mql_enum_name: '{mql_enum_name}'; mql_variant_name: '{mql_variant_name}'; mql_variant_value: {mql_variant_value}");
+    // 1) `mql_variant_name` gets converted to `rust_variant_name` --> from Upper & Snake case to Camel Case;
+    //    The same happens for `mql_enum_name`. A `resolve_rust_enum_value(enum, variant)` will answer us,
+    //    consulting a static HashMap<rust_enum_name: String, HashMap<rust_enum_variant: String, i32>>.
+    //    --> this HashMap will be filled by each module's init function
+    // 2) a static HashMap<String, (Vec<i32>, Vec<i32>)> will be instantiated by `init()` and populated by the `init()` functions of each submodule:
+    //    for each `mql_enum_ name`, the pair of `mql_to_rust` and `rust_to_mql` vectors will be instantiated, to be populated by this function
+    // 3) the two i32 vectors will be populated with 1 entry each, for each call of this function:
+    //    - `mql_to_rust` -- indexed by the Metatrader value, answering back the Rust value
+    //    - `rust_to_mql` -- indexed by the Rust value, answering back the MQL5 value
+}
+
 /// Called by the `OnInit()` to inform the market data for the symbol being considered
 /// (as well the session information for operation) and to get the `handle` to be passed
 /// to all the other functions here -- if negative, it indicates an error code and the
 /// loading of the MT5 script must be cancelled
 #[no_mangle]
 pub extern fn register_trading_expert_advisor_for_production(account_token: *const u16, algorithm: *const u16, symbol: *const u16) -> i32 {
-    let account_token = unsafe { U16CString::from_ptr_str(account_token) }.to_string().unwrap_or(String::from("ERROR CONVERTING `account_token` -- a supposedly UTF-16 Metatrader 5 String to a UTF-8 Rust String"));
-    let algorithm = unsafe { U16CString::from_ptr_str(algorithm) }.to_string().unwrap_or(String::from("ERROR CONVERTING `algorithm` -- a supposedly UTF-16 Metatrader 5 String to a UTF-8 Rust String"));
-    let symbol = unsafe { U16CString::from_ptr_str(symbol) }.to_string().unwrap_or(String::from("ERROR CONVERTING `symbol` -- a supposedly UTF-16 Metatrader 5 String to a UTF-8 Rust String"));
+    let account_token = unsafe { U16CString::from_ptr_str(account_token) }.to_string().unwrap_or(String::from("ERROR CONVERTING `account_token` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
+    let algorithm = unsafe { U16CString::from_ptr_str(algorithm) }.to_string().unwrap_or(String::from("ERROR CONVERTING `algorithm` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
+    let symbol = unsafe { U16CString::from_ptr_str(symbol) }.to_string().unwrap_or(String::from("ERROR CONVERTING `symbol` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
 
     let handle_id = register(account_token, algorithm, symbol);
 
@@ -85,9 +101,9 @@ pub extern fn unregister_trading_expert_advisor(handle_id: i32, reason_id: i32) 
 /// loading of the MT5 script must be cancelled
 #[no_mangle]
 pub extern fn register_trading_expert_advisor_for_testing(account_token: *const u16, algorithm: *const u16, symbol: *const u16) -> i32 {
-    let account_token = unsafe { U16CString::from_ptr_str(account_token) }.to_string().unwrap_or(String::from("ERROR CONVERTING `account_token` -- a supposedly UTF-16 Metatrader 5 String to a UTF-8 Rust String"));
-    let algorithm = unsafe { U16CString::from_ptr_str(algorithm) }.to_string().unwrap_or(String::from("ERROR CONVERTING `algorithm` -- a supposedly UTF-16 Metatrader 5 String to a UTF-8 Rust String"));
-    let symbol = unsafe { U16CString::from_ptr_str(symbol) }.to_string().unwrap_or(String::from("ERROR CONVERTING `symbol` -- a supposedly UTF-16 Metatrader 5 String to a UTF-8 Rust String"));
+    let account_token = unsafe { U16CString::from_ptr_str(account_token) }.to_string().unwrap_or(String::from("ERROR CONVERTING `account_token` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
+    let algorithm = unsafe { U16CString::from_ptr_str(algorithm) }.to_string().unwrap_or(String::from("ERROR CONVERTING `algorithm` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
+    let symbol = unsafe { U16CString::from_ptr_str(symbol) }.to_string().unwrap_or(String::from("ERROR CONVERTING `symbol` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
     let handle_id = register(account_token, algorithm, symbol);
 
     // sleep a little -- relative to the conceived `handle_id` -- to allow the UI to be responsive when we approach the limit of 100 EA's in the Metatrader 5 Terminal
@@ -168,6 +184,9 @@ pub extern fn on_trade(handle_id:            i32,
     info!("OnTrade: handle_id: {handle_id}, symbol: '{symbol}', pending_orders_count: {pending_orders_count}, open_positions_count: {open_positions_count}");
 }
 
+/// Called on book updates -- notice, however, that many book events may be skipped: this function is only
+/// useful for reporting the new book state, which is shared in the `book_info_array_ptr` with a limit of
+/// 5 entries the buying book and 5 entries for the selling book.
 #[no_mangle]
 pub extern fn on_book(handle_id:           i32,
                       book_info_array_ptr: *const Mq5MqlBookInfo,
@@ -182,6 +201,19 @@ pub extern fn on_book(handle_id:           i32,
     info!("OnBook({handle_id}): {}: {:?}", handle.symbol, delta_events);
     apply_book_delta_events(&mut handle.books, &delta_events);
     info!("OnBook({handle_id}): {}: {:?}", handle.symbol, handle.books);
+}
+
+#[no_mangle]
+pub extern fn on_trade_transaction(handle_id:   i32,
+                                   transaction: *const MqlTradeTransaction,
+                                   request:     *const MqlTradeRequest,
+                                   result:      *const MqlTradeResult) {
+
+    let handle = unsafe { &mut HANDLES[handle_id as usize] };
+    let transaction = unsafe { &*transaction };
+    let request       = unsafe { &*request };
+    let result          = unsafe { &*result };
+    info!("OnTradeTransaction({handle_id}): {}: {:?}; {:?}; {:?}", handle.symbol, transaction, request, result);
 }
 
 /// Called when a testing session ends -- returns the genetic evaluation function result, for which the genetic engine (built into Metatrader)
@@ -228,21 +260,27 @@ pub extern fn on_tester_pass(handle_id: u32) {
 pub extern fn test_on_tick(buffer: *mut u16, tick: *const Mq5MqlTick) {
     serialize_mql5_struct(buffer, tick);
 }
+
 /// Tests the correct reading of the [SymbolInfoBridge] structure
 #[no_mangle]
 pub extern fn test_report_symbol_info(buffer: *mut u16, symbol_info: *const SymbolInfoBridge) {
-    serialize_mql5_struct(buffer, symbol_info);
+    let mql_symbol_info = unsafe { &*symbol_info };
+    let symbol_info = SymbolInfoBridge::from_ptr_to_internal(mql_symbol_info);
+    serialize_mql5_struct(buffer, std::ptr::addr_of!(symbol_info));
 }
+
 /// Tests the correct reading of the [AccountInfoBridge] structure
 #[no_mangle]
 pub extern fn test_report_account_info(buffer: *mut u16, account_info: *const AccountInfoBridge) {
     serialize_mql5_struct(buffer, account_info);
 }
+
 /// Tests the correct reading of the [DealPropertiesBridge] structure
 #[no_mangle]
 pub extern fn test_report_deal_properties(buffer: *mut u16, deal_properties: *const DealPropertiesBridge) {
     serialize_mql5_struct(buffer, deal_properties);
 }
+
 /// Tests the correct reading of the [Mq5MqlBookInfo] structure
 #[no_mangle]
 pub extern fn test_on_book(buffer: *mut u16, book_info_array: *const Mq5MqlBookInfo, array_len: i32) {
@@ -257,32 +295,55 @@ pub extern fn test_on_book(buffer: *mut u16, book_info_array: *const Mq5MqlBookI
     serialize_mql5_array(buffer, owned_book_info);
 }
 
+/// Tests the correct reading of the [MqlTradeTransaction], [MqlTradeRequest] and [MqlTradeResult] structures
+#[no_mangle]
+pub extern fn test_on_trade_transaction(buffer:      *mut u16,
+                                        transaction: *const MqlTradeTransaction,
+                                        request:     *const MqlTradeRequest,
+                                        result:      *const MqlTradeResult) {
+
+    let transaction = unsafe { &*transaction };
+    let request       = unsafe { &*request };
+    let result          = unsafe { &*result };
+    unchecked_convert_rust_to_mql5_string(format!("{:?}; {:?}; {:?}", transaction, request, result),
+                                          buffer);
+}
+
+/// Converts & copies `rust_string` into `pre_allocated_mql5_string`./
+/// `pre_allocated_mql5_string` should have enough space to hold the data + \0, or else
+/// Undefined Behavior will happen due to the corruption to the Metatrader heap
+fn unchecked_convert_rust_to_mql5_string(rust_string: String, pre_allocated_mql5_string: *mut u16) {
+    let u16_string = U16CString::from_str(rust_string).unwrap();
+log::debug!("### u16_string: {:?}; -- len={}", u16_string, u16_string.len());
+    let u16_string_ptr = u16_string.as_ptr();
+log::debug!("### u16_string_ptr: {:?}", u16_string_ptr);
+    unsafe {
+log::debug!("### pre copy");
+        std::ptr::copy_nonoverlapping(u16_string_ptr, pre_allocated_mql5_string, (u16_string.len()) * 2);
+log::debug!("### post copy, pre \0");
+        // write the end of the string char \0
+        std::ptr::write((pre_allocated_mql5_string as usize + u16_string.len()*2) as *mut u16, 0);
+log::debug!("### post \0");
+    }
+}
+
 /// Puts the Debug output of `struct_ptr` into `pre_allocated_mql5_string` -- which should have enough size or else
 /// memory corruption will occur
 fn serialize_mql5_struct<StructType: Debug>(pre_allocated_mql5_string: *mut u16, struct_ptr: *const StructType) {
+log::debug!("### pre_allocated_mql5_string {:x}", pre_allocated_mql5_string as u64);
+log::debug!("### struct_ptr {:x}", struct_ptr as u64);
     let strct = unsafe { &*struct_ptr };
-    let rust_string = format!("{:?}", strct);
-    let u16_string = U16CString::from_str(rust_string).unwrap();
-    let u16_string_ptr = u16_string.as_ptr();
-    unsafe {
-        std::ptr::copy_nonoverlapping(u16_string_ptr, pre_allocated_mql5_string, (u16_string.len()) * 2);
-        // write the end of the string char \0
-        std::ptr::write((pre_allocated_mql5_string as usize + u16_string.len()*2) as *mut u16, 0);
-    }
+log::debug!("### pre strct");
+log::debug!("### strct: {:?}", strct);
+log::debug!("### post strct");
+    unchecked_convert_rust_to_mql5_string(format!("{:?}", strct), pre_allocated_mql5_string);
+log::debug!("### wtf!! did it work??");
 }
 
 /// Dumps the Debug output of `array` into `pre_allocated_mql5_string` -- which should have enough size or else
 /// memory corruption will occur
 fn serialize_mql5_array<StructType: Debug>(pre_allocated_mql5_string: *mut u16, array: Vec<StructType>) {
-    let rust_string = format!("{:?}", array);
-    info!("Test is answering back: {}", rust_string);
-    let u16_string = U16CString::from_str(rust_string).unwrap();
-    let u16_string_ptr = u16_string.as_ptr();
-    unsafe {
-        std::ptr::copy_nonoverlapping(u16_string_ptr, pre_allocated_mql5_string, (u16_string.len()) * 2);
-        // write the end of the string char \0
-        std::ptr::write((pre_allocated_mql5_string as usize + u16_string.len()*2) as *mut u16, 0);
-    }
+    unchecked_convert_rust_to_mql5_string(format!("{:?}", array), pre_allocated_mql5_string);
 }
 
 /// Prepares the environment for this library's functions to work

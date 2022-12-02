@@ -33,6 +33,7 @@ int OnInit() {
         report_symbol_info(rust_handle, symbol_info);
         // per-session information (reported only by the first expert advisor to start)
         if (rust_handle == 0) {
+            #include "EnumReporter.mqh"
             AccountInfoBridge account_info = InstantiateAccountInfoBridge();
             //Print(StringFormat("RustMtBridge(%d): '%s': Reporting account info...", rust_handle, _Symbol));
             report_account_info(rust_handle, account_info);

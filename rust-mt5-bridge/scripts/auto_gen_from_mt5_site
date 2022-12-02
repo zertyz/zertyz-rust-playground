@@ -272,6 +272,7 @@ END
   lua /tmp/lua.script <"$local_page" >>"$out_file" && echo ' OK' || (echo ' FAILURE -- Enter to edit'; read; vim /tmp/lua.script)
 }
 
+# also appends MQL code to pass the enum values to Rust
 function append_enum_definition_to_rust_file {
   local page="$1"
   local mq5_enum_name="$2"
@@ -283,6 +284,8 @@ function append_enum_definition_to_rust_file {
 
 cat << END  > "/tmp/lua.script"
 
+  local enum_reporter_hnd = io.open("../RustMT5Bridge/EnumReporter.mqh", "a+")
+
   function prefix(enum_comment)
     print("/// "..enum_comment.."/")
     print("/// auto-generated from ${page}")
@@ -290,17 +293,21 @@ cat << END  > "/tmp/lua.script"
     print("pub enum ${rust_enum_name} {")
   end
 
-  function for_variant(variant, comment)
+  function for_variant(mq5_variant, comment)
     comment = string.gsub(comment, "&nbsp;", " ")
     comment = string.gsub(comment, "\r?\n", "/\n\t/// ")
     comment = string.gsub(comment, "</[Pp]>", "/\n\t/// ")
     comment = string.gsub(comment, "<[Bb][Rr][^>]*>", "/\n\t/// ")
     comment = string.gsub(comment, "<[^>]*>", "")
     print("\t/// "..comment)
-    -- Snake upper case (MQL5 enum variant style) to Camel case (Rust enum variant style)
-    variant = string.gsub(string.lower(variant), "_(.)", string.upper)
+    -- Upper Snake case (MQL5 enum variant style) to Upper Camel case (Rust enum variant style)
+    local variant = string.gsub(string.lower(mq5_variant), "_(.)", string.upper)
     variant = string.gsub(variant, "^(.)", string.upper)
     print("\t"..variant..",")
+
+    -- write the MQL code to report the enum values to Rust
+    enum_reporter_hnd:write("set_enum_variant_value(\"${rust_enum_name}\", \""..variant.."\", "..mq5_variant..");\n")
+
   end
 
   function suffix()
