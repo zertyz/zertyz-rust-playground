@@ -1,0 +1,47 @@
+# Setup:
+# 1) Make sure you can compile for Windows by adding the cross compiler:
+#    rustup target add x86_64-pc-windows-gnu        # x86_64-pc-windows-msvc only works inside Windows
+# 2) Build for release:
+#     RUSTFLAGS="-C target-feature=+crt-static" cargo build --target x86_64-pc-windows-gnu --release -p rust-RustMT5Bridge-bridge
+#
+# NOTE: I noticed the produced .DLL to be quite big... maybe this is due to using x86_64-pc-windows-gnu runtime
+#       -- which, probably, is statically linked there.
+
+[package]
+name = "rust-mt5-bridge"
+version = "0.1.0"
+edition = "2021"
+default-run = "main"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+
+# dynamic library -- when compiled for Windows, will produce the DLL
+
+[lib]
+crate-type = ["cdylib"]
+path = "src/rust_mt5_bridge/mod.rs"
+rustflags = ["-C", "target-feature=+crt-static"]    # force statically linking the C runtime, which solved problems after using several crates when compiling with GNU crosscompiler and running in Wine
+
+
+[dependencies]
+
+log            = { version = "0.4", features = ["max_level_debug", "release_max_level_info"] }
+simple-log     = "1.6"    # Much, much faster than 'simple-logging' and 'simplelog' for file writing (possibly buffered?)
+widestring     = "1.0"    # MetaTrader 5 Strings (UTF-16) to Rust Strings utilities
+
+once_cell      = "1.16"   # oficial replacer for lazy_static?
+
+chrono         = "0.4"
+
+regex          = "1"
+
+parking_lot    = "0.12"
+
+
+[dev-dependencies]
+ctor = "0.1"            # setup and teardown for modules

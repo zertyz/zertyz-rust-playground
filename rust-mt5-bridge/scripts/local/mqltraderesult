@@ -1,0 +1,532 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="x-dns-prefetch-control" content="on">
+  <link rel="dns-prefetch" href="https://c.mql5.com">
+      <meta name="description" content="Trade Request Result Structure - Data Structures - Constants, Enumerations and Structures - MQL5 Reference - Reference on algorithmic/automated trading language for MetaTrader 5">
+      <meta property="og:url" content="https://www.mql5.com/en/docs/constants/structures/mqltraderesult">
+      <meta property="og:title" content="Documentation on MQL5: Constants, Enumerations and Structures / Data Structures / Trade Request Result Structure">
+      <meta property="og:image" content="https://c.mql5.com/i/og/mql5-logo-fb-2.png">
+      <meta property="og:image:width" content="1200">
+      <meta property="og:image:height" content="630">
+      <meta property="og:type" content="article">
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content="@mql5com">
+      <meta name="twitter:image" content="https://c.mql5.com/i/og/mql5-logo-fb-2.png">
+  <meta name="theme-color" content="#4a76b8">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="shortcut icon" href="https://c.mql5.com/i/favicon.ico">
+  <meta name="msapplication-config" content="none" />
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  <meta property="qc:admins" content="36367170677651456375" />
+  <meta property="wb:webmaster" content="073d7690269bcd81" />
+  <link href="https://c.mql5.com/styles/core.2d0bfba83438e38ccdb8fba999e3714f.css" type="text/css" rel="stylesheet" media="all">
+  <link href="https://c.mql5.com/styles/all.6f047d4a4fae80d4d5056645744f9217.css" type="text/css" rel="stylesheet" media="all">
+  <link href="https://c.mql5.com/styles/help.dc456a9bc124c80d98aa8b0ee6081bb9.css" type="text/css" rel="stylesheet" media="all">
+      <link rel="canonical" href="https://www.mql5.com/en/docs/constants/structures/mqltraderesult">
+      <link rel="alternate" hreflang="en" href="https://www.mql5.com/en/docs/constants/structures/mqltraderesult">
+      <link rel="alternate" hreflang="ru" href="https://www.mql5.com/ru/docs/constants/structures/mqltraderesult">
+      <link rel="alternate" hreflang="zh" href="https://www.mql5.com/zh/docs/constants/structures/mqltraderesult">
+      <link rel="alternate" hreflang="es" href="https://www.mql5.com/es/docs/constants/structures/mqltraderesult">
+      <link rel="alternate" hreflang="pt" href="https://www.mql5.com/pt/docs/constants/structures/mqltraderesult">
+      <link rel="alternate" hreflang="ja" href="https://www.mql5.com/ja/docs/constants/structures/mqltraderesult">
+      <link rel="alternate" hreflang="de" href="https://www.mql5.com/de/docs/constants/structures/mqltraderesult">
+      <link rel="alternate" hreflang="ko" href="https://www.mql5.com/ko/docs/constants/structures/mqltraderesult">
+      <link rel="alternate" hreflang="fr" href="https://www.mql5.com/fr/docs/constants/structures/mqltraderesult">
+      <link rel="alternate" hreflang="it" href="https://www.mql5.com/it/docs/constants/structures/mqltraderesult">
+      <link rel="alternate" hreflang="tr" href="https://www.mql5.com/tr/docs/constants/structures/mqltraderesult">
+  <title>Trade Request Result Structure - Data Structures - Constants, Enumerations and Structures - MQL5 Reference - Reference on algorithmic/automated trading language for MetaTrader 5</title>
+
+
+<script type="text/javascript">
+  !function(){window.mqGlobal={};var t=!1,n=!1,e=[],o=[],i=[];function d(t){var n;for(n=0;n<t.length;n+=1)t[n]()}function c(){t||(t=!0,d(e),d(o),o=[],e=[])}function a(){c(),n||(n=!0,d(i),i=[])}if(mqGlobal.AddOnReady=function(n,i){t?n(document):i?e.push(n):o.push(n)},mqGlobal.AddOnLoad=function(t){n?t(document):i.push(t)},mqGlobal.AddOnActiveWindowChange=function(t){this._onvisibility||(this._onvisibility=[]),this._onvisibility[this._onvisibility.length]=t},document.addEventListener)document.addEventListener("DOMContentLoaded",c,!1),window.addEventListener("load",a,!1);else if(document.attachEvent&&(document.attachEvent("onreadystatechange",(function(){switch(document.readyState){case"interactive":c();break;case"complete":a()}})),window.attachEvent("onload",a),document.documentElement.doScroll&&window==window.top)){!function n(){if(!t&&document.body)try{document.documentElement.doScroll("left"),c()}catch(t){setTimeout(n,0)}}()}}();
+  mqGlobal.CookieDomain = ".mql5.com";
+  mqGlobal.Language = 'en';
+  mqGlobal.IsMobile = false;
+  mqGlobal.ClearRteStorage = function (e) { if (window.GStorage || (window.GStorage = globalStorage()), window.GStorage.supported) try { var o = e; window.GStorage.getItem("rte_autosave_uid", function (e, t) { t == o && (window.GStorage.removeItem("rte_autosave_text"), window.GStorage.removeItem("rte_autosave_date"), window.GStorage.removeItem("rte_autosave_uid")) }) } catch (e) { } };
+</script>
+  
+
+        <script type='text/javascript'>
+        
+        </script>
+
+    <script src="https://c.mql5.com/js/all.061be13d7247865424d177395e40b83b.js" type="text/javascript" defer="defer"></script>
+
+
+</head>
+
+<body>
+
+  <div class="cover" id="cover">
+
+    <header>
+      <div class="head">
+      <a href="https://www.mql5.com" class="head__logo" title="MQL5 - Language of trade strategies built-in the MetaTrader 5 client terminal"></a>
+        <ul id="mainmenu" class="menu dropdown" style="padding-right: 0;margin-right: 140px;">
+          <li class="selected">
+                    <a id="mainMenuSelected" href="#">
+                      <span class="on">Documentation</span><span class="off">Sections</span>
+                    </a>
+            <nav>
+              <ul id="mainmenuItems">
+                
+                    <li><a href="/en/forum" data-fz-event="MQL5+Menu+Forum"><span>Forum</span></a></li>
+                    <li><a href="/en/market" data-fz-event="MQL5+Menu+Market"><span>Market</span></a></li>
+                    <li><a href="/en/signals" data-fz-event="MQL5+Menu+Signals"><span>Signals</span></a></li>
+                    <li><a href="/en/job" data-fz-event="MQL5+Menu+Job"><span>Freelance</span></a></li>
+                    <li><a href="/en/quotes/overview" data-fz-event="MQL5+Menu+Overview"><span>Quotes</span></a></li>
+                    <li><a href="https://trade.metatrader5.com/" target="_blank" data-fz-event="MQL5+Menu+Trading"><span>WebTerminal</span></a></li>
+                    <li><a href="/en/economic-calendar" data-fz-event="MQL5+Menu+Economic+Calendar"><span>Calendar</span></a></li>
+                    <li><a href="/en/vps" data-fz-event="MQL5+Menu+VPS"><span>VPS</span></a></li>
+                    <li><a href="/en/articles" data-fz-event="MQL5+Menu+Articles"><span>Articles</span></a></li>
+                    <li><a href="/en/code" data-fz-event="MQL5+Menu+CodeBase"><span>CodeBase</span></a></li>
+                    <li class="selected"><a href="/en/docs" data-fz-event="MQL5+Menu+Docs"><span>Documentation</span></a></li>
+                    <li class="main-menu__about-link"><a href="/en/about"><span>About</span></a></li>
+              </ul>
+            </nav>
+          </li>
+          <li><input class="blurHandler" id="mainMenuBlurHandler" type="checkbox"></li>
+        </ul>
+      <div class="head__toolbar" id="headerToolbar">
+          <div class="container loginRegister"><nav><ul id="loginRegisterButtons"><li><a class="login" title="Please sign in. OpenID supported" href="https://www.mql5.com/en/auth_login" data-fz-event="MQL5+Menu+Siginin">Log in</a></li><li><a class="registration en" title="Please register" href="https://www.mql5.com/en/auth_register" data-fz-event="MQL5+Menu+Register" onclick="window.fpush('MQL5+Button+Click');">Create an account</a></li></ul></nav></div>
+        <div class="container"><div class="toggle-button" id="sidebarToggleButton"><i></i><i></i><i></i></div></div>
+
+        <div class="group-menu" id="groupMenu">
+
+ 
+            <div class="container lang-menu-container">
+              <div id="langMenuContainer" class="lang-menu">
+                <input class="blurHandler" id="langmenuBlurHandler" type="checkbox">
+                <nav>
+                  <ul class="lang-menu__list" id="langmenu">
+                    <li class="lang-menu__list-item lang-menu__list-item_selected"><a href="/en/docs/constants/structures/mqltraderesult"><i class="icons-languages icons-languages_en"></i><span>English</span></a></li>
+<li class="lang-menu__list-item"><a href="/ru/docs/constants/structures/mqltraderesult"><i class="icons-languages icons-languages_ru"></i><span>Русский</span></a></li>
+<li class="lang-menu__list-item"><a href="/zh/docs/constants/structures/mqltraderesult"><i class="icons-languages icons-languages_zh"></i><span>中文</span></a></li>
+<li class="lang-menu__list-item"><a href="/es/docs/constants/structures/mqltraderesult"><i class="icons-languages icons-languages_es"></i><span>Español</span></a></li>
+<li class="lang-menu__list-item"><a href="/pt/docs/constants/structures/mqltraderesult"><i class="icons-languages icons-languages_pt"></i><span>Português</span></a></li>
+<li class="lang-menu__list-item"><a href="/ja/docs/constants/structures/mqltraderesult"><i class="icons-languages icons-languages_ja"></i><span>日本語</span></a></li>
+<li class="lang-menu__list-item"><a href="/de/docs/constants/structures/mqltraderesult"><i class="icons-languages icons-languages_de"></i><span>Deutsch</span></a></li>
+<li class="lang-menu__list-item"><a href="/ko/docs/constants/structures/mqltraderesult"><i class="icons-languages icons-languages_ko"></i><span>한국어</span></a></li>
+<li class="lang-menu__list-item"><a href="/fr/docs/constants/structures/mqltraderesult"><i class="icons-languages icons-languages_fr"></i><span>Français</span></a></li>
+<li class="lang-menu__list-item"><a href="/it/docs/constants/structures/mqltraderesult"><i class="icons-languages icons-languages_it"></i><span>Italiano</span></a></li>
+<li class="lang-menu__list-item"><a href="/tr/docs/constants/structures/mqltraderesult"><i class="icons-languages icons-languages_tr"></i><span>Türkçe</span></a></li>
+
+                  </ul>
+                </nav>
+              </div>
+            </div>
+ 
+
+          <div class="container search-box-container">
+            <div id="searchBoxContainer" class="search-box">
+
+<form action='https://www.mql5.com/en/search' onsubmit='window.fpush("MQL5+Menu+Search"); document.location.assign(("https://www.mql5.com/en/search") + ($("keyword").value.length>0?("#!keyword="+encodeURIComponent($("keyword").value)):"")); if(document.location.href.indexOf("/en/search#")>=0)setTimeout(function(){document.location.reload(true);},10);return false;' id='main_search_form' class='header-search' method='post'>
+<div class="header-search__box"><div class="header-search__input-wrapper"><input name="keyword" type="text" title="Enter search text" id="keyword" /></div></div><input type="submit" value="" class="header-search__hidden-submit" /><div class="header-search__submit" id="searchSubmit"></div></form>            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sub-nav__container" style="right: 282px; display: none;" id="subNavContainer">
+        <div class="sub-nav__toggle" id="subNavToggle">...</div>
+        <ul id="subNavList"></ul>
+        <input class="blurHandler" id="blurHandlerSubNav" type="checkbox">
+      </div>
+    </div>
+    </header>
+
+    <main>
+      <aside>
+<div id='bfogggabsofabcpxuzmgaibarmaxasdrj' class="rcd93snl9yk0rqeut ff"></div>      </aside>
+
+      <article>
+        <div class="body" id="bodyContent">
+          <header>
+            <div class="top-band">
+              
+  <div><a href="/en/docs" class="boldenPath" title="MQL5 Reference">MQL5 Reference</a><span class="arrow_right" style="margin: 0 6px;"></span><a href="/en/docs/constants" class="boldenPath" title="Constants, Enumerations and Structures">Constants, Enumerations and Structures</a><span class="arrow_right" style="margin: 0 6px;"></span><a href="/en/docs/constants/structures" class="boldenPath" title="Data Structures">Data Structures</a><span class="arrow_right" style="margin: 0 6px;"></span><span class="boldenPath">Trade Request Result Structure</span>&nbsp;</div>
+
+            </div>
+          </header>
+
+          
+
+
+
+<div style="overflow: hidden;">
+    <div class="left-panel docsTree" style="width: 253px;">
+      <ul class="docsMenu"><li class="docsMenuNode"><a href="/en/docs/constants/structures/mqldatetime" title="Date Type Structure">Date Type Structure</a></li><li class="docsMenuNode"><a href="/en/docs/constants/structures/mqlparam" title="Indicator Parameter Structure">Indicator Parameter Structure</a></li><li class="docsMenuNode"><a href="/en/docs/constants/structures/mqlrates" title="History Data Structure">History Data Structure</a></li><li class="docsMenuNode"><a href="/en/docs/constants/structures/mqlbookinfo" title="Order Book Structure">Order Book Structure</a></li><li class="docsMenuNode"><a href="/en/docs/constants/structures/mqltraderequest" title="Trade Request Structure">Trade Request Structure</a></li><li class="docsMenuNode"><a href="/en/docs/constants/structures/mqltradecheckresult" title="Request Check Result Structure">Request Check Result Structure</a></li><li class="docsMenuNode"><span class="boldenPath">Trade Request Result Structure</span></li><li class="docsMenuNode"><a href="/en/docs/constants/structures/mqltradetransaction" title="Trade Transaction Structure">Trade Transaction Structure</a></li><li class="docsMenuNode"><a href="/en/docs/constants/structures/mqltick" title="Price Data Structure">Price Data Structure</a></li><li class="docsMenuNode"><a href="/en/docs/constants/structures/mqlcalendar" title="Economic Сalendar structures">Economic Сalendar structures</a></li></ul>
+      
+      
+      
+        <div class="directHelp">
+        </div>
+    </div>
+
+
+<div class="docsContainer">
+  <div id="help">
+<H1>The Structure of a Trade Request Result (MqlTradeResult)</H1>
+<p class="p_Text"><span class="f_Text">As result of a <a href="/en/docs/constants/structures/mqltraderequest" class="topiclink">trade request</a>, a trade server returns data about the trade request processing result as a special predefined structure of MqlTradeResult type.</span></p>
+<div style="text-align: left; text-indent: 0; line-height: 1.0; page-break-inside: avoid; border-color: #b3b3b3; border-style: solid; border-width: thin; background: #fbf9f5; padding: 0 0 0 0; margin: 2px 17px 2px 17px;"><table class="help" cellpadding="3" style="border:none; border-spacing:0;">
+<tr>
+<td style="vertical-align:top; padding:3px; border:none"><p class="p_CodeExample" style="page-break-inside: avoid;"><span class="f_CodeExample" style="color: #0000ff;">struct&nbsp;</span><span class="f_CodeExample" style="font-weight: bold;">MqlTradeResult</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;{</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">uint&nbsp;</span><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_Param">retcode</span><span class="f_CodeExample">;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//&nbsp;Operation&nbsp;return&nbsp;code</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">ulong</span><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_Param">deal</span><span class="f_CodeExample">;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//&nbsp;Deal&nbsp;ticket,&nbsp;if&nbsp;it&nbsp;is&nbsp;performed</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">ulong</span><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_Param">order</span><span class="f_CodeExample">;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//&nbsp;Order&nbsp;ticket,&nbsp;if&nbsp;it&nbsp;is&nbsp;placed</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">double</span><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_Param">volume</span><span class="f_CodeExample">;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//&nbsp;Deal&nbsp;volume,&nbsp;confirmed&nbsp;by&nbsp;broker</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">double</span><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_Param">price</span><span class="f_CodeExample">;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//&nbsp;Deal&nbsp;price,&nbsp;confirmed&nbsp;by&nbsp;broker</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">double</span><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_Param">bid</span><span class="f_CodeExample">;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//&nbsp;Current&nbsp;Bid&nbsp;price</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">double</span><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_Param">ask</span><span class="f_CodeExample">;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//&nbsp;Current&nbsp;Ask&nbsp;price</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">string</span><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_Param">comment</span><span class="f_CodeExample">;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//&nbsp;Broker&nbsp;comment&nbsp;to&nbsp;operation&nbsp;(by&nbsp;default&nbsp;it&nbsp;is&nbsp;filled&nbsp;by&nbsp;description&nbsp;of&nbsp;trade&nbsp;server&nbsp;return&nbsp;code)</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">uint&nbsp;</span><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_Param">request_id</span><span class="f_CodeExample">;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//&nbsp;Request&nbsp;ID&nbsp;set&nbsp;by&nbsp;the&nbsp;terminal&nbsp;during&nbsp;the&nbsp;dispatch&nbsp;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">uint&nbsp;</span><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_Param">retcode_external</span><span class="f_CodeExample">;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//&nbsp;Return&nbsp;code&nbsp;of&nbsp;an&nbsp;external&nbsp;trading&nbsp;system</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;};</span></p>
+</td>
+</tr>
+</table>
+</div>
+<p class="p_Text"><span class="f_Text" style="font-weight: bold;">Fields description</span></p>
+<div style="text-align: justify; text-indent: 0; padding: 0 0 0 0; margin: 8px 17px 7px 17px;"><table class="EnumTable" cellpadding="5" border="1">
+<thead>
+<tr class="EnumTable">
+<th class="EnumTable" style="width:130px;"><p class="p_fortable"><span class="f_fortable" style="font-weight: bold;">Field</span></p>
+</th>
+<th class="EnumTable"><p class="p_fortable"><span class="f_fortable" style="font-weight: bold;">Description</span></p>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:130px;"><p class="p_fortable"><span class="f_fortable">retcode</span></p>
+</td>
+<td class="EnumTable"><p class="p_Normal"><span class="f_fortable"> <a href="/en/docs/constants/errorswarnings/enum_trade_return_codes" class="topiclink">Return code</a> of a trade server</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:130px;"><p class="p_fortable"><span class="f_fortable">deal</span></p>
+</td>
+<td class="EnumTable"><p class="p_fortable"><span class="f_fortable"><a href="/en/docs/constants/tradingconstants/dealproperties" class="topiclink">Deal</a> ticket, &nbsp;if a deal has been performed. It is available for a trade operation of <a href="/en/docs/constants/tradingconstants/enum_trade_request_actions" class="topiclink">TRADE_ACTION_DEAL</a> type</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:130px;"><p class="p_fortable"><span class="f_fortable">order</span></p>
+</td>
+<td class="EnumTable"><p class="p_fortable"><span class="f_fortable"><a href="/en/docs/constants/tradingconstants/orderproperties" class="topiclink">Order</a> ticket, if a ticket has been placed. It is available for a trade operation of  <a href="/en/docs/constants/tradingconstants/enum_trade_request_actions" class="topiclink">TRADE_ACTION_PENDING</a> type</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:130px;"><p class="p_fortable"><span class="f_fortable">volume</span></p>
+</td>
+<td class="EnumTable"><p class="p_fortable"><span class="f_fortable">Deal volume, confirmed by broker. It depends on the <a href="/en/docs/constants/tradingconstants/orderproperties#enum_order_type_filling" class="topiclink">order filling type</a></span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:130px;"><p class="p_fortable"><span class="f_fortable">price</span></p>
+</td>
+<td class="EnumTable"><p class="p_fortable"><span class="f_fortable">Deal price, confirmed by broker. It depends on the </span><span class="f_fortable" style="font-style: italic;">deviation</span><span class="f_fortable"> field of the <a href="/en/docs/constants/structures/mqltraderequest" class="topiclink">trade request</a> and/or on the <a href="/en/docs/constants/tradingconstants/enum_trade_request_actions" class="topiclink">trade operation</a></span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:130px;"><p class="p_fortable"><span class="f_fortable">bid</span></p>
+</td>
+<td class="EnumTable"><p class="p_fortable"><span class="f_fortable">The current market Bid price (requote price)</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:130px;"><p class="p_fortable"><span class="f_fortable">ask</span></p>
+</td>
+<td class="EnumTable"><p class="p_fortable"><span class="f_fortable">The current market Ask price (requote price)</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:130px;"><p class="p_fortable"><span class="f_fortable">comment</span></p>
+</td>
+<td class="EnumTable"><p class="p_fortable"><span class="f_fortable">The broker comment to operation (by default it is filled by description of trade server return code)</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:130px;"><p class="p_fortable"><span class="f_fortable">request_id</span></p>
+</td>
+<td class="EnumTable"><p class="p_fortable"><span class="f_fortable">Request ID set by the terminal when sending to the trade server</span></p>
+</td>
+</tr>
+<tr class="EnumTable">
+<td class="EnumTable" style="width:130px;"><p class="p_fortable"><span class="f_fortable">retcode_external</span></p>
+</td>
+<td class="EnumTable"><p class="p_fortable"><span class="f_fortable">The code of the error returned by an external trading system. The use and types of these errors depend on the broker and the external trading system, to which trading operations are sent.</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p_Text"><span class="f_Text">The trade operation result is returned to a variable of the MqlTradeResult type, which is passed as the second parameter to <a href="/en/docs/trading/ordersend" class="topiclink">OrderSend()</a> to perform <a href="/en/docs/constants/tradingconstants/enum_trade_request_actions" class="topiclink">trade operations</a>. </span></p>
+<p class="p_Text"><span class="f_Text">The terminal fixes <a href="/en/docs/constants/structures/mqltraderequest" class="topiclink">request</a> ID in request_id field when sending it to the trade server using <a href="/en/docs/trading/ordersend" class="topiclink">OrdersSend(</a>) and <a href="/en/docs/trading/ordersendasync" class="topiclink">OrderSendAsync()</a> functions. The terminal receives messages about performed transactions from the trade server and submits them for processing by <a href="/en/docs/event_handlers/ontradetransaction" class="topiclink">OnTradeTransaction()</a> function containing the following components as parameters:</span></p>
+<ul style="list-style-type:disc">
+<li class="p_li"><span class="f_li">description of the trade transaction in <a href="/en/docs/constants/structures/mqltradetransaction" class="topiclink">MqlTradeTransaction</a> structure;</span></li>
+<li class="p_li"><span class="f_li">description of the <a href="/en/docs/constants/structures/mqltraderequest" class="topiclink">trade request</a> sent from OrderSend() or OrdersSendAsync() function. Request ID is sent by the terminal to the trade server, while the request itself and its request_id are stored in the terminal memory;</span></li>
+<li class="p_li"><span class="f_li">the trade request execution result as MqlTradeResult structure with request_id field containing ID of this request.</span></li>
+</ul>
+<p class="p_Text"><span class="f_Text">OnTradeTransaction() function receives three input parameters but the last two should be analyzed only for transactions having <a href="/en/docs/constants/structures/mqltradetransaction" class="topiclink">TRADE_TRANSACTION_REQUEST</a> type. In all other cases, data on the trade request and its execution result are not filled. Example of parameters analysis can be found at <a href="/en/docs/constants/structures/mqltradetransaction" class="topiclink">Structure of a Trade Request</a>.</span></p>
+<p class="p_Text"><span class="f_Text">Setting request_id by the terminal for the trade request when sending it to the server is mainly introduced for working with OrderSendAsync() asynchronous function. This identifier allows to associate the performed action (OrderSend or OrderSendAsync functions call) with the result of this action sent to <a href="/en/docs/event_handlers/ontradetransaction" class="topiclink">OnTradeTransaction()</a>.</span></p>
+<p class="p_Text"><span class="f_Text" style="font-weight: bold;">Example:</span></p>
+<div style="text-align: left; text-indent: 0; line-height: 1.0; page-break-inside: avoid; border-color: #b3b3b3; border-style: solid; border-width: thin; background: #fbf9f5; padding: 0 0 0 0; margin: 2px 17px 2px 17px;"><table class="help" cellpadding="3" style="border:none; border-spacing:0;">
+<tr>
+<td style="vertical-align:top; padding:3px; border:none"><p class="p_CodeExample" style="page-break-inside: avoid;"><span class="f_CodeExample" style="color: #808080;">//+------------------------------------------------------------------+</span>
+<br><span class="f_CodeExample" style="color: #808080;">//|&nbsp;Sending&nbsp;a&nbsp;trade&nbsp;request&nbsp;with&nbsp;the&nbsp;result&nbsp;processing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|</span>
+<br><span class="f_CodeExample" style="color: #808080;">//+------------------------------------------------------------------+</span>
+<br><span class="f_CodeExample" style="color: #0000ff;">bool</span><span class="f_CodeExample">&nbsp;MyOrderSend(MqlTradeRequest&nbsp;request,MqlTradeResult&nbsp;result)</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;{</span>
+<br><span class="f_CodeExample" style="color: #808080;">//---&nbsp;reset&nbsp;the&nbsp;last&nbsp;error&nbsp;code&nbsp;to&nbsp;zero</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">ResetLastError</span><span class="f_CodeExample">();</span>
+<br><span class="f_CodeExample" style="color: #808080;">//---&nbsp;send&nbsp;request</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">bool</span><span class="f_CodeExample">&nbsp;success=</span><span class="f_CodeExample" style="color: #0000ff;">OrderSend</span><span class="f_CodeExample">(request,result);</span>
+<br><span class="f_CodeExample" style="color: #808080;">//---&nbsp;if&nbsp;the&nbsp;result&nbsp;fails&nbsp;-&nbsp;try&nbsp;to&nbsp;find&nbsp;out&nbsp;why</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">if</span><span class="f_CodeExample">(!success)</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">int</span><span class="f_CodeExample">&nbsp;answer=result.retcode;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;TradeLog:&nbsp;Trade&nbsp;request&nbsp;failed.&nbsp;Error&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,</span><span class="f_CodeExample" style="color: #0000ff;">GetLastError</span><span class="f_CodeExample">());</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">switch</span><span class="f_CodeExample">(answer)</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//---&nbsp;requote</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">case</span><span class="f_CodeExample">&nbsp;10004:</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;TRADE_RETCODE_REQUOTE&quot;</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;request.price&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,request.price,</span><span class="f_CodeExample" style="color: #008080;">&quot;&nbsp;&nbsp;&nbsp;result.ask&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result.ask,</span><span class="f_CodeExample" style="color: #008080;">&quot;&nbsp;result.bid&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,result.bid);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">break</span><span class="f_CodeExample">;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//---&nbsp;order&nbsp;is&nbsp;not&nbsp;accepted&nbsp;by&nbsp;the&nbsp;server</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">case</span><span class="f_CodeExample">&nbsp;10006:</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;TRADE_RETCODE_REJECT&quot;</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;request.price&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,request.price,</span><span class="f_CodeExample" style="color: #008080;">&quot;&nbsp;&nbsp;&nbsp;result.ask&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result.ask,</span><span class="f_CodeExample" style="color: #008080;">&quot;&nbsp;result.bid&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,result.bid);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">break</span><span class="f_CodeExample">;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//---&nbsp;invalid&nbsp;price</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">case</span><span class="f_CodeExample">&nbsp;10015:</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;TRADE_RETCODE_INVALID_PRICE&quot;</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;request.price&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,request.price,</span><span class="f_CodeExample" style="color: #008080;">&quot;&nbsp;&nbsp;&nbsp;result.ask&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result.ask,</span><span class="f_CodeExample" style="color: #008080;">&quot;&nbsp;result.bid&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,result.bid);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">break</span><span class="f_CodeExample">;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//---&nbsp;invalid&nbsp;SL&nbsp;and/or&nbsp;TP</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">case</span><span class="f_CodeExample">&nbsp;10016:</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;TRADE_RETCODE_INVALID_STOPS&quot;</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;request.sl&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,request.sl,</span><span class="f_CodeExample" style="color: #008080;">&quot;&nbsp;request.tp&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,request.tp);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;result.ask&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,result.ask,</span><span class="f_CodeExample" style="color: #008080;">&quot;&nbsp;result.bid&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,result.bid);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">break</span><span class="f_CodeExample">;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//---&nbsp;invalid&nbsp;volume</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">case</span><span class="f_CodeExample">&nbsp;10014:</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;TRADE_RETCODE_INVALID_VOLUME&quot;</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;request.volume&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,request.volume,</span><span class="f_CodeExample" style="color: #008080;">&quot;&nbsp;&nbsp;&nbsp;result.volume&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result.volume);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">break</span><span class="f_CodeExample">;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//---&nbsp;not&nbsp;enough&nbsp;money&nbsp;for&nbsp;a&nbsp;trade&nbsp;operation&nbsp;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">case</span><span class="f_CodeExample">&nbsp;10019:</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;TRADE_RETCODE_NO_MONEY&quot;</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;request.volume&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,request.volume,</span><span class="f_CodeExample" style="color: #008080;">&quot;&nbsp;&nbsp;&nbsp;result.volume&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result.volume,</span><span class="f_CodeExample" style="color: #008080;">&quot;&nbsp;&nbsp;&nbsp;result.comment&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,result.</span><span class="f_CodeExample" style="color: #0000ff;">comment</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">break</span><span class="f_CodeExample">;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//---&nbsp;some&nbsp;other&nbsp;reason,&nbsp;output&nbsp;the&nbsp;server&nbsp;response&nbsp;code&nbsp;</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">default</span><span class="f_CodeExample">:</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">Print</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #008080;">&quot;Other&nbsp;answer&nbsp;=&nbsp;&quot;</span><span class="f_CodeExample">,answer);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #808080;">//---&nbsp;notify&nbsp;about&nbsp;the&nbsp;unsuccessful&nbsp;result&nbsp;of&nbsp;the&nbsp;trade&nbsp;request&nbsp;by&nbsp;returning&nbsp;false</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">return</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #0000ff;">false</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+<br><span class="f_CodeExample" style="color: #808080;">//---&nbsp;OrderSend()&nbsp;returns&nbsp;true&nbsp;-&nbsp;repeat&nbsp;the&nbsp;answer</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;&nbsp;</span><span class="f_CodeExample" style="color: #0000ff;">return</span><span class="f_CodeExample">(</span><span class="f_CodeExample" style="color: #0000ff;">true</span><span class="f_CodeExample">);</span>
+<br><span class="f_CodeExample">&nbsp;&nbsp;}</span></p>
+</td>
+</tr>
+</table>
+</div>
+
+</div>
+
+    
+  <div style="height: 1px; overflow: hidden; clear: both;"></div>
+</div>
+
+
+  <div class="docsNav">
+        <div style="float: left;">
+          <span class="arrow_left" style="margin-right: 4px;"></span><a href="/en/docs/constants/structures/mqltradecheckresult" title="Request Check Result Structure">Request Check Result Structure</a>
+        </div>
+        <div style="float: right; margin-right: 4px;">
+          <a href="/en/docs/constants/structures/mqltradetransaction" title="Trade Transaction Structure">Trade Transaction Structure</a><span class="arrow_right" style="margin-left: 4px;"></span>
+        </div>
+  </div>
+
+  <div class="docsNav docsNav__sub">
+    
+
+<div id='wdausxxqrpvhekbwjrjlhqjghyhesrqqau' class="rfz1ewcn4c2uhkx4z rfz1ewcn4c2uhkx4z_docs ff"></div>  </div>
+
+
+</div>
+<!-- Docs file updated: 2022.11.10 -->
+
+        </div>
+      </article>
+    </main>
+
+      <footer>
+
+
+<div class="footer  desktop" id="footer">
+  <ul class="links  links_desktop">
+      <li id="navFooterCommunity">
+        <b>MQL5.community</b>
+        <nav>
+          <ul>
+            <li><a href="https://trade.metatrader5.com/" target="_blank" data-fz-event="MQL5+Footer+Trading">Online trading / WebTerminal</a></li>
+            <li><a href="/en/code" data-fz-event="MQL5+Footer+CodeBase">Free technical indicators and robots</a></li>
+            <li><a href="/en/articles" data-fz-event="MQL5+Footer+Articles">Articles about programming and trading</a></li>
+            <li><a href="/en/job" data-fz-event="MQL5+Footer+Job">Order trading robots on the Freelance</a></li>
+            <li><a href="/en/market" data-fz-event="MQL5+Footer+Market">Market of Expert Advisors and applications&#x9;</a></li>
+            <li><a href="/en/signals" data-fz-event="MQL5+Footer+Signals">Follow forex signals</a></li>
+            <li><a href="/en/vps" data-fz-event="MQL5+Footer+VPS">Low latency forex VPS</a></li>
+            <li><a href="/en/forum" data-fz-event="MQL5+Footer+Forum">Traders forum</a></li>
+            <li><a href="/en/blogs" data-fz-event="MQL5+Footer+Blogs">Trading blogs</a></li>
+            <li><a href="/en/charts" data-fz-event="MQL5+Footer+Charts">Charts</a></li>
+          </ul>
+        </nav>
+      </li>
+      <li id="navFooterMt5">
+        <b>MetaTrader 5</b>
+        <nav>
+          <ul>
+            <li><a href="https://www.metatrader5.com" data-fz-event="MQL5+Footer+MetaTrader+5"><span class="nobr">MetaTrader 5</span> Trading Platform</a></li>
+            <li><a href="https://www.metatrader5.com/en/releasenotes" data-fz-event="MQL5+Footer+MetaTrader+5"><span class="nobr">MetaTrader 5</span> latest updates</a></li>
+            <li><a href="https://www.metatrader5.com/en/news" data-fz-event="MQL5+Footer+MetaTrader+5">News, implementations and technology</a></li>
+            <li><a href="https://www.metatrader5.com/en/terminal/help" data-fz-event="MQL5+Footer+MetaTrader+5"><span class="nobr">MetaTrader 5</span> User Manual</a></li>
+            <li><a href="/en/docs" data-fz-event="MQL5+Footer+Docs">MQL5 language of trading strategies</a></li>
+            <li><a href="https://cloud.mql5.com" data-fz-event="MQL5+Footer+Cloud">MQL5 Cloud Network</a></li>
+            <li><a href="https://www.finteza.com/?utm_source=www.mql5.com&utm_medium=cpc&utm_term=cross-link&utm_content=visit.finteza.com&utm_campaign=0791.finteza.cross-link" data-fz-event="MQL5+Footer+Finteza" target="_blank">End-to-End Analytics</a></li>
+              <li><a href="https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe?utm_source=www.mql5.com&amp;utm_campaign=download" data-fz-event="MetaTrader+5+Desktop+Download">Download <span class="nobr">MetaTrader 5</span></a></li>
+              <li><a href="https://www.metatrader5.com/en/terminal/help/start_advanced/installation" data-fz-event="MQL5+Footer+MetaTrader+5">Install Platform</a></li>
+              <li><a href="https://www.metatrader5.com/en/terminal/help/start_advanced/deinstallation" data-fz-event="MQL5+Footer+MetaTrader+5">Uninstall Platform</a></li>
+          </ul>
+        </nav>
+
+      </li>
+    <li id="navFooterWebsite">
+        <b >Website</b>
+        <nav>
+          <ul>
+            <li><a href="/en/about" data-fz-event="MQL5+Footer+About">About</a></li>
+              <li><a href="/en/wall" data-fz-event="MQL5+Footer+Wall">Timeline</a></li>
+            <li><a href="/en/about/terms" data-fz-event="MQL5+Footer+About">Terms and Conditions</a></li>
+            <li><a href="/en/about/autopayments" data-fz-event="MQL5+Footer+About">Recurring Payment Agreement</a></li>
+            <li><a href="/en/about/agencyagreement" data-fz-event="MQL5+Footer+About">Agency Agreement – Offer</a></li>
+            <li><a href="/en/about/privacy" data-fz-event="MQL5+Footer+About">Privacy and Data Protection Policy</a></li>
+            <li><a href="/en/about/cookies" data-fz-event="MQL5+Footer+About">Cookies Policy</a></li>
+            <li>
+                <a href="/en/contact" data-fz-event="MQL5+Footer+Contacts">Contacts and requests</a>
+            </li>
+          </ul>
+        </nav>
+    </li>
+
+      <li id="navFooterDownload">
+        <b>Join us — download <span class="nobr">MetaTrader 5!</span></b>
+        <ul>
+            <li class="icon windows"><a href="https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe?utm_source=www.mql5.com&amp;utm_campaign=download" data-fz-event="MetaTrader+5+Desktop+Download" title="Download MetaTrader 5 for Windows Free!">Windows</a></li>
+            <li class="icon ios"><a href="https://download.mql5.com/cdn/mobile/mt5/ios?utm_source=www.mql5.com&amp;utm_campaign=install.metaquotes" data-fz-event="MetaTrader+5+iOS+Download" target="_blank" rel="nofollow noopener" title="Download MetaTrader 5 for iPhone Free!">iPhone/iPad</a></li>
+            <li class="icon macos"><a href="https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/MetaTrader5.dmg?utm_source=www.mql5.com&amp;utm_campaign=download" data-fz-event="MetaTrader+5+Desktop+Download" title="Download MetaTrader 5 for Mac OS Free!">Mac OS</a></li>
+            <li class="icon android"><a href="https://download.mql5.com/cdn/mobile/mt5/android?utm_source=www.mql5.com&amp;utm_campaign=install.metaquotes" data-fz-event="MetaTrader+5+Android+Download" target="_blank" rel="nofollow noopener" title="Download MetaTrader 5 Android from Google Play Free!"><span>Android</span></a></li>
+            <li class="icon huawei"><a href="https://download.mql5.com/cdn/mobile/mt5/android/app-gallery?utm_source=www.mql5.com&amp;utm_campaign=install.metaquotes" data-fz-event="MetaTrader+5+Android+Download" target="_blank" rel="nofollow noopener" title="MetaTrader 5 Android (Huawei AppGallery)"><span>Huawei</span></a></li>
+            <li class="icon linux"><a href="/en/articles/625" data-fz-event="MetaTrader+5+Desktop+Download" target="_blank" title="MetaTrader 5 on Linux"><span>Linux</span></a></li>
+          <li class="icon tradays"><a href="https://www.tradays.com/en/download?utm_source=www.mql5.com&amp;utm_campaign=download" data-fz-event="MQL5+Footer+Download+Tradays" target="_blank" title="Tradays Economic Calendar"><span>Tradays Economic Calendar</span></a></li>
+        </ul>
+
+        <div class="footer__other">
+          <div class="footer__not-a-broker">Not a broker, no real trading accounts</div>
+          <div class="copyright">13 Anastasi Sioukri, 3105, Limassol, Cyprus</div>
+          <div class="copyright">Copyright 2000-2022, <span class="nobr">MetaQuotes Ltd</span></div>
+        </div>
+      </li>
+  </ul>
+</div>
+
+
+      </footer>
+
+    <div class="shadow-layer" id="layer"></div>
+        
+  </div>
+  
+
+  <script type='text/javascript'>
+  (function(a,e,f,g,b,c,d){a[b]||(a.FintezaCoreObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=!0,c.defer=!0,c.src=g,d&&d.parentNode&&d.parentNode.insertBefore(c,d))})
+    (window,document,"script","/tz/core.js","fz");
+  window.fz("register", "website", {
+    id: "sqjxkxkswybhifrohpyooonwgbvsfzmayq",
+    trackLinks: true
+  });
+  </script>
+
+  <script type="text/javascript">
+mqGlobal.AddOnLoad(function () {
+        new TrackScrollPosition('Docs');
+      });window.fz("show","wdausxxqrpvhekbwjrjlhqjghyhesrqqau");mqGlobal.AddOnLoad(function(){window.keywordMainFormSuggests = new Suggestions("keyword","https://search.mql5.com/api/suggest","en",function(){$('main_search_form').onsubmit();});});window.fz("show","bfogggabsofabcpxuzmgaibarmaxasdrj");mqGlobal.AddOnReady(function ()
+      {
+        window.floatVerticalPanelNode = FloatVerticalPanel('This website uses cookies. Learn more about our <a href="/en/about/cookies">Cookies Policy</a>.','cookie_accept');
+      });       mqGlobal.AddOnLoad(function () { Mql5Cookie.init('mql5.com','5055859424621323793'); });
+      if (typeof Attach !== "undefined")
+        Attach.setAcceptFilter(".zip, .txt, .log, .mqh, .ex5, .mq5, .mq4, .mqproj, .ex4, .mt5, .set, .tpl, .cl, .py, .sqlite, .csv, .ipynb, .gif, .png, .jpg, .jpeg");
+  </script>
+
+    <div class="b-fixed-mt" id="bFixedMt" style="display: none;">
+      <div id='jjyeyqenuvuvgqlpjjrqigjthhcgagwglu' class="bfb ff"><script type='text/javascript'>window.fz("show","jjyeyqenuvuvgqlpjjrqigjthhcgagwglu");</script></div>
+    </div>
+
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "url": "https://www.mql5.com",
+      "logo": "https://c.mql5.com/i/community/logo_mql5-2.png",
+      "sameAs": [
+        "https://www.facebook.com/mql5.community",
+        "https://www.twitter.com/mql5com",
+        "https://www.youtube.com/user/MetaQuotesOfficial"
+       ]
+    }
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "MQL5 Community",
+  "url": "https://www.mql5.com",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://www.mql5.com/en/search?keyword={keyword}",
+    "query-input": "required name=keyword"
+  }
+}
+  </script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ItemList","itemListElement":[{"@type":"SiteNavigationElement","position":1,"name":"Forum","description":"Discussions of trading strategies and algorithmic trading. MQL5.community  the largest forex forum","url":"https://www.mql5.com/en/forum"},{"@type":"SiteNavigationElement","position":2,"name":"Market","description":"MetaTrader Market - a Market of trading robots, indicators, trading books and magazines","url":"https://www.mql5.com/en/market"},{"@type":"SiteNavigationElement","position":3,"name":"Signals","description":"Social trading, copy trading and account monitoring with MetaTrader - Trading Signals on MQL5.com","url":"https://www.mql5.com/en/signals"},{"@type":"SiteNavigationElement","position":4,"name":"Freelance","description":"Order trading robots, technical indicators and algorithmic trading applications. Forex jobs. Freelance on MQL5.com","url":"https://www.mql5.com/en/job"},{"@type":"SiteNavigationElement","position":5,"name":"Quotes","description":"","url":"https://www.mql5.com/en/quotes/overview"},{"@type":"SiteNavigationElement","position":6,"name":"WebTerminal","description":"WebTerminal for the MetaTrader trading platform. Online forex trading.","url":"https://trade.metatrader5.com/"},{"@type":"SiteNavigationElement","position":7,"name":"Calendar","description":"","url":"https://www.mql5.com/en/economic-calendar"},{"@type":"SiteNavigationElement","position":8,"name":"VPS","description":"","url":"https://www.mql5.com/en/vps"},{"@type":"SiteNavigationElement","position":9,"name":"Articles","description":"","url":"https://www.mql5.com/en/articles"},{"@type":"SiteNavigationElement","position":10,"name":"CodeBase","description":"Download trading robots, technical indicators and scripts with source code - MQL5 Code Base for MetaTrader 5","url":"https://www.mql5.com/en/code"},{"@type":"SiteNavigationElement","position":11,"name":"Documentation","description":"MetaQuotes Language 5 (MQL5) Reference - Documentation on MQL5.com","url":"https://www.mql5.com/en/docs"}]}
+</script>
+</body>
+</html>

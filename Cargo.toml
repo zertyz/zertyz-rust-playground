@@ -19,6 +19,7 @@ members = [
     "compiler-bug",
     "self-referential-structs",
     "iterators-vs-streams",
+    "rust-mt5-bridge",
 ]
 
 # uncomment the bellow section to enable aggressive linking optimizations when compiling for release,
