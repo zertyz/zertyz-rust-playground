@@ -1,5 +1,8 @@
-// this should be executed once when the DLL is loaded
-// (usually, when handle_id 0 is given out by Rust
+// This should be executed once when the DLL is loaded
+// (usually, when handle_id 0 is given out by Rust)
+// In case any enum variant fails to register, the MQL Program must quit to avoid undefined behavior
+// -- and, in this case, attempts to start other programs (with other handle_ids) must also fail, as
+//    the Rust binary vs the MQL Program versions are out of sync
 
 set_enum_variant_value("EnumDayOfWeek", "Sunday", SUNDAY);
 set_enum_variant_value("EnumDayOfWeek", "Monday", MONDAY);
@@ -176,7 +179,7 @@ set_enum_variant_value("EnumSymbolIndustry", "IndustryUtilitiesRegulatedWater", 
 //set_enum_variant_value("EnumSymbolIndustry", "IndustryUtilitiesFirst", INDUSTRY_UTILITIES_FIRST);
 //set_enum_variant_value("EnumSymbolIndustry", "IndustryUtilitiesLast", INDUSTRY_UTILITIES_LAST);
 set_enum_variant_value("EnumSymbolOptionMode", "SymbolOptionModeEuropean", SYMBOL_OPTION_MODE_EUROPEAN);
-set_enum_variant_value("EnumSymbolOptionMode", "SymbolOptionModeAmerican ", SYMBOL_OPTION_MODE_AMERICAN );
+set_enum_variant_value("EnumSymbolOptionMode", "SymbolOptionModeAmerican", SYMBOL_OPTION_MODE_AMERICAN );
 set_enum_variant_value("EnumSymbolOptionRight", "SymbolOptionRightCall", SYMBOL_OPTION_RIGHT_CALL);
 set_enum_variant_value("EnumSymbolOptionRight", "SymbolOptionRightPut", SYMBOL_OPTION_RIGHT_PUT);
 set_enum_variant_value("EnumSymbolOrderGtcMode", "SymbolOrdersGtc", SYMBOL_ORDERS_GTC);
@@ -236,7 +239,7 @@ set_enum_variant_value("EnumDealReason", "DealReasonSo", DEAL_REASON_SO);
 set_enum_variant_value("EnumDealReason", "DealReasonRollover", DEAL_REASON_ROLLOVER);
 set_enum_variant_value("EnumDealReason", "DealReasonVmargin", DEAL_REASON_VMARGIN);
 set_enum_variant_value("EnumDealReason", "DealReasonSplit", DEAL_REASON_SPLIT);
-set_enum_variant_value("EnumDealType", "DealTypeBuy ", DEAL_TYPE_BUY );
+set_enum_variant_value("EnumDealType", "DealTypeBuy", DEAL_TYPE_BUY);
 set_enum_variant_value("EnumDealType", "DealTypeSell", DEAL_TYPE_SELL);
 set_enum_variant_value("EnumDealType", "DealTypeBalance", DEAL_TYPE_BALANCE);
 set_enum_variant_value("EnumDealType", "DealTypeCredit", DEAL_TYPE_CREDIT);
@@ -287,8 +290,8 @@ set_enum_variant_value("EnumOrderState", "OrderStateRejected", ORDER_STATE_REJEC
 set_enum_variant_value("EnumOrderState", "OrderStateExpired", ORDER_STATE_EXPIRED);
 set_enum_variant_value("EnumOrderState", "OrderStateRequestAdd", ORDER_STATE_REQUEST_ADD);
 set_enum_variant_value("EnumOrderState", "OrderStateRequestModify", ORDER_STATE_REQUEST_MODIFY);
-set_enum_variant_value("EnumOrderState", " orderStateRequestCancel",  ORDER_STATE_REQUEST_CANCEL);
-set_enum_variant_value("EnumDealType", "DealTypeBuy ", DEAL_TYPE_BUY );
+set_enum_variant_value("EnumOrderState", "OrderStateRequestCancel", ORDER_STATE_REQUEST_CANCEL);
+set_enum_variant_value("EnumDealType", "DealTypeBuy", DEAL_TYPE_BUY);
 set_enum_variant_value("EnumDealType", "DealTypeSell", DEAL_TYPE_SELL);
 set_enum_variant_value("EnumDealType", "DealTypeBalance", DEAL_TYPE_BALANCE);
 set_enum_variant_value("EnumDealType", "DealTypeCredit", DEAL_TYPE_CREDIT);

@@ -1,9 +1,15 @@
 //! Mapping of https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants to Rust
 
 
+use super::{
+    types::*,
+    super::mql_rust_enum::{MqlRustEnumDescriptor},
+};
+use std::str::FromStr;
 use chrono::NaiveDateTime;
 use widestring::U16CString;
-use super::types::*;
+use once_cell::sync::Lazy;
+use strum::{EnumString,FromRepr};
 
 
 /// Holds all symbol information -- struct crafted from MT5's `SymbolInfoInteger()`, `SymbolInfoDouble()` and `SymbolInfoString()`
@@ -11,13 +17,13 @@ use super::types::*;
 #[derive(Debug)]
 pub struct SymbolInfoBridge {
     /// The sector of the economy to which the asset belongs
-    pub symbol_sector: EnumSymbolSector,
+    pub symbol_sector: i32, // EnumSymbolSector,
     /// The industry or the economy branch to which the symbol belongs
-    pub symbol_industry: EnumSymbolIndustry,
+    pub symbol_industry: i32, // EnumSymbolIndustry,
     /// The color of the background used for the symbol in Market Watch
     pub symbol_background_color: MQ5Color,
     /// The price type used for generating symbols bars, i.e. Bid or Last
-    pub symbol_chart_mode: EnumSymbolChartMode,
+    pub symbol_chart_mode: i32, // EnumSymbolChartMode,
     /// Number of deals in the current session
     pub symbol_session_deals: i64,
     /// Number of Buy orders at the moment
@@ -41,9 +47,9 @@ pub struct SymbolInfoBridge {
     /// Maximal number of requests shown in Depth of Market. For symbols that have no queue of requests, the value is equal to zero.
     pub symbol_ticks_bookdepth: i32,
     /// Contract price calculation mode
-    pub symbol_trade_calc_mode: EnumSymbolCalcMode,
+    pub symbol_trade_calc_mode: i32, // EnumSymbolCalcMode,
     /// Order execution type
-    pub symbol_trade_mode: EnumSymbolTradeMode,
+    pub symbol_trade_mode: i32, // EnumSymbolTradeMode,
     /// Date of the symbol trade beginning (usually used for futures)
     pub symbol_start_time: MQ5DateTime,
     /// Date of the symbol trade end (usually used for futures)
@@ -53,11 +59,11 @@ pub struct SymbolInfoBridge {
     /// Distance to freeze trade operations in points
     pub symbol_trade_freeze_level: i32,
     /// Deal execution mode
-    pub symbol_trade_exemode: EnumSymbolTradeExecution,
+    pub symbol_trade_exemode: i32, // EnumSymbolTradeExecution,
     /// Swap calculation model
-    pub symbol_swap_mode: EnumSymbolSwapMode,
+    pub symbol_swap_mode: i32, // EnumSymbolSwapMode,
     /// The day of week to charge 3-day swap rollover
-    pub symbol_swap_rollover3days: EnumDayOfWeek,
+    pub symbol_swap_rollover3days: i32, // EnumDayOfWeek,
     /// Flags of allowed order expiration modes
     pub symbol_expiration_mode : i32,
     /// Flags of allowed order filling modes
@@ -65,11 +71,11 @@ pub struct SymbolInfoBridge {
     /// Flags of allowed order types
     pub symbol_order_mode: i32,
     /// Expiration of Stop Loss and Take Profit orders, if SYMBOL_EXPIRATION_MODE=SYMBOL_EXPIRATION_GTC (Good till canceled)
-    pub symbol_order_gtc_mode: EnumSymbolOrderGtcMode,
+    pub symbol_order_gtc_mode: i32, // EnumSymbolOrderGtcMode,
     /// Option type
-    pub symbol_option_mode: EnumSymbolOptionMode,
+    pub symbol_option_mode: i32, // EnumSymbolOptionMode,
     /// Option right (Call/Put)
-    pub symbol_option_right: EnumSymbolOptionRight,
+    pub symbol_option_right: i32, // EnumSymbolOptionRight,
     /// Bid - best sell offer
     pub symbol_bid: f64,
     /// Maximal Bid of the day
@@ -242,10 +248,10 @@ impl SymbolInfoBridge {
         log::debug!("report_symbol_info(xx): _____: {:#?}", symbol_info_bridge);
 
         SymbolInfoRust {
-            symbol_sector: symbol_info_bridge.symbol_sector,
-            symbol_industry: symbol_info_bridge.symbol_industry,
+            symbol_sector: ENUM_SYMBOL_SECTOR.resolve_rust_variant(symbol_info_bridge.symbol_sector),
+            symbol_industry: ENUM_SYMBOL_INDUSTRY.resolve_rust_variant(symbol_info_bridge.symbol_industry),
             symbol_background_color: (((symbol_info_bridge.symbol_background_color & 0x00FF0000) >> 16) as u8, ((symbol_info_bridge.symbol_background_color & 0x0000FF00) >> 8) as u8, (symbol_info_bridge.symbol_background_color & 0x000000FF) as u8),
-            symbol_chart_mode: symbol_info_bridge.symbol_chart_mode,
+            symbol_chart_mode: ENUM_SYMBOL_CHART_MODE.resolve_rust_variant(symbol_info_bridge.symbol_chart_mode),
             symbol_session_deals: symbol_info_bridge.symbol_session_deals,
             symbol_session_buy_orders: symbol_info_bridge.symbol_session_buy_orders,
             symbol_session_sell_orders: symbol_info_bridge.symbol_session_sell_orders,
@@ -256,21 +262,21 @@ impl SymbolInfoBridge {
             symbol_digits: symbol_info_bridge.symbol_digits,
             symbol_spread: symbol_info_bridge.symbol_spread,
             symbol_ticks_bookdepth: symbol_info_bridge.symbol_ticks_bookdepth,
-            symbol_trade_calc_mode: symbol_info_bridge.symbol_trade_calc_mode,
-            symbol_trade_mode: symbol_info_bridge.symbol_trade_mode,
+            symbol_trade_calc_mode: ENUM_SYMBOL_CALC_MODE.resolve_rust_variant(symbol_info_bridge.symbol_trade_calc_mode),
+            symbol_trade_mode: ENUM_SYMBOL_TRADE_MODE.resolve_rust_variant(symbol_info_bridge.symbol_trade_mode),
             symbol_start_time: NaiveDateTime::from_timestamp(symbol_info_bridge.symbol_start_time as i64, 0),
             symbol_expiration_time: NaiveDateTime::from_timestamp(symbol_info_bridge.symbol_expiration_time as i64, 0),
             symbol_trade_stops_level: symbol_info_bridge.symbol_trade_stops_level,
             symbol_trade_freeze_level: symbol_info_bridge.symbol_trade_freeze_level,
-            symbol_trade_exemode: symbol_info_bridge.symbol_trade_exemode,
-            symbol_swap_mode: symbol_info_bridge.symbol_swap_mode,
-            symbol_swap_rollover3days: symbol_info_bridge.symbol_swap_rollover3days,
+            symbol_trade_exemode: ENUM_SYMBOL_TRADE_EXECUTION.resolve_rust_variant(symbol_info_bridge.symbol_trade_exemode),
+            symbol_swap_mode: ENUM_SYMBOL_SWAP_MODE.resolve_rust_variant(symbol_info_bridge.symbol_swap_mode),
+            symbol_swap_rollover3days: ENUM_DAY_OF_WEEK.resolve_rust_variant(symbol_info_bridge.symbol_swap_rollover3days),
             symbol_expiration_mode: symbol_info_bridge.symbol_expiration_mode,
             symbol_filling_mode: symbol_info_bridge.symbol_filling_mode,
             symbol_order_mode: symbol_info_bridge.symbol_order_mode,
-            symbol_order_gtc_mode: symbol_info_bridge.symbol_order_gtc_mode,
-            symbol_option_mode: symbol_info_bridge.symbol_option_mode,
-            symbol_option_right: symbol_info_bridge.symbol_option_right,
+            symbol_order_gtc_mode: ENUM_SYMBOL_ORDER_GTC_MODE.resolve_rust_variant(symbol_info_bridge.symbol_order_gtc_mode),
+            symbol_option_mode: ENUM_SYMBOL_OPTION_MODE.resolve_rust_variant(symbol_info_bridge.symbol_option_mode),
+            symbol_option_right: ENUM_SYMBOL_OPTION_RIGHT.resolve_rust_variant(symbol_info_bridge.symbol_option_right),
             symbol_bid: symbol_info_bridge.symbol_bid,
             symbol_bidhigh: symbol_info_bridge.symbol_bidhigh,
             symbol_bidlow: symbol_info_bridge.symbol_bidlow,
@@ -584,7 +590,7 @@ pub struct SymbolInfoRust {
 /// Values of the ENUM_DAY_OF_WEEK enumeration are used for specifying days of week./
 /// auto-generated from https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants
 #[repr(i32)]
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumDayOfWeek {
     /// Sunday
     Sunday,
@@ -601,19 +607,28 @@ pub enum EnumDayOfWeek {
     /// Saturday
     Saturday,
 
-    // this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-    Unmapped7,  Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-    Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-    Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-    Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-    Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-    Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+    /// in case MQL Code is out of sync with the DLL version...
+    UnknownMqlVariantValue = -1,
 }
+impl Into<i32> for EnumDayOfWeek {
+    fn into(self) -> i32 {
+        self as i32
+    }
+}
+impl From<i32> for EnumDayOfWeek {
+    fn from(variant_value: i32) -> Self {
+        if let Some(variant) = Self::from_repr(variant_value) {
+            return variant;
+        }
+        Self::UnknownMqlVariantValue
+    }
+}
+
 
 /// The ENUM_SYMBOL_CALC_MODE enumeration is used for obtaining information about how the margin requirements for a symbol are calculated./
 /// auto-generated from https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants
 #[repr(i32)]
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumSymbolCalcMode {
     /// Forex mode - calculation of profit and margin for Forex
     SymbolCalcModeForex,
@@ -632,26 +647,14 @@ pub enum EnumSymbolCalcMode {
     /// Futures mode –  calculation of margin and profit for trading futures contracts on a stock exchange
     SymbolCalcModeExchFutures,
     /// FORTS Futures mode –  calculation of margin and profit for trading futures contracts on FORTS. The margin may be reduced by the amount of MarginDiscount deviation according to the following rules:/
-    /// /
     /// 1. If the price of a long position (buy order) is less than the estimated price, MarginDiscount = Lots*((PriceSettle-PriceOrder)*TickPrice/TickSize)/
-    /// /
     /// 2. If the price of a short position (sell order) exceeds the estimated price, MarginDiscount = Lots*((PriceOrder-PriceSettle)*TickPrice/TickSize)/
-    /// /
     /// where:/
-    /// /
-    /// /
     /// PriceSettle – estimated (clearing) price of the previous session;/
     /// PriceOrder – average weighted position price or open price set in the order (request);/
     /// TickPrice – tick price (cost of the price change by one point)/
     /// TickSize – tick size (minimum price change step)/
-    /// /
-    /// /
-    /// /
-    /// /
     /// Margin: Lots * InitialMargin * Margin_Rate or Lots * MaintenanceMargin * Margin_Rate * Margin_Rate/
-    /// /
-    ///  /
-    /// /
     /// Profit:  (close_price - open_price) * Lots * TickPrice / TickSize
     SymbolCalcModeExchFuturesForts,
     /// Exchange Bonds mode – calculation of margin and profit for trading bonds on a stock exchange
@@ -663,39 +666,54 @@ pub enum EnumSymbolCalcMode {
     /// Collateral mode - a symbol is used as a non-tradable asset on a trading account. The market value of an open position is calculated based on the volume, current market price, contract size and liquidity ratio. The value is included into Assets, which are added to Equity. Open positions of such symbols increase the Free Margin amount and are used as additional margin (collateral) for open positions of tradable instruments.
     SymbolCalcModeServCollateral,
 
-    // this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-    Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-    Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-    Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-    Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-    Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-    Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+    /// in case MQL Code is out of sync with the DLL version...
+    UnknownMqlVariantValue = -1,
+}
+impl Into<i32> for EnumSymbolCalcMode {
+    fn into(self) -> i32 {
+        self as i32
+    }
+}
+impl From<i32> for EnumSymbolCalcMode {
+    fn from(variant_value: i32) -> Self {
+        if let Some(variant) = Self::from_repr(variant_value) {
+            return variant;
+        }
+        Self::UnknownMqlVariantValue
+    }
 }
 
 /// A symbol price chart can be based on Bid or Last prices. The price selected for symbol charts also affects the generation and display of bars in the terminal. Possible values of the SYMBOL_CHART_MODE property are described in ENUM_SYMBOL_CHART_MODE/
 /// auto-generated from https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants
 #[repr(i32)]
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumSymbolChartMode {
     /// Bars are based on Bid prices
     SymbolChartModeBid,
     /// Bars are based on Last prices
     SymbolChartModeLast,
 
-    // this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-    Unmapped2,  Unmapped3,   Unmapped4,  Unmapped5,  Unmapped6, Unmapped7,
-    Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-    Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-    Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-    Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-    Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-    Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+    /// in case MQL Code is out of sync with the DLL version...
+    UnknownMqlVariantValue = -1,
+}
+impl Into<i32> for EnumSymbolChartMode {
+    fn into(self) -> i32 {
+        self as i32
+    }
+}
+impl From<i32> for EnumSymbolChartMode {
+    fn from(variant_value: i32) -> Self {
+        if let Some(variant) = Self::from_repr(variant_value) {
+            return variant;
+        }
+        Self::UnknownMqlVariantValue
+    }
 }
 
 /// Each financial instrument can be assigned to a specific type of industry or economy branch. An industry is a branch of an economy that produces a closely related set of raw materials, goods, or services. ENUM_SYMBOL_INDUSTRY lists industries which a trading instrument can belong to./
 /// auto-generated from https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants
 #[repr(i32)]
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumSymbolIndustry {
     /// Undefined
     IndustryUndefined,
@@ -1002,58 +1020,81 @@ pub enum EnumSymbolIndustry {
     /// End of the utilities services types enumeration. Corresponds to INDUSTRY_UTILITIES_REGULATED_WATER.
     IndustryUtilitiesLast,
 
-    // this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-    Unmapped151, Unmapped152, Unmapped153, Unmapped154, Unmapped155, Unmapped156, Unmapped157, Unmapped158, Unmapped159,
-    Unmapped160, Unmapped161, Unmapped162, Unmapped163, Unmapped164, Unmapped165, Unmapped166, Unmapped167, Unmapped168, Unmapped169, Unmapped170, Unmapped171, Unmapped172,
-    Unmapped173, Unmapped174, Unmapped175, Unmapped176, Unmapped177, Unmapped178, Unmapped179, Unmapped180, Unmapped181, Unmapped182, Unmapped183, Unmapped184, Unmapped185,
-    Unmapped186, Unmapped187, Unmapped188, Unmapped189, Unmapped190, Unmapped191, Unmapped192, Unmapped193, Unmapped194, Unmapped195, Unmapped196, Unmapped197, Unmapped198,
-
+    /// in case MQL Code is out of sync with the DLL version...
+    UnknownMqlVariantValue = -1,
+}
+impl Into<i32> for EnumSymbolIndustry {
+    fn into(self) -> i32 {
+        self as i32
+    }
+}
+impl From<i32> for EnumSymbolIndustry {
+    fn from(variant_value: i32) -> Self {
+        if let Some(variant) = Self::from_repr(variant_value) {
+            return variant;
+        }
+        Self::UnknownMqlVariantValue
+    }
 }
 
 /// /
 /// auto-generated from https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants
 #[repr(i32)]
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumSymbolOptionMode {
     /// European option may only be exercised on a specified date (expiration, execution date, delivery date)
     SymbolOptionModeEuropean,
     /// American option may be exercised on any trading day or before expiry. The period within which a buyer can exercise the option is specified for it
-    SymbolOptionModeAmerican ,
+    SymbolOptionModeAmerican,
 
-    // this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-    Unmapped2,  Unmapped3,   Unmapped4,  Unmapped5,  Unmapped6, Unmapped7,
-    Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-    Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-    Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-    Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-    Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-    Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+    /// in case MQL Code is out of sync with the DLL version...
+    UnknownMqlVariantValue = -1,
+}
+impl Into<i32> for EnumSymbolOptionMode {
+    fn into(self) -> i32 {
+        self as i32
+    }
+}
+impl From<i32> for EnumSymbolOptionMode {
+    fn from(variant_value: i32) -> Self {
+        if let Some(variant) = Self::from_repr(variant_value) {
+            return variant;
+        }
+        Self::UnknownMqlVariantValue
+    }
 }
 
 /// An option is a contract, which gives the right, but not the obligation, to buy or sell an underlying asset (goods, stocks, futures, etc.) at a specified price on or before a specific date. The following enumerations describe option properties, including the option type and the right arising from it. /
 /// auto-generated from https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants
 #[repr(i32)]
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumSymbolOptionRight {
     /// A call option gives you the right to buy an asset at a specified price
     SymbolOptionRightCall,
     /// A put option gives you the right to sell an asset at a specified price
     SymbolOptionRightPut,
 
-    // this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-    Unmapped2,  Unmapped3,   Unmapped4,  Unmapped5,  Unmapped6, Unmapped7,
-    Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-    Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-    Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-    Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-    Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-    Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+    /// in case MQL Code is out of sync with the DLL version...
+    UnknownMqlVariantValue = -1,
+}
+impl Into<i32> for EnumSymbolOptionRight {
+    fn into(self) -> i32 {
+        self as i32
+    }
+}
+impl From<i32> for EnumSymbolOptionRight {
+    fn from(variant_value: i32) -> Self {
+        if let Some(variant) = Self::from_repr(variant_value) {
+            return variant;
+        }
+        Self::UnknownMqlVariantValue
+    }
 }
 
 /// If the SYMBOL_EXPIRATION_MODE property is set to SYMBOL_EXPIRATION_GTC (good till canceled), the expiration of pending orders, as well as of Stop Loss/Take Profit orders should be additionally set using the ENUM_SYMBOL_ORDER_GTC_MODE enumeration./
 /// auto-generated from https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants
 #[repr(i32)]
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumSymbolOrderGtcMode {
     /// Pending orders and Stop Loss/Take Profit levels are valid for an unlimited period until their explicit cancellation
     SymbolOrdersGtc,
@@ -1062,20 +1103,27 @@ pub enum EnumSymbolOrderGtcMode {
     /// When a trade day changes, only pending orders are deleted, while Stop Loss and Take Profit levels are preserved.
     SymbolOrdersDailyExcludingStops,
 
-    // this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-    Unmapped3,   Unmapped4,  Unmapped5,  Unmapped6, Unmapped7,
-    Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-    Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-    Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-    Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-    Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-    Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+    /// in case MQL Code is out of sync with the DLL version...
+    UnknownMqlVariantValue = -1,
+}
+impl Into<i32> for EnumSymbolOrderGtcMode {
+    fn into(self) -> i32 {
+        self as i32
+    }
+}
+impl From<i32> for EnumSymbolOrderGtcMode {
+    fn from(variant_value: i32) -> Self {
+        if let Some(variant) = Self::from_repr(variant_value) {
+            return variant;
+        }
+        Self::UnknownMqlVariantValue
+    }
 }
 
 /// Financial instruments are categorized by sectors of the economy. An economic sector is a part of economic activity which has specific characteristics, economic goals, functions and behavior, which allow separating this sector from other parts of the economy. ENUM_SYMBOL_SECTOR lists the economic sectors which a trading instruments can belong to./
 /// auto-generated from https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants
 #[repr(i32)]
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumSymbolSector {
     /// Undefined
     SectorUndefined,
@@ -1106,20 +1154,27 @@ pub enum EnumSymbolSector {
     /// Utilities
     SectorUtilities,
 
-    // this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-    Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-    Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-    Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-    Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-    Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-    Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
-
+    /// in case MQL Code is out of sync with the DLL version...
+    UnknownMqlVariantValue = -1,
+}
+impl Into<i32> for EnumSymbolSector {
+    fn into(self) -> i32 {
+        self as i32
+    }
+}
+impl From<i32> for EnumSymbolSector {
+    fn from(variant_value: i32) -> Self {
+        if let Some(variant) = Self::from_repr(variant_value) {
+            return variant;
+        }
+        Self::UnknownMqlVariantValue
+    }
 }
 
 /// Methods of swap calculation at position transfer are specified in enumeration ENUM_SYMBOL_SWAP_MODE. The method of swap calculation determines the units of measure of the SYMBOL_SWAP_LONG and SYMBOL_SWAP_SHORT parameters. For example, if swaps are charged in the client deposit currency, then the values of those parameters are specified as an amount of money in the client deposit currency./
 /// auto-generated from https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants
 #[repr(i32)]
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumSymbolSwapMode {
     /// Swaps disabled (no swaps)
     SymbolSwapModeDisabled,
@@ -1140,20 +1195,27 @@ pub enum EnumSymbolSwapMode {
     /// Swaps are charged by reopening positions. At the end of a trading day the position is closed. Next day it is reopened by the current Bid price +/- specified number of points (parameters SYMBOL_SWAP_LONG and SYMBOL_SWAP_SHORT)
     SymbolSwapModeReopenBid,
 
-    // this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-    Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-    Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-    Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-    Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-    Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-    Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
-
+    /// in case MQL Code is out of sync with the DLL version...
+    UnknownMqlVariantValue = -1,
+}
+impl Into<i32> for EnumSymbolSwapMode {
+    fn into(self) -> i32 {
+        self as i32
+    }
+}
+impl From<i32> for EnumSymbolSwapMode {
+    fn from(variant_value: i32) -> Self {
+        if let Some(variant) = Self::from_repr(variant_value) {
+            return variant;
+        }
+        Self::UnknownMqlVariantValue
+    }
 }
 
 /// Possible deal execution modes for a certain symbol are defined in enumeration ENUM_SYMBOL_TRADE_EXECUTION./
 /// auto-generated from https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants
 #[repr(i32)]
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumSymbolTradeExecution {
     ///  Execution by request
     SymbolTradeExecutionRequest,
@@ -1164,21 +1226,27 @@ pub enum EnumSymbolTradeExecution {
     /// Exchange execution
     SymbolTradeExecutionExchange,
 
-    // this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-    Unmapped4,  Unmapped5,  Unmapped6,  Unmapped7,
-    Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-    Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-    Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-    Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-    Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-    Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
-
+    /// in case MQL Code is out of sync with the DLL version...
+    UnknownMqlVariantValue = -1,
+}
+impl Into<i32> for EnumSymbolTradeExecution {
+    fn into(self) -> i32 {
+        self as i32
+    }
+}
+impl From<i32> for EnumSymbolTradeExecution {
+    fn from(variant_value: i32) -> Self {
+        if let Some(variant) = Self::from_repr(variant_value) {
+            return variant;
+        }
+        Self::UnknownMqlVariantValue
+    }
 }
 
 /// There are several symbol trading modes. Information about trading modes of a certain symbol is reflected in the values of enumeration ENUM_SYMBOL_TRADE_MODE./
 /// auto-generated from https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants
 #[repr(i32)]
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumSymbolTradeMode {
     /// Trade is disabled for the symbol
     SymbolTradeModeDisabled,
@@ -1191,13 +1259,46 @@ pub enum EnumSymbolTradeMode {
     /// No trade restrictions
     SymbolTradeModeFull,
 
-    // this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-    Unmapped5,  Unmapped6,  Unmapped7,
-    Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-    Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-    Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-    Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-    Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-    Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+    /// in case MQL Code is out of sync with the DLL version...
+    UnknownMqlVariantValue = -1,
+}
+impl Into<i32> for EnumSymbolTradeMode {
+    fn into(self) -> i32 {
+        self as i32
+    }
+}
+impl From<i32> for EnumSymbolTradeMode {
+    fn from(variant_value: i32) -> Self {
+        if let Some(variant) = Self::from_repr(variant_value) {
+            return variant;
+        }
+        Self::UnknownMqlVariantValue
+    }
+}
 
+pub static ENUM_DAY_OF_WEEK:            Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumDayOfWeek", &EnumDayOfWeek::from_str));
+pub static ENUM_SYMBOL_CALC_MODE:       Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumSymbolCalcMode", &EnumSymbolCalcMode::from_str));
+pub static ENUM_SYMBOL_CHART_MODE:      Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumSymbolChartMode", &EnumSymbolChartMode::from_str));
+pub static ENUM_SYMBOL_INDUSTRY:        Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumSymbolIndustry", &EnumSymbolIndustry::from_str));
+pub static ENUM_SYMBOL_OPTION_MODE:     Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumSymbolOptionMode", &EnumSymbolOptionMode::from_str));
+pub static ENUM_SYMBOL_OPTION_RIGHT:    Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumSymbolOptionRight", &EnumSymbolOptionRight::from_str));
+pub static ENUM_SYMBOL_ORDER_GTC_MODE:  Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumSymbolOrderGtcMode", &EnumSymbolOrderGtcMode::from_str));
+pub static ENUM_SYMBOL_SECTOR:          Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumSymbolSector", &EnumSymbolSector::from_str));
+pub static ENUM_SYMBOL_SWAP_MODE:       Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumSymbolSwapMode", &EnumSymbolSwapMode::from_str));
+pub static ENUM_SYMBOL_TRADE_EXECUTION: Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumSymbolTradeExecution", &EnumSymbolTradeExecution::from_str));
+pub static ENUM_SYMBOL_TRADE_MODE:      Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumSymbolTradeMode", &EnumSymbolTradeMode::from_str));
+
+/// called when the program starts -- to register the MQL<=>Rust Enums
+pub fn init() {
+    log::info!("Internally registering ENUM '{}'", ENUM_DAY_OF_WEEK.name());
+    log::info!("Internally registering ENUM '{}'", ENUM_SYMBOL_CALC_MODE.name());
+    log::info!("Internally registering ENUM '{}'", ENUM_SYMBOL_CHART_MODE.name());
+    log::info!("Internally registering ENUM '{}'", ENUM_SYMBOL_INDUSTRY.name());
+    log::info!("Internally registering ENUM '{}'", ENUM_SYMBOL_OPTION_MODE.name());
+    log::info!("Internally registering ENUM '{}'", ENUM_SYMBOL_OPTION_RIGHT.name());
+    log::info!("Internally registering ENUM '{}'", ENUM_SYMBOL_ORDER_GTC_MODE.name());
+    log::info!("Internally registering ENUM '{}'", ENUM_SYMBOL_SECTOR.name());
+    log::info!("Internally registering ENUM '{}'", ENUM_SYMBOL_SWAP_MODE.name());
+    log::info!("Internally registering ENUM '{}'", ENUM_SYMBOL_TRADE_EXECUTION.name());
+    log::info!("Internally registering ENUM '{}'", ENUM_SYMBOL_TRADE_MODE.name());
 }

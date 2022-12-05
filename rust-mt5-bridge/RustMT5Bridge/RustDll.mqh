@@ -7,8 +7,9 @@
 
 
 #import "rust_mt5_bridge.dll"
-void set_enum_variant_value(string rust_enum_name, string rust_variant_name, int mql_variant_value);
+void   set_enum_variant_value(string rust_enum_name, string rust_variant_name, int mql_variant_value);
 int    register_trading_expert_advisor_for_production(string account_token, string rust_algorithm, string symbol);
+bool   has_fatal_error(int handle, string& error_message);
 void   unregister_trading_expert_advisor(int handle, int reason_id);
 void   report_symbol_info(int handle, SymbolInfoBridge& symbol_info);
 void   report_account_info(int handle, AccountInfoBridge& account_info);

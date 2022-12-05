@@ -1,6 +1,8 @@
+use super::{
+    types::*,
+    mql_rust_enum,
+};
 use std::collections::VecDeque;
-use super::types::*;
-
 use std::ffi::{c_char, CStr, CString, OsStr, OsString};
 use std::fmt::Debug;
 use std::fs;
@@ -9,12 +11,11 @@ use std::iter::Iterator;
 use std::mem::MaybeUninit;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering::Relaxed;
-
 use once_cell::sync::Lazy;
 use widestring::{U16CString, WideCStr, WideCString, WideString};
-use log::{error, info, LevelFilter};
 use parking_lot::RawMutex;
 use parking_lot::lock_api::RawMutex as _RawMutex;
+use log::{info, warn, error, LevelFilter};
 
 
 const MAX_HANDLES: i32 = 1024;
@@ -27,6 +28,8 @@ static HANDLE_COUNT: AtomicI32 = AtomicI32::new(0);
 static mut HANDLES: Vec<Handle> = Vec::new();
 /// Guard for writes to HANDLES (reads are unguarded)
 static HANDLES_GUARD: RawMutex = RawMutex::INIT;
+/// If present, indicates any fatal errors that should cause MQL Programs to quit in order to avoid undefined behavior
+static mut FATAL_ERROR: Option<String> = None;
 
 /// See the docs docs for this function in https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain
 #[no_mangle]
@@ -45,20 +48,44 @@ pub extern "system" fn DllMain(_: *const (), fdw_reason: u32, _: *const ()) -> u
     1   // = TRUE: the DLL is good with the reported event
 }
 
+/// Called by the `OnInit()` to expose, to Rust, the MQL values for the mapped enums.\
+/// If there are problems registering the enum variant -- for instance, if this DLL doesn't
+/// know about it, this DLL instance will be marked as having experienced a "fatal error"
+/// -- for which the MQL Program should respond by quitting, as undefined behavior is likely
+/// to happen (See [has_fatal_error()])
 #[no_mangle]
-pub extern fn set_enum_variant_value(mql_enum_name: *const u16, mql_variant_name: *const u16, mql_variant_value: i32) {
-    let mql_enum_name     = unsafe { U16CString::from_ptr_str(    mql_enum_name) }.to_string().unwrap_or(String::from("ERROR CONVERTING `mql_enum_name` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
-    let mql_variant_name  = unsafe { U16CString::from_ptr_str( mql_variant_name) }.to_string().unwrap_or(String::from("ERROR CONVERTING `mql_variant_name` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
-    info!("set_enum_variant_value: mql_enum_name: '{mql_enum_name}'; mql_variant_name: '{mql_variant_name}'; mql_variant_value: {mql_variant_value}");
-    // 1) `mql_variant_name` gets converted to `rust_variant_name` --> from Upper & Snake case to Camel Case;
-    //    The same happens for `mql_enum_name`. A `resolve_rust_enum_value(enum, variant)` will answer us,
-    //    consulting a static HashMap<rust_enum_name: String, HashMap<rust_enum_variant: String, i32>>.
-    //    --> this HashMap will be filled by each module's init function
-    // 2) a static HashMap<String, (Vec<i32>, Vec<i32>)> will be instantiated by `init()` and populated by the `init()` functions of each submodule:
-    //    for each `mql_enum_ name`, the pair of `mql_to_rust` and `rust_to_mql` vectors will be instantiated, to be populated by this function
-    // 3) the two i32 vectors will be populated with 1 entry each, for each call of this function:
-    //    - `mql_to_rust` -- indexed by the Metatrader value, answering back the Rust value
-    //    - `rust_to_mql` -- indexed by the Rust value, answering back the MQL5 value
+pub extern fn set_enum_variant_value(rust_enum_name: *const u16, rust_variant_name: *const u16, mql_variant_value: i32) {
+    let rust_enum_name     = unsafe { U16CString::from_ptr_str(    rust_enum_name) }.to_string().unwrap_or(String::from("ERROR CONVERTING `rust_enum_name` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
+    let rust_variant_name  = unsafe { U16CString::from_ptr_str( rust_variant_name) }.to_string().unwrap_or(String::from("ERROR CONVERTING `rust_variant_name` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
+    match mql_rust_enum::set_enum_variant_value(&rust_enum_name, &rust_variant_name, mql_variant_value) {
+        Ok(()) => {
+            info!("set_enum_variant_value: rust_enum_name: '{rust_enum_name}'; rust_variant_name: '{rust_variant_name}'; mql_variant_value: {mql_variant_value}");
+        },
+        Err(error_message) => {
+            error!("set_enum_variant_value: {} -- MQL Program should quit, otherwise UNDEFINED BEHAVIOR will happen", error_message);
+            unsafe { FATAL_ERROR = Some(error_message.clone()); }
+        },
+    }
+}
+
+/// "fatal errors" are DLL errors that should cause any MQL programs to quit, as attempting to continue
+/// is likely to cause undefined behavior -- which is sure to be disastrous.\
+/// MQL Programs should check on this function before returning from `OnInit()`, and quit in case `true` is returned -- in this case,
+/// `pre_allocated_error_message_buffer` will contain a brief explanation of the problem -- which should be shown to the
+/// Metatrader Terminal User.\
+/// NOTE: `pre_allocated_error_message_buffer` should be allocated on the MQL side and
+///       have enough space to hold the error messages -- 256 bytes should be enough.\
+/// NOTE 2: the MQL Program must be asked to quit through the "Rust=>MQL calling interface" as well, if errors
+///         were detected past `OnInit()`
+#[no_mangle]
+pub extern fn has_fatal_error(handle_id: i32, pre_allocated_error_message_buffer: *mut u16) -> bool {
+    if let Some(fatal_error) = unsafe { &FATAL_ERROR } {
+        warn!("Informing handle_id {handle_id} that it must quit due to the fatal error '{fatal_error}'");
+        unchecked_convert_rust_to_mql5_string(fatal_error.clone(), pre_allocated_error_message_buffer);
+        true
+    } else {
+        false
+    }
 }
 
 /// Called by the `OnInit()` to inform the market data for the symbol being considered
@@ -314,16 +341,11 @@ pub extern fn test_on_trade_transaction(buffer:      *mut u16,
 /// Undefined Behavior will happen due to the corruption to the Metatrader heap
 fn unchecked_convert_rust_to_mql5_string(rust_string: String, pre_allocated_mql5_string: *mut u16) {
     let u16_string = U16CString::from_str(rust_string).unwrap();
-log::debug!("### u16_string: {:?}; -- len={}", u16_string, u16_string.len());
     let u16_string_ptr = u16_string.as_ptr();
-log::debug!("### u16_string_ptr: {:?}", u16_string_ptr);
     unsafe {
-log::debug!("### pre copy");
         std::ptr::copy_nonoverlapping(u16_string_ptr, pre_allocated_mql5_string, (u16_string.len()) * 2);
-log::debug!("### post copy, pre \0");
         // write the end of the string char \0
         std::ptr::write((pre_allocated_mql5_string as usize + u16_string.len()*2) as *mut u16, 0);
-log::debug!("### post \0");
     }
 }
 
@@ -379,6 +401,12 @@ fn init(log_file_path: Option<&str>) {
             });
         }
     }
+    symbol_info_bridge::init();
+    account_info_bridge::init();
+    deal_properties_bridge::init();
+    mql_book_info::init();
+    mql_trade_request::init();
+    mql_trade_transaction::init();
 }
 
 /// Reserves a slot, inits it & returns the `handle_id` that is required by, almost, every function in this DLL./
@@ -499,17 +527,17 @@ fn compute_book_delta_events(old_books: &OrderBooks, new_books: &[Mq5MqlBookInfo
         let mut peeked_new = new_books_iter.peek();
         // compute the book and price of interest and, possibly, postpone analysis on one of the books to the next iteration
         let book = match (peeked_old, peeked_new) {
-                                     (Some(old), Some(new)) if old.book_type == new.book_type => old.book_type,
-                                     (Some(old), Some(new)) /* if they are != */              => if old.book_type.is_sell() {
-                                                                                                                                 peeked_new = None;
-                                                                                                                                 old.book_type
-                                                                                                                             } else {
-                                                                                                                                 peeked_old = None;
-                                                                                                                                 new.book_type
-                                                                                                                             },
-                                     (Some(old), None) => old.book_type,
-                                     (None, Some(new)) => new.book_type,
-                                     (None, None) => break,
+                                     (Some(old), Some(new)) if old.book_type == unsafe {ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type)} => old.book_type,
+                                     (Some(old), Some(new)) /* if they are != */                                                                           => if old.book_type.is_sell() {
+                                                                                                                                                                                              peeked_new = None;
+                                                                                                                                                                                              old.book_type
+                                                                                                                                                                                          } else {
+                                                                                                                                                                                              peeked_old = None;
+                                                                                                                                                                                              unsafe {ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type)}
+                                                                                                                                                                                          },
+                                     (Some(old), None)    => old.book_type,
+                                     (None, Some(new)) => unsafe {ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type)},
+                                     (None, None)                       => break,
                                  };
         let (price, quantity) = match (peeked_old, peeked_new) {
                                                (Some(old), Some(new)) if book.is_sell() => max_price(old.price, old.volume, new.price, new.volume_real),
@@ -526,7 +554,7 @@ fn compute_book_delta_events(old_books: &OrderBooks, new_books: &[Mq5MqlBookInfo
 
         // compute the delta events
         if let (Some(old), Some(new)) = (peeked_old, peeked_new) {
-            if old.book_type == new.book_type && old.price == new.price && old.volume != new.volume_real {
+            if old.book_type == unsafe {ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type)} && old.price == new.price && old.volume != new.volume_real {
                 delta_events.push(BookEvents::Update { book: BookParties::from_mt5_enum_book(book), price, quantity: new.volume_real });
             }
         }
@@ -601,6 +629,15 @@ mod tests {
     #[test]
     fn on_book() {
 
+        ENUM_BOOK_TYPE.debug();
+        mql_rust_enum::set_enum_variant_value("EnumBookType", "BookTypeBuy", BookTypeBuy as i32)
+            .expect("Setting the MQL variant value of a Rust-known variant for a previously registered enum");;
+        mql_rust_enum::set_enum_variant_value("EnumBookType", "BookTypeSell", BookTypeSell as i32)
+            .expect("Setting the MQL variant value of a Rust-known variant for a previously registered enum");;
+        mql_rust_enum::set_enum_variant_value("EnumBookType", "BookTypeBuyMarket", BookTypeBuyMarket as i32)
+            .expect("Setting the MQL variant value of a Rust-known variant for a previously registered enum");;
+        mql_rust_enum::set_enum_variant_value("EnumBookType", "BookTypeSellMarket", BookTypeSellMarket as i32)
+            .expect("Setting the MQL variant value of a Rust-known variant for a previously registered enum");;
         let handle_id = register(format!("acnt_tkn"), format!("algo"), format!("SYMBL"));
         let handle = unsafe { &HANDLES[handle_id as usize] };
 
@@ -632,16 +669,16 @@ mod tests {
 
         let consumed_buy_price_point = (
             [
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.47, volume: 0, volume_real: 58400.00 },
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.46, volume: 0, volume_real: 125400.00 },
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.45, volume: 0, volume_real: 54200.00 },
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.44, volume: 0, volume_real: 57700.00 },
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.43, volume: 0, volume_real: 16700.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy,  price: 23.41, volume: 0, volume_real: 42300.00 },     // 23.42 was consumed
-                Mq5MqlBookInfo { book_type: BookTypeBuy,  price: 23.40, volume: 0, volume_real: 51700.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy,  price: 23.39, volume: 0, volume_real: 61300.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy,  price: 23.38, volume: 0, volume_real: 55900.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy,  price: 23.37, volume: 0, volume_real: 1400.00 },      // this is the new price point
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.47, volume: 0, volume_real: 58400.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.46, volume: 0, volume_real: 125400.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.45, volume: 0, volume_real: 54200.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.44, volume: 0, volume_real: 57700.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.43, volume: 0, volume_real: 16700.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.41, volume: 0, volume_real: 42300.00 },     // 23.42 was consumed
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.40, volume: 0, volume_real: 51700.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.39, volume: 0, volume_real: 61300.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.38, volume: 0, volume_real: 55900.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.37, volume: 0, volume_real: 1400.00 },      // this is the new price point
             ],
             [
                 BookEvents::Del { book: BookParties::Buyers, price: 23.42, quantity: 4100.00 },
@@ -650,16 +687,16 @@ mod tests {
 
         let consumed_sell_price_point = (
             [
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.48, volume: 0, volume_real: 76100.00 },    // this is the new price point
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.47, volume: 0, volume_real: 58400.00 },
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.46, volume: 0, volume_real: 125400.00 },
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.45, volume: 0, volume_real: 54200.00 },
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.44, volume: 0, volume_real: 57700.00 },    // 23.43 was consumed
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.42,  volume: 0, volume_real: 4100.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.41,  volume: 0, volume_real: 42300.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.40,  volume: 0, volume_real: 51700.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.39,  volume: 0, volume_real: 61300.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.38,  volume: 0, volume_real: 55900.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.48, volume: 0, volume_real: 76100.00 },    // this is the new price point
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.47, volume: 0, volume_real: 58400.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.46, volume: 0, volume_real: 125400.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.45, volume: 0, volume_real: 54200.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.44, volume: 0, volume_real: 57700.00 },    // 23.43 was consumed
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.42,  volume: 0, volume_real: 4100.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.41,  volume: 0, volume_real: 42300.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.40,  volume: 0, volume_real: 51700.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.39,  volume: 0, volume_real: 61300.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.38,  volume: 0, volume_real: 55900.00 },
             ],
             [
                 BookEvents::Add { book: BookParties::Sellers, price: 23.48, quantity: 76100.00 },
@@ -668,16 +705,16 @@ mod tests {
 
         let consumed_buy_and_sell_price_points = (
             [
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.48, volume: 0, volume_real: 76100.00 },
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.47, volume: 0, volume_real: 58400.00 },
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.46, volume: 0, volume_real: 125400.00 },
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.45, volume: 0, volume_real: 54200.00 },
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.44, volume: 0, volume_real: 57700.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.41,  volume: 0, volume_real: 42300.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.40,  volume: 0, volume_real: 51700.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.39,  volume: 0, volume_real: 61300.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.38,  volume: 0, volume_real: 55900.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.37,  volume: 0, volume_real: 1400.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.48, volume: 0, volume_real: 76100.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.47, volume: 0, volume_real: 58400.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.46, volume: 0, volume_real: 125400.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.45, volume: 0, volume_real: 54200.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.44, volume: 0, volume_real: 57700.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.41,  volume: 0, volume_real: 42300.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.40,  volume: 0, volume_real: 51700.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.39,  volume: 0, volume_real: 61300.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.38,  volume: 0, volume_real: 55900.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.37,  volume: 0, volume_real: 1400.00 },
             ],
             [
                 BookEvents::Add { book: BookParties::Sellers, price: 23.48, quantity: 76100.00 },
@@ -688,16 +725,16 @@ mod tests {
 
         let price_gaps = (
             [
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.48, volume: 0, volume_real: 58401.00 },    // price gap here: 23.47 is now missing
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.46, volume: 0, volume_real: 125400.00 },
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.45, volume: 0, volume_real: 54200.00 },
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.44, volume: 0, volume_real: 57700.00 },
-                Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.43, volume: 0, volume_real: 16700.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.42,  volume: 0, volume_real: 4100.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.41,  volume: 0, volume_real: 42300.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.40,  volume: 0, volume_real: 51700.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.39,  volume: 0, volume_real: 61300.00 },
-                Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.37,  volume: 0, volume_real: 55901.00 },     // price gap here: 23.38 is now missing
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.48, volume: 0, volume_real: 58401.00 },    // price gap here: 23.47 is now missing
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.46, volume: 0, volume_real: 125400.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.45, volume: 0, volume_real: 54200.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.44, volume: 0, volume_real: 57700.00 },
+                Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.43, volume: 0, volume_real: 16700.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.42,  volume: 0, volume_real: 4100.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.41,  volume: 0, volume_real: 42300.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.40,  volume: 0, volume_real: 51700.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.39,  volume: 0, volume_real: 61300.00 },
+                Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.37,  volume: 0, volume_real: 55901.00 },     // price gap here: 23.38 is now missing
             ],
             [
                 BookEvents::Add { book: BookParties::Sellers, price: 23.48, quantity: 58401.00 },
@@ -733,7 +770,7 @@ mod tests {
         // exercise 'Add' events
         assert("Check 1 (empty `old_books` / full `new_books`)",
                OrderBooks { sell_orders: Default::default(), buy_orders: Default::default() },
-               base_books_generator().iter().map(|e| Mq5MqlBookInfo { book_type: e.book_type, price: e.price, volume: 0, volume_real: e.volume }).collect::<Vec<_>>(),
+               base_books_generator().iter().map(|e| Mq5MqlBookInfo { book_type: e.book_type as i32, price: e.price, volume: 0, volume_real: e.volume }).collect::<Vec<_>>(),
                base_books_generator().iter()
                    .map(|mql_book_info| match mql_book_info.book_type {
                        BookTypeSell | BookTypeSellMarket => BookEvents::Add { book: BookParties::Sellers, price: mql_book_info.price, quantity: mql_book_info.volume },
@@ -758,7 +795,7 @@ mod tests {
         assert("Check 3 (quantity changes)",
                base_books_generator(),
                base_books_generator().iter()
-                   .map(|mql_book_info| Mq5MqlBookInfo { book_type: mql_book_info.book_type, price: mql_book_info.price, volume: 0, volume_real: mql_book_info.volume + 100.0, })
+                   .map(|mql_book_info| Mq5MqlBookInfo { book_type: mql_book_info.book_type as i32, price: mql_book_info.price, volume: 0, volume_real: mql_book_info.volume + 100.0, })
                    .collect::<Vec<_>>(),
                base_books_generator().iter()
                    .map(|mql_book_info| match mql_book_info.book_type {
@@ -809,16 +846,16 @@ mod tests {
                    ])
                },
                vec![
-                   Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.75, volume: 34600, volume_real: 34600.0 },
-                   Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.74, volume: 33000, volume_real: 33000.0 },
-                   Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.73, volume: 29700, volume_real: 29700.0 },
-                   Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.72, volume: 28200, volume_real: 28200.0 },
-                   Mq5MqlBookInfo { book_type: BookTypeSell, price: 23.71, volume: 9900, volume_real: 9900.0 },
-                   Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.69, volume: 14900, volume_real: 14900.0 },
-                   Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.68, volume: 30700, volume_real: 30700.0 },
-                   Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.67, volume: 15100, volume_real: 15100.0 },
-                   Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.66, volume: 24500, volume_real: 24500.0 },
-                   Mq5MqlBookInfo { book_type: BookTypeBuy, price: 23.65, volume: 89500, volume_real: 89500.0 }
+                   Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.75, volume: 34600, volume_real: 34600.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.74, volume: 33000, volume_real: 33000.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.73, volume: 29700, volume_real: 29700.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.72, volume: 28200, volume_real: 28200.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 23.71, volume: 9900, volume_real: 9900.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.69, volume: 14900, volume_real: 14900.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.68, volume: 30700, volume_real: 30700.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.67, volume: 15100, volume_real: 15100.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.66, volume: 24500, volume_real: 24500.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 23.65, volume: 89500, volume_real: 89500.0 }
                ],
                vec![
                    BookEvents::Del { book: BookParties::Sellers, price: 23.76, quantity: 39500.0 },

@@ -20,10 +20,10 @@ fn main() -> Result<ExitCode, Box<dyn Error>> {
     println!("rust-mt5-bridge manual testing tool");
     println!("===================================");
     println!("Use it to replay production log files, helping in the event data interpretation evolutions");
-    println!("");
+    println!();
     println!("Example:");
     println!("    ./target/release/main < rust_mt5_bridge.log");
-    println!("");
+    println!();
 
 
     // initialize the DLL, just like Metatrader 5 would
@@ -101,7 +101,7 @@ fn main() -> Result<ExitCode, Box<dyn Error>> {
                     else {
                         panic!("Couldn't parse all book info `f64` numbers from book info '{book_info_split}' at line #{line_number}");
                     };
-                    parsed_book_array.push(Mq5MqlBookInfo { book_type, price, volume, volume_real });
+                    parsed_book_array.push(Mq5MqlBookInfo { book_type: book_type as i32, price, volume, volume_real });
                 } else {
                     panic!("Unparseable book info '{book_info_split}' from book_info_list '{book_info_list}' at line #{line_number}");
                 }

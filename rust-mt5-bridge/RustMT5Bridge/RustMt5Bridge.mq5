@@ -16,12 +16,12 @@ input double wakeup_grace_secs = 1.0;   // After the wakeup_spread has been reac
 //   * https://www.mql5.com/en/docs/constants/environment_state/mql5_programm_info
 //   * https://www.mql5.com/en/docs/marketinformation/symbolinfosessiontrade
 
-string account_token  = "SjDud7s53Hvx7643Gtta7352Jdgx7453Hfzt635";                  // The account for the one attempting to run the algorithm
-string rust_algorithm = StringFormat("Fictitious(min_profit: %G, wakeup_spread: %G, wakeup_grace_secs: )",
+string   account_token  = "SjDud7s53Hvx7643Gtta7352Jdgx7453Hfzt635";                // The account for the one attempting to run the algorithm
+string   rust_algorithm = StringFormat("Fictitious(min_profit: %G, wakeup_spread: %G, wakeup_grace_secs: )",
                                      min_profit, wakeup_spread, wakeup_grace_secs); // Which Algorithm to run on the Rust side
-int    rust_handle   = -1;                                                          // The handler to identify this instance on the Rust side -- to be passed to almost all Rust functions
+int      rust_handle   = -1;                                                        // The handler to identify this instance on the Rust side -- to be passed to almost all Rust functions
 datetime testing_start;                                                             // If testing was started, remembers when
-string report;
+string   report;
 
 int OnInit() {
     rust_handle = register_trading_expert_advisor_for_production(account_token, rust_algorithm, _Symbol);
@@ -29,8 +29,6 @@ int OnInit() {
         Print(StringFormat("RustMtBridge: PRODUCTION trading EA for symbol '%s' was successfully registered with rust_handle=%d for using Rust algorithm '%s' and account token '%s'",
                            _Symbol, rust_handle, rust_algorithm, account_token));
         SymbolInfoBridge symbol_info = InstantiateSymbolInfoBridge(_Symbol);
-        //Print(StringFormat("RustMtBridge(%d): '%s': Reporting symbol info...", rust_handle, _Symbol));
-        report_symbol_info(rust_handle, symbol_info);
         // per-session information (reported only by the first expert advisor to start)
         if (rust_handle == 0) {
             #include "EnumReporter.mqh"
@@ -48,9 +46,19 @@ int OnInit() {
                 }
             }
         }
+        //Print(StringFormat("RustMtBridge(%d): '%s': Reporting symbol info...", rust_handle, _Symbol));
+        report_symbol_info(rust_handle, symbol_info);
         //Print(StringFormat("RustMtBridge(%d): '%s': Initialization completed", rust_handle, _Symbol));
         MarketBookAdd(_Symbol);
-        return INIT_SUCCEEDED;
+        // check any DLL errors that could prevent this EA from running well
+        string error_message; // pre-allocated buffer for any error messages
+        StringReserve(error_message, 16384);
+        if (has_fatal_error(rust_handle, error_message)) {
+            Print("QUITTING DUE TO ERROR: " + error_message);
+            return INIT_FAILED;
+        } else {
+            return INIT_SUCCEEDED;
+        }
     } else {
         Print(StringFormat("RustMtBridge: FAILED registering PRODUCTION trading EA for symbol '%s' with Error Code #%d -- attempted Rust algorithm was '%s' and account token '%s'",
                            _Symbol, rust_handle, rust_algorithm, account_token));

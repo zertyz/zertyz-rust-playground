@@ -17,6 +17,12 @@ void OnStart() {
                                      // -- unfortunately, if not enough size is provided, memory corruption will happen, since Rust don't receive the buffer size when strings
                                      //    are passed as function parameters (just the pointer to the buffer is passed)
 
+    // Makes all MQL Enum variant values known to Rust, so they may be converted properly (MQL Variants are not ordered nor sequential, unfortunately)
+    #include "EnumReporter.mqh"
+    // check that all went fine
+    if (has_fatal_error(-1, observed)) {
+        Print("I'D QUIT NOW (BUT I WON'T) DUE TO DLL ERROR: " + observed);
+    }
 
  /*   test_name = "Testing MqlTick serialization...";
     MqlTick mql_tick;
@@ -225,14 +231,15 @@ void OnStart() {
     Print("SYMBOL_CALC_MODE_EXCH_STOCKS_MOEX: 	", SYMBOL_CALC_MODE_EXCH_STOCKS_MOEX);
     Print("SYMBOL_CALC_MODE_EXCH_BONDS_MOEX: 	", SYMBOL_CALC_MODE_EXCH_BONDS_MOEX);
     Print("SYMBOL_CALC_MODE_SERV_COLLATERAL: 	", SYMBOL_CALC_MODE_SERV_COLLATERAL);
+   
 
 
     test_name = "Testing SymbolInfoBridge serialization...";
     SymbolInfoBridge symbol_info_bridge;
-    symbol_info_bridge.symbol_sector = SECTOR_UNDEFINED;
-    symbol_info_bridge.symbol_industry = INDUSTRY_UNDEFINED;
+    symbol_info_bridge.symbol_sector = SECTOR_HEALTHCARE;
+    symbol_info_bridge.symbol_industry = INDUSTRY_ADVERTISING;
     symbol_info_bridge.symbol_background_color = 8421504;   // #808080
-    symbol_info_bridge.symbol_chart_mode = SYMBOL_CHART_MODE_LAST;
+    symbol_info_bridge.symbol_chart_mode = SYMBOL_CHART_MODE_BID;
     symbol_info_bridge.symbol_session_deals = 547;
     symbol_info_bridge.symbol_session_buy_orders = 745;
     symbol_info_bridge.symbol_session_sell_orders = 574;
@@ -244,14 +251,14 @@ void OnStart() {
     symbol_info_bridge.symbol_digits = 3;
     symbol_info_bridge.symbol_spread = 47;
     symbol_info_bridge.symbol_ticks_bookdepth = 74;
-    symbol_info_bridge.symbol_trade_calc_mode = SYMBOL_CALC_MODE_CFD;
-    symbol_info_bridge.symbol_trade_mode = SYMBOL_TRADE_MODE_FULL;
+    symbol_info_bridge.symbol_trade_calc_mode = SYMBOL_CALC_MODE_EXCH_FUTURES;
+    symbol_info_bridge.symbol_trade_mode = SYMBOL_TRADE_MODE_CLOSEONLY;
     symbol_info_bridge.symbol_start_time = 7447;
     symbol_info_bridge.symbol_expiration_time = 32777;
     symbol_info_bridge.symbol_trade_stops_level = 9182;
     symbol_info_bridge.symbol_trade_freeze_level = 1928;
-    symbol_info_bridge.symbol_trade_exemode = SYMBOL_TRADE_EXECUTION_MARKET;
-    symbol_info_bridge.symbol_swap_mode = SYMBOL_SWAP_MODE_INTEREST_OPEN;
+    symbol_info_bridge.symbol_trade_exemode = SYMBOL_TRADE_EXECUTION_INSTANT;
+    symbol_info_bridge.symbol_swap_mode = SYMBOL_SWAP_MODE_INTEREST_CURRENT;
     symbol_info_bridge.symbol_swap_rollover3days = FRIDAY;
     symbol_info_bridge.symbol_expiration_mode  = 1982;
     symbol_info_bridge.symbol_filling_mode = 1289;
@@ -341,10 +348,10 @@ void OnStart() {
     symbol_info_bridge.symbol_spread_float = false;
     symbol_info_bridge.symbol_margin_hedged_use_leg = true;
     expected = "SymbolInfoRust { " +
-    "symbol_sector: SectorUndefined, " +
-    "symbol_industry: IndustryUndefined, " +
+    "symbol_sector: SectorHealthcare, " +
+    "symbol_industry: IndustryAdvertising, " +
     "symbol_background_color: (128, 128, 128), " +
-    "symbol_chart_mode: SymbolChartModeLast, " +
+    "symbol_chart_mode: SymbolChartModeBid, " +
     "symbol_session_deals: 547, " +
     "symbol_session_buy_orders: 745, " +
     "symbol_session_sell_orders: 574, " +
@@ -355,14 +362,14 @@ void OnStart() {
     "symbol_digits: 3, " +
     "symbol_spread: 47, " +
     "symbol_ticks_bookdepth: 74, " +
-    "symbol_trade_calc_mode: SymbolCalcModeFutures, " +
-    "symbol_trade_mode: SymbolTradeModeFull, " +
+    "symbol_trade_calc_mode: SymbolCalcModeExchFutures, " +
+    "symbol_trade_mode: SymbolTradeModeCloseonly, " +
     "symbol_start_time: 1970-01-01T02:04:07, " +
     "symbol_expiration_time: 1970-01-01T09:06:17, " +
     "symbol_trade_stops_level: 9182, " +
     "symbol_trade_freeze_level: 1928, " +
-    "symbol_trade_exemode: SymbolTradeExecutionMarket, " +
-    "symbol_swap_mode: SymbolSwapModeInterestOpen, " +
+    "symbol_trade_exemode: SymbolTradeExecutionInstant, " +
+    "symbol_swap_mode: SymbolSwapModeInterestCurrent, " +
     "symbol_swap_rollover3days: Friday, " +
     "symbol_expiration_mode: 1982, " +
     "symbol_filling_mode: 1289, " +

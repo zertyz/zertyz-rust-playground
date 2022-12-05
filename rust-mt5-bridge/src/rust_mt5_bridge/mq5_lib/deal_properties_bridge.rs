@@ -1,8 +1,14 @@
 //! Mapping of https://www.mql5.com/en/docs/constants/tradingconstants/dealproperties to Rust
 
 
+use super::{
+	types::*,
+	super::mql_rust_enum::{MqlRustEnumDescriptor},
+};
+use std::str::FromStr;
 use chrono::NaiveDateTime;
-use super::types::*;
+use once_cell::sync::Lazy;
+use strum::{EnumString,FromRepr};
 
 
 /// Holds all deals information -- struct crafted from MT5's `HistoryDealGetDouble()`, `HistoryDealGetString()` and `HistoryDealGetInteger()`
@@ -44,11 +50,11 @@ pub struct DealPropertiesBridge {
 	/// Deal time
 	pub deal_time: MQ5DateTime,
 	/// Deal type
-	pub deal_type: EnumDealType,
+	pub deal_type: i32, //EnumDealType,
 	/// Deal entry - entry in, entry out, reverse
-	pub deal_entry: EnumDealEntry,
+	pub deal_entry: i32, //EnumDealEntry,
 	/// The reason or source for deal execution
-	pub deal_reason: EnumDealReason,
+	pub deal_reason: i32, //EnumDealReason,
 }
 impl DealPropertiesBridge {
 
@@ -74,9 +80,9 @@ impl DealPropertiesBridge {
 			deal_magic: deal_properties_bridge.deal_magic,
 			deal_position_id: deal_properties_bridge.deal_position_id,
 			deal_time: NaiveDateTime::from_timestamp(deal_properties_bridge.deal_time as i64, 1000_000 * (deal_properties_bridge.deal_time_msc % 1000) as u32),
-			deal_type: deal_properties_bridge.deal_type,
-			deal_entry: deal_properties_bridge.deal_entry,
-			deal_reason: deal_properties_bridge.deal_reason,
+			deal_type: ENUM_DEAL_TYPE.resolve_rust_variant(deal_properties_bridge.deal_type),
+			deal_entry: ENUM_DEAL_ENTRY.resolve_rust_variant(deal_properties_bridge.deal_entry),
+			deal_reason: ENUM_DEAL_REASON.resolve_rust_variant(deal_properties_bridge.deal_reason),
 		}
 	}
 }
@@ -127,7 +133,7 @@ pub struct DealPropertiesRust {
 /// All these situations are described by values from the ENUM_DEAL_ENTRY enumeration. In order to receive this information about a deal, use the HistoryDealGetInteger() function with the DEAL_ENTRY modifier./
 /// auto-generated from https://www.mql5.com/en/docs/constants/tradingconstants/dealproperties
 #[repr(i32)]
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumDealEntry {
 	/// Entry in
 	DealEntryIn,
@@ -138,20 +144,27 @@ pub enum EnumDealEntry {
 	/// Close a position by an opposite one
 	DealEntryOutBy,
 
-	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped4,  Unmapped5,  Unmapped6,  Unmapped7,
-	Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+	/// in case MQL Code is out of sync with the DLL version...
+	UnknownMqlVariantValue = -1,
+}
+impl Into<i32> for EnumDealEntry {
+	fn into(self) -> i32 {
+		self as i32
+	}
+}
+impl From<i32> for EnumDealEntry {
+	fn from(variant_value: i32) -> Self {
+		if let Some(variant) = Self::from_repr(variant_value) {
+			return variant;
+		}
+		Self::UnknownMqlVariantValue
+	}
 }
 
 /// The reason for deal execution is contained in the DEAL_REASON property. A deal can be executed as a result of triggering of an order placed from a mobile application or an MQL5 program, as well as as a result of the StopOut event, variation margin calculation, etc. Possible values of DEAL_REASON are described in the ENUM_DEAL_REASON enumeration. For non-trading deals resulting from balance, credit, commission and other operations, DEAL_REASON_CLIENT is indicated as the reason./
 /// auto-generated from https://www.mql5.com/en/docs/constants/tradingconstants/dealproperties
 #[repr(i32)]
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumDealReason {
 	/// The deal was executed as a result of activation of an order placed from a desktop terminal
 	DealReasonClient,
@@ -174,19 +187,27 @@ pub enum EnumDealReason {
 	/// The deal was executed after the split (price reduction) of an instrument, which had an open position during split announcement
 	DealReasonSplit,
 
-	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+	/// in case MQL Code is out of sync with the DLL version...
+	UnknownMqlVariantValue = -1,
+}
+impl Into<i32> for EnumDealReason {
+	fn into(self) -> i32 {
+		self as i32
+	}
+}
+impl From<i32> for EnumDealReason {
+	fn from(variant_value: i32) -> Self {
+		if let Some(variant) = Self::from_repr(variant_value) {
+			return variant;
+		}
+		Self::UnknownMqlVariantValue
+	}
 }
 
 /// Each deal is characterized by a type, allowed values are enumerated in ENUM_DEAL_TYPE. In order to obtain information about the deal type, use the HistoryDealGetInteger() function with the DEAL_TYPE modifier./
 /// auto-generated from https://www.mql5.com/en/docs/constants/tradingconstants/dealproperties
 #[repr(i32)]
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumDealType {
 	/// Buy
 	DealTypeBuy,
@@ -225,12 +246,30 @@ pub enum EnumDealType {
 	/// Tax charges
 	DealTax,
 
-	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped18, Unmapped19, Unmapped20,
-	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+	/// in case MQL Code is out of sync with the DLL version...
+	UnknownMqlVariantValue = -1,
+}
+impl Into<i32> for EnumDealType {
+	fn into(self) -> i32 {
+		self as i32
+	}
+}
+impl From<i32> for EnumDealType {
+	fn from(variant_value: i32) -> Self {
+		if let Some(variant) = Self::from_repr(variant_value) {
+			return variant;
+		}
+		Self::UnknownMqlVariantValue
+	}
 }
 
+static ENUM_DEAL_ENTRY:  Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumDealEntry", &EnumDealEntry::from_str));
+static ENUM_DEAL_REASON: Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumDealReason", &EnumDealReason::from_str));
+static ENUM_DEAL_TYPE:   Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumDealType", &EnumDealType::from_str));
+
+/// called when the program starts -- to register the MQL<=>Rust Enums
+pub fn init() {
+	log::info!("Internally registering ENUM '{}'", ENUM_DEAL_ENTRY.name());
+	log::info!("Internally registering ENUM '{}'", ENUM_DEAL_REASON.name());
+	log::info!("Internally registering ENUM '{}'", ENUM_DEAL_TYPE.name());
+}

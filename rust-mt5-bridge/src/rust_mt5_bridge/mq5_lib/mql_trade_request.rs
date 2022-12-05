@@ -1,7 +1,13 @@
 //! Mapping of https://www.mql5.com/en/docs/constants/structures/mqltraderequest to Rust
 
 
-use super::types::*;
+use super::{
+	types::*,
+	super::mql_rust_enum::{MqlRustEnumDescriptor},
+};
+use std::str::FromStr;
+use once_cell::sync::Lazy;
+use strum::{EnumString,FromRepr};
 
 
 /// Rust version of the Metatrader 5 `MqlTradeRequest` structure. From the site:/
@@ -11,7 +17,7 @@ use super::types::*;
 #[derive(/*disable debug on this structure for production since it will cause a copy due to 'packed(4)' above*/Debug,Copy,Clone)]
 pub struct MqlTradeRequest {
 	/// Trade operation type
-	pub action: EnumTradeRequestActions,
+	pub action: i32, // EnumTradeRequestActions,
 	/// Expert Advisor ID (magic number)
 	pub magic: u64,
 	/// Order ticket
@@ -31,11 +37,11 @@ pub struct MqlTradeRequest {
 	/// Maximal possible deviation from the requested price
 	pub deviation: u64,
 	/// Order type
-	pub type_: EnumOrderType,
+	pub type_: i32, // EnumOrderType,
 	/// Order execution type
-	pub type_filling: EnumOrderTypeFilling,
+	pub type_filling: i32, // EnumOrderTypeFilling,
 	/// Order expiration type
-	pub type_time: EnumOrderTypeTime,
+	pub type_time: i32, // EnumOrderTypeTime,
 	/// Order expiration time (for the orders of ORDER_TIME_SPECIFIED type)
 	pub expiration: MQ5DateTime,
 	/// Order comment
@@ -49,7 +55,7 @@ pub struct MqlTradeRequest {
 /// Trading is done by sending orders to open positions using the OrderSend() function, as well as to place, modify or delete pending orders. Each trade order refers to the type of the requested operation. Trading operations are described in the ENUM_TRADE_REQUEST_ACTIONS enumeration./
 /// auto-generated from https://www.mql5.com/en/docs/constants/tradingconstants/enum_trade_request_actions
 #[repr(i32)]
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumTradeRequestActions {
 	/// Place a trade order for an immediate execution with the specified parameters (market order)
 	TradeActionDeal,
@@ -64,52 +70,27 @@ pub enum EnumTradeRequestActions {
 	/// Close a position by an opposite one
 	TradeActionCloseBy,
 
-	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped6,  Unmapped7,  Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+	/// in case MQL Code is out of sync with the DLL version...
+	UnknownMqlVariantValue = -1,
 }
-
-/// When sending a trade request using the OrderSend() function, some operations require the indication of the order type. The order type is specified in the type field of the special structure MqlTradeRequest, and can accept values of the ENUM_ORDER_TYPE enumeration./
-/// auto-generated from https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties
-#[repr(i32)]
-#[derive(Debug,Copy,Clone)]
-pub enum EnumOrderType {
-	/// Market Buy order
-	OrderTypeBuy,
-	/// Market Sell order
-	OrderTypeSell,
-	/// Buy Limit pending order
-	OrderTypeBuyLimit,
-	/// Sell Limit pending order
-	OrderTypeSellLimit,
-	/// Buy Stop pending order
-	OrderTypeBuyStop,
-	/// Sell Stop pending order
-	OrderTypeSellStop,
-	/// Upon reaching the order price, a pending Buy Limit order is placed at the StopLimit price
-	OrderTypeBuyStopLimit,
-	/// Upon reaching the order price, a pending Sell Limit order is placed at the StopLimit price
-	OrderTypeSellStopLimit,
-	/// Order to close a position by an opposite one
-	OrderTypeCloseBy,
-
-	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
+impl Into<i32> for EnumTradeRequestActions {
+	fn into(self) -> i32 {
+		self as i32
+	}
+}
+impl From<i32> for EnumTradeRequestActions {
+	fn from(variant_value: i32) -> Self {
+		if let Some(variant) = Self::from_repr(variant_value) {
+			return variant;
+		}
+		Self::UnknownMqlVariantValue
+	}
 }
 
 /// SYMBOL_TRADE_EXECUTION_EXCHANGE/
 /// auto-generated from https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties
 #[repr(i32)]
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum EnumOrderTypeFilling {
 	/// Fill or Kill/
 	/// An order can be executed in the specified volume only./
@@ -126,38 +107,28 @@ pub enum EnumOrderTypeFilling {
 	/// Return orders are not allowed in the Market Execution mode (market execution — SYMBOL_TRADE_EXECUTION_MARKET).
 	OrderFillingReturn,
 
-	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped3,  Unmapped4,  Unmapped5,  Unmapped6,  Unmapped7,
-	Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
-
+	/// in case MQL Code is out of sync with the DLL version...
+	UnknownMqlVariantValue = -1,
+}
+impl Into<i32> for EnumOrderTypeFilling {
+	fn into(self) -> i32 {
+		self as i32
+	}
+}
+impl From<i32> for EnumOrderTypeFilling {
+	fn from(variant_value: i32) -> Self {
+		if let Some(variant) = Self::from_repr(variant_value) {
+			return variant;
+		}
+		Self::UnknownMqlVariantValue
+	}
 }
 
-/// The order validity period can be set in the type_time field of the special structure MqlTradeRequest when sending a trade request using the OrderSend() function. Values of the ENUM_ORDER_TYPE_TIME enumeration are allowed. To obtain the value of this property use the function OrderGetInteger() or HistoryOrderGetInteger() with the ORDER_TYPE_TIME modifier./
-/// auto-generated from https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties
-#[repr(i32)]
-#[derive(Debug,Copy,Clone)]
-pub enum EnumOrderTypeTime {
-	/// Good till cancel order
-	OrderTimeGtc,
-	/// Good till current trade day order
-	OrderTimeDay,
-	/// Good till expired order
-	OrderTimeSpecified,
-	/// The order will be effective till 23:59:59 of the specified day. If this time is outside a trading session, the order expires in the nearest trading time.
-	OrderTimeSpecifiedDay,
+pub static ENUM_TRADE_REQUEST_ACTIONS: Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumTradeRequestActions", &EnumTradeRequestActions::from_str));
+pub static ENUM_ORDER_TYPE_FILLING:    Lazy<&MqlRustEnumDescriptor> = Lazy::new(|| MqlRustEnumDescriptor::new("EnumOrderTypeFilling", &EnumOrderTypeFilling::from_str));
 
-	// this will allow Rust not to crash when deserializing the data, if some variants are missing or if some new ones were added to meta trader
-	Unmapped4,  Unmapped5,  Unmapped6,  Unmapped7,
-	Unmapped8,  Unmapped9,  Unmapped10, Unmapped11, Unmapped12, Unmapped13, Unmapped14, Unmapped15, Unmapped16, Unmapped17, Unmapped18, Unmapped19, Unmapped20,
-	Unmapped21, Unmapped22, Unmapped23, Unmapped24, Unmapped25, Unmapped26, Unmapped27, Unmapped28, Unmapped29, Unmapped30, Unmapped31, Unmapped32, Unmapped33,
-	Unmapped34, Unmapped35, Unmapped36, Unmapped37, Unmapped38, Unmapped39, Unmapped40, Unmapped41, Unmapped42, Unmapped43, Unmapped44, Unmapped45, Unmapped46,
-	Unmapped47, Unmapped48, Unmapped49, Unmapped50, Unmapped51, Unmapped52, Unmapped53, Unmapped54, Unmapped55, Unmapped56, Unmapped57, Unmapped58, Unmapped59,
-	Unmapped60, Unmapped61, Unmapped62, Unmapped63, Unmapped64, Unmapped65, Unmapped66, Unmapped67, Unmapped68, Unmapped69, Unmapped70, Unmapped71, Unmapped72,
-	Unmapped73, Unmapped74, Unmapped75, Unmapped76, Unmapped77, Unmapped78, Unmapped79, Unmapped80, Unmapped81, Unmapped82, Unmapped83, Unmapped84, Unmapped85,
-
+/// called when the program starts -- to register the MQL<=>Rust Enums
+pub fn init() {
+	log::info!("Internally registering ENUM '{}'", ENUM_TRADE_REQUEST_ACTIONS.name());
+	log::info!("Internally registering ENUM '{}'", ENUM_ORDER_TYPE_FILLING.name());
 }
