@@ -15,7 +15,7 @@ use once_cell::sync::Lazy;
 use widestring::{U16CString, WideCStr, WideCString, WideString};
 use parking_lot::RawMutex;
 use parking_lot::lock_api::RawMutex as _RawMutex;
-use log::{info, warn, error, LevelFilter};
+use log::{debug, info, warn, error, LevelFilter};
 
 
 const MAX_HANDLES: i32 = 1024;
@@ -222,12 +222,12 @@ pub extern fn on_book(handle_id:           i32,
     let handle = unsafe { &mut HANDLES[handle_id as usize] };
     let book_info_array = unsafe { std::slice::from_raw_parts(book_info_array_ptr, array_len as usize) };
     // this should be logged
-    info!("OnBook({handle_id}): {}: {:?}", handle.symbol, book_info_array);
+debug!("OnBook({handle_id}): {}: {:?}", handle.symbol, book_info_array);
     let delta_events = compute_book_delta_events(&handle.books, book_info_array);
     // these will be enqueued for later processing
     info!("OnBook({handle_id}): {}: {:?}", handle.symbol, delta_events);
     apply_book_delta_events(&mut handle.books, &delta_events);
-    info!("OnBook({handle_id}): {}: {:?}", handle.symbol, handle.books);
+debug!("OnBook({handle_id}): {}: {:?}", handle.symbol, handle.books);
 }
 
 #[no_mangle]
@@ -299,13 +299,19 @@ pub extern fn test_report_symbol_info(buffer: *mut u16, symbol_info: *const Symb
 /// Tests the correct reading of the [AccountInfoBridge] structure
 #[no_mangle]
 pub extern fn test_report_account_info(buffer: *mut u16, account_info: *const AccountInfoBridge) {
-    serialize_mql5_struct(buffer, account_info);
+    let account_info = unsafe { &*account_info };
+    let account_info = AccountInfoBridge::from_ptr_to_internal(account_info);
+    debug!("{:?}", account_info);
+    serialize_mql5_struct(buffer, std::ptr::addr_of!(account_info));
 }
 
 /// Tests the correct reading of the [DealPropertiesBridge] structure
 #[no_mangle]
 pub extern fn test_report_deal_properties(buffer: *mut u16, deal_properties: *const DealPropertiesBridge) {
-    serialize_mql5_struct(buffer, deal_properties);
+    let deal_properties = unsafe { &*deal_properties };
+    let deal_properties = DealPropertiesBridge::from_ptr_to_internal(deal_properties);
+    debug!("{:?}", deal_properties);
+    serialize_mql5_struct(buffer, std::ptr::addr_of!(deal_properties));
 }
 
 /// Tests the correct reading of the [Mq5MqlBookInfo] structure
@@ -319,6 +325,7 @@ pub extern fn test_on_book(buffer: *mut u16, book_info_array: *const Mq5MqlBookI
         owned_book_info.push(rust_book_info);
         book_info_cursor = (book_info_cursor as usize + std::mem::size_of::<Mq5MqlBookInfo>()) as *mut Mq5MqlBookInfo;
     }
+    debug!("{:?}", owned_book_info);
     serialize_mql5_array(buffer, owned_book_info);
 }
 
@@ -332,8 +339,9 @@ pub extern fn test_on_trade_transaction(buffer:      *mut u16,
     let transaction = unsafe { &*transaction };
     let request       = unsafe { &*request };
     let result          = unsafe { &*result };
-    unchecked_convert_rust_to_mql5_string(format!("{:?}; {:?}; {:?}", transaction, request, result),
-                                          buffer);
+    let rust_string = format!("{:?}; {:?}; {:?}", transaction, request, result);
+    debug!("{}", rust_string);
+    unchecked_convert_rust_to_mql5_string(rust_string, buffer);
 }
 
 /// Converts & copies `rust_string` into `pre_allocated_mql5_string`./
@@ -352,14 +360,8 @@ fn unchecked_convert_rust_to_mql5_string(rust_string: String, pre_allocated_mql5
 /// Puts the Debug output of `struct_ptr` into `pre_allocated_mql5_string` -- which should have enough size or else
 /// memory corruption will occur
 fn serialize_mql5_struct<StructType: Debug>(pre_allocated_mql5_string: *mut u16, struct_ptr: *const StructType) {
-log::debug!("### pre_allocated_mql5_string {:x}", pre_allocated_mql5_string as u64);
-log::debug!("### struct_ptr {:x}", struct_ptr as u64);
     let strct = unsafe { &*struct_ptr };
-log::debug!("### pre strct");
-log::debug!("### strct: {:?}", strct);
-log::debug!("### post strct");
     unchecked_convert_rust_to_mql5_string(format!("{:?}", strct), pre_allocated_mql5_string);
-log::debug!("### wtf!! did it work??");
 }
 
 /// Dumps the Debug output of `array` into `pre_allocated_mql5_string` -- which should have enough size or else

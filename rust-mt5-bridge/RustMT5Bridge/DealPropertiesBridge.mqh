@@ -9,15 +9,15 @@ struct DealPropertiesBridge {
 	                        double                          deal_fee;      // Fee for making a deal charged immediately after performing a deal
 	                        double                           deal_sl;      // Stop Loss level
 	                        double                           deal_tp;      // Take Profit level
-	                        string                       deal_symbol;      // Deal symbol
-	                        string                      deal_comment;      // Deal comment
-	                        string                  deal_external_id;      // Deal identifier in an external trading system (on the Exchange) 
 	                          long                       deal_ticket;      // Deal ticket. Unique number assigned to each deal
 	                          long                        deal_order;      // Deal order number
 	                          long                     deal_time_msc;      // The time of a deal execution in milliseconds since 01.01.1970
 	                          long                        deal_magic;      // Deal magic number (see ORDER_MAGIC)
 	                          long                  deal_position_id;      // Identifier of a position, in the opening, modification or closing of which this deal took part. Each position has a unique identifier that is assigned to all deals executed for the symbol during the entire lifetime of the position.
 	                      datetime                         deal_time;      // Deal time
+	                        string                       deal_symbol;      // Deal symbol
+	                        string                      deal_comment;      // Deal comment
+	                        string                  deal_external_id;      // Deal identifier in an external trading system (on the Exchange) 
 	                ENUM_DEAL_TYPE                         deal_type;      // Deal type
 	               ENUM_DEAL_ENTRY                        deal_entry;      // Deal entry - entry in, entry out, reverse
 	              ENUM_DEAL_REASON                       deal_reason;      // The reason or source for deal execution

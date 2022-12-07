@@ -76,25 +76,10 @@ pub struct AccountInfoBridge {
 impl AccountInfoBridge {
 
 	pub fn from_ptr_to_internal(account_info_bridge: *const AccountInfoBridge) -> AccountInfoRust {
+
 		let account_info_bridge = unsafe { &*account_info_bridge };
 
 		log::debug!("report_account_info(xx): _____: {:#?}", account_info_bridge);
-
-log::debug!("WTF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-
-log::debug!("{:x}", std::ptr::addr_of!(ENUM_ACCOUNT_TRADE_MODE) as u64);
-log::debug!("'{}'", ENUM_ACCOUNT_TRADE_MODE.name());
-log::debug!("{}", ENUM_ACCOUNT_TRADE_MODE.debug());
-let account_trade_mode: EnumAccountTradeMode = ENUM_ACCOUNT_TRADE_MODE.resolve_rust_variant(account_info_bridge.account_trade_mode);
-log::debug!("account_trade_mode: {}", account_trade_mode as i32);
-
-log::debug!("{}", ENUM_ACCOUNT_STOPOUT_MODE.debug());
-let account_margin_so_mode: EnumAccountStopoutMode = ENUM_ACCOUNT_STOPOUT_MODE.resolve_rust_variant(account_info_bridge.account_margin_so_mode);
-log::debug!("account_margin_so_mode: {}", account_margin_so_mode as i32);
-
-log::debug!("{}", ENUM_ACCOUNT_MARGIN_MODE.debug());
-let account_margin_mode: EnumAccountMarginMode = ENUM_ACCOUNT_MARGIN_MODE.resolve_rust_variant(account_info_bridge.account_margin_mode);
-log::debug!("account_margin_mode: {}", account_margin_mode as i32);
 
 		AccountInfoRust {
 			account_balance: account_info_bridge.account_balance,

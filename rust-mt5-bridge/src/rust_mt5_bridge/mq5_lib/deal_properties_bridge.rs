@@ -31,12 +31,6 @@ pub struct DealPropertiesBridge {
 	pub deal_sl: f64,
 	/// Take Profit level
 	pub deal_tp: f64,
-	/// Deal symbol
-	pub deal_symbol: MQ5String,
-	/// Deal comment
-	pub deal_comment: MQ5String,
-	/// Deal identifier in an external trading system (on the Exchange) 
-	pub deal_external_id: MQ5String,
 	/// Deal ticket. Unique number assigned to each deal
 	pub deal_ticket: i64,
 	/// Deal order number
@@ -49,6 +43,12 @@ pub struct DealPropertiesBridge {
 	pub deal_position_id: i64,
 	/// Deal time
 	pub deal_time: MQ5DateTime,
+	/// Deal symbol
+	pub deal_symbol: MQ5String,
+	/// Deal comment
+	pub deal_comment: MQ5String,
+	/// Deal identifier in an external trading system (on the Exchange)
+	pub deal_external_id: MQ5String,
 	/// Deal type
 	pub deal_type: i32, //EnumDealType,
 	/// Deal entry - entry in, entry out, reverse
@@ -59,6 +59,7 @@ pub struct DealPropertiesBridge {
 impl DealPropertiesBridge {
 
 	pub fn from_ptr_to_internal(deal_properties_bridge: *const DealPropertiesBridge) -> DealPropertiesRust {
+
 		let deal_properties_bridge = unsafe { &*deal_properties_bridge };
 
 		log::debug!("report_deal_properties(xx): _____: {:#?}", deal_properties_bridge);
@@ -72,14 +73,14 @@ impl DealPropertiesBridge {
 			deal_fee: deal_properties_bridge.deal_fee,
 			deal_sl: deal_properties_bridge.deal_sl,
 			deal_tp: deal_properties_bridge.deal_tp,
-			deal_symbol: string_from_mql_string(&deal_properties_bridge.deal_symbol),
-			deal_comment: string_from_mql_string(&deal_properties_bridge.deal_comment),
-			deal_external_id: string_from_mql_string(&deal_properties_bridge.deal_external_id),
 			deal_ticket: deal_properties_bridge.deal_ticket,
 			deal_order: deal_properties_bridge.deal_order,
 			deal_magic: deal_properties_bridge.deal_magic,
 			deal_position_id: deal_properties_bridge.deal_position_id,
 			deal_time: NaiveDateTime::from_timestamp(deal_properties_bridge.deal_time as i64, 1000_000 * (deal_properties_bridge.deal_time_msc % 1000) as u32),
+			deal_symbol: string_from_mql_string(&deal_properties_bridge.deal_symbol),
+			deal_comment: string_from_mql_string(&deal_properties_bridge.deal_comment),
+			deal_external_id: string_from_mql_string(&deal_properties_bridge.deal_external_id),
 			deal_type: ENUM_DEAL_TYPE.resolve_rust_variant(deal_properties_bridge.deal_type),
 			deal_entry: ENUM_DEAL_ENTRY.resolve_rust_variant(deal_properties_bridge.deal_entry),
 			deal_reason: ENUM_DEAL_REASON.resolve_rust_variant(deal_properties_bridge.deal_reason),
@@ -106,12 +107,6 @@ pub struct DealPropertiesRust {
 	pub deal_sl: f64,
 	/// Take Profit level
 	pub deal_tp: f64,
-	/// Deal symbol
-	pub deal_symbol: String,
-	/// Deal comment
-	pub deal_comment: String,
-	/// Deal identifier in an external trading system (on the Exchange)
-	pub deal_external_id: String,
 	/// Deal ticket. Unique number assigned to each deal
 	pub deal_ticket: i64,
 	/// Deal order number
@@ -122,6 +117,12 @@ pub struct DealPropertiesRust {
 	pub deal_position_id: i64,
 	/// Deal time
 	pub deal_time: NaiveDateTime,
+	/// Deal symbol
+	pub deal_symbol: String,
+	/// Deal comment
+	pub deal_comment: String,
+	/// Deal identifier in an external trading system (on the Exchange)
+	pub deal_external_id: String,
 	/// Deal type
 	pub deal_type: EnumDealType,
 	/// Deal entry - entry in, entry out, reverse

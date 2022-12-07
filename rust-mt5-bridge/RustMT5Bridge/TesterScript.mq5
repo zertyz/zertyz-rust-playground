@@ -24,7 +24,7 @@ void OnStart() {
         Print("I'D QUIT NOW (BUT I WON'T) DUE TO DLL ERROR: " + observed);
     }
 
- /*   test_name = "Testing MqlTick serialization...";
+    test_name = "Testing MqlTick serialization...";
     MqlTick mql_tick;
     mql_tick.time        = 12344321;
     mql_tick.bid         = 97.58;
@@ -48,190 +48,6 @@ void OnStart() {
     expose_constant("TICK_FLAG_VOLUME", TICK_FLAG_VOLUME, "a tick has changed a volume");
     expose_constant("TICK_FLAG_BUY",    TICK_FLAG_BUY,    "a tick is a result of a buy deal");
     expose_constant("TICK_FLAG_SELL",   TICK_FLAG_SELL,   "a tick is a result of a sell deal");
-*/
-
-/*   Print("ENUM_SYMBOL_SECTOR:");
-   Print("    SECTOR_BASIC_MATERIALS: ", SECTOR_BASIC_MATERIALS);
-   Print("    SECTOR_COMMUNICATION_SERVICES: ", SECTOR_COMMUNICATION_SERVICES);
-   Print("    SECTOR_CONSUMER_CYCLICAL: ", SECTOR_CONSUMER_CYCLICAL);
-   Print("    SECTOR_CONSUMER_DEFENSIVE: ", SECTOR_CONSUMER_DEFENSIVE);
-   Print("    SECTOR_CURRENCY: ", SECTOR_CURRENCY);
-   Print("    SECTOR_CURRENCY_CRYPTO: ", SECTOR_CURRENCY_CRYPTO);
-   Print("    SECTOR_ENERGY: ", SECTOR_ENERGY);
-   Print("    SECTOR_FINANCIAL: ", SECTOR_FINANCIAL);
-   Print("    SECTOR_HEALTHCARE: ", SECTOR_HEALTHCARE);
-   Print("    SECTOR_INDUSTRIALS: ", SECTOR_INDUSTRIALS);
-   Print("    SECTOR_REAL_ESTATE: ", SECTOR_REAL_ESTATE);
-   Print("    SECTOR_TECHNOLOGY: ", SECTOR_TECHNOLOGY);
-   Print("    SECTOR_UTILITIES: ", SECTOR_UTILITIES);
-   
-   Print("ENUM_SYMBOL_INDUSTRY:");
-    Print("    INDUSTRY_UNDEFINED: 	", INDUSTRY_UNDEFINED);
-    Print("    INDUSTRY_AGRICULTURAL_INPUTS: 	", INDUSTRY_AGRICULTURAL_INPUTS);
-    Print("    INDUSTRY_ALUMINIUM: 	", INDUSTRY_ALUMINIUM);
-    Print("    INDUSTRY_BUILDING_MATERIALS: 	", INDUSTRY_BUILDING_MATERIALS);
-    Print("    INDUSTRY_CHEMICALS: 	", INDUSTRY_CHEMICALS);
-    Print("    INDUSTRY_COKING_COAL: 	", INDUSTRY_COKING_COAL);
-    Print("    INDUSTRY_COPPER: 	", INDUSTRY_COPPER);
-    Print("    INDUSTRY_GOLD: 	", INDUSTRY_GOLD);
-    Print("    INDUSTRY_LUMBER_WOOD: 	", INDUSTRY_LUMBER_WOOD);
-    Print("    INDUSTRY_INDUSTRIAL_METALS: 	", INDUSTRY_INDUSTRIAL_METALS);
-    Print("    INDUSTRY_PRECIOUS_METALS: 	", INDUSTRY_PRECIOUS_METALS);
-    Print("    INDUSTRY_PAPER: 	", INDUSTRY_PAPER);
-    Print("    INDUSTRY_SILVER: 	", INDUSTRY_SILVER);
-    Print("    INDUSTRY_SPECIALTY_CHEMICALS: 	", INDUSTRY_SPECIALTY_CHEMICALS);
-    Print("    INDUSTRY_STEEL: 	", INDUSTRY_STEEL);
-    Print("    INDUSTRY_ADVERTISING: 	", INDUSTRY_ADVERTISING);
-    Print("    INDUSTRY_BROADCASTING: 	", INDUSTRY_BROADCASTING);
-    Print("    INDUSTRY_GAMING_MULTIMEDIA: 	", INDUSTRY_GAMING_MULTIMEDIA);
-    Print("    INDUSTRY_ENTERTAINMENT: 	", INDUSTRY_ENTERTAINMENT);
-    Print("    INDUSTRY_INTERNET_CONTENT: 	", INDUSTRY_INTERNET_CONTENT);
-    Print("    INDUSTRY_PUBLISHING: 	", INDUSTRY_PUBLISHING);
-    Print("    INDUSTRY_TELECOM: 	", INDUSTRY_TELECOM);
-    Print("    INDUSTRY_APPAREL_MANUFACTURING: 	", INDUSTRY_APPAREL_MANUFACTURING);
-    Print("    INDUSTRY_APPAREL_RETAIL: 	", INDUSTRY_APPAREL_RETAIL);
-    Print("    INDUSTRY_AUTO_MANUFACTURERS: 	", INDUSTRY_AUTO_MANUFACTURERS);
-    Print("    INDUSTRY_AUTO_PARTS: 	", INDUSTRY_AUTO_PARTS);
-    Print("    INDUSTRY_AUTO_DEALERSHIP: 	", INDUSTRY_AUTO_DEALERSHIP);
-    Print("    INDUSTRY_DEPARTMENT_STORES: 	", INDUSTRY_DEPARTMENT_STORES);
-    Print("    INDUSTRY_FOOTWEAR_ACCESSORIES: 	", INDUSTRY_FOOTWEAR_ACCESSORIES);
-    Print("    INDUSTRY_FURNISHINGS: 	", INDUSTRY_FURNISHINGS);
-    Print("    INDUSTRY_GAMBLING: 	", INDUSTRY_GAMBLING);
-    Print("    INDUSTRY_HOME_IMPROV_RETAIL: 	", INDUSTRY_HOME_IMPROV_RETAIL);
-    Print("    INDUSTRY_INTERNET_RETAIL: 	", INDUSTRY_INTERNET_RETAIL);
-    Print("    INDUSTRY_LEISURE: 	", INDUSTRY_LEISURE);
-    Print("    INDUSTRY_LODGING: 	", INDUSTRY_LODGING);
-    Print("    INDUSTRY_LUXURY_GOODS: 	", INDUSTRY_LUXURY_GOODS);
-    Print("    INDUSTRY_PACKAGING_CONTAINERS: 	", INDUSTRY_PACKAGING_CONTAINERS);
-    Print("    INDUSTRY_PERSONAL_SERVICES: 	", INDUSTRY_PERSONAL_SERVICES);
-    Print("    INDUSTRY_RECREATIONAL_VEHICLES: 	", INDUSTRY_RECREATIONAL_VEHICLES);
-    Print("    INDUSTRY_RESIDENT_CONSTRUCTION: 	", INDUSTRY_RESIDENT_CONSTRUCTION);
-    Print("    INDUSTRY_RESORTS_CASINOS: 	", INDUSTRY_RESORTS_CASINOS);
-    Print("    INDUSTRY_RESTAURANTS: 	", INDUSTRY_RESTAURANTS);
-    Print("    INDUSTRY_SPECIALTY_RETAIL: 	", INDUSTRY_SPECIALTY_RETAIL);
-    Print("    INDUSTRY_TEXTILE_MANUFACTURING: 	", INDUSTRY_TEXTILE_MANUFACTURING);
-    Print("    INDUSTRY_TRAVEL_SERVICES: 	", INDUSTRY_TRAVEL_SERVICES);
-    Print("    INDUSTRY_BEVERAGES_BREWERS: 	", INDUSTRY_BEVERAGES_BREWERS);
-    Print("    INDUSTRY_BEVERAGES_NON_ALCO: 	", INDUSTRY_BEVERAGES_NON_ALCO);
-    Print("    INDUSTRY_BEVERAGES_WINERIES: 	", INDUSTRY_BEVERAGES_WINERIES);
-    Print("    INDUSTRY_CONFECTIONERS: 	", INDUSTRY_CONFECTIONERS);
-    Print("    INDUSTRY_DISCOUNT_STORES: 	", INDUSTRY_DISCOUNT_STORES);
-    Print("    INDUSTRY_EDUCATION_TRAINIG: 	", INDUSTRY_EDUCATION_TRAINIG);
-    Print("    INDUSTRY_FARM_PRODUCTS: 	", INDUSTRY_FARM_PRODUCTS);
-    Print("    INDUSTRY_FOOD_DISTRIBUTION: 	", INDUSTRY_FOOD_DISTRIBUTION);
-    Print("    INDUSTRY_GROCERY_STORES: 	", INDUSTRY_GROCERY_STORES);
-    Print("    INDUSTRY_HOUSEHOLD_PRODUCTS: 	", INDUSTRY_HOUSEHOLD_PRODUCTS);
-    Print("    INDUSTRY_PACKAGED_FOODS: 	", INDUSTRY_PACKAGED_FOODS);
-    Print("    INDUSTRY_TOBACCO: 	", INDUSTRY_TOBACCO);
-    Print("    INDUSTRY_OIL_GAS_DRILLING: 	", INDUSTRY_OIL_GAS_DRILLING);
-    Print("    INDUSTRY_OIL_GAS_EP: 	", INDUSTRY_OIL_GAS_EP);
-    Print("    INDUSTRY_OIL_GAS_EQUIPMENT: 	", INDUSTRY_OIL_GAS_EQUIPMENT);
-    Print("    INDUSTRY_OIL_GAS_INTEGRATED: 	", INDUSTRY_OIL_GAS_INTEGRATED);
-    Print("    INDUSTRY_OIL_GAS_MIDSTREAM: 	", INDUSTRY_OIL_GAS_MIDSTREAM);
-    Print("    INDUSTRY_OIL_GAS_REFINING: 	", INDUSTRY_OIL_GAS_REFINING);
-    Print("    INDUSTRY_THERMAL_COAL: 	", INDUSTRY_THERMAL_COAL);
-    Print("    INDUSTRY_URANIUM: 	", INDUSTRY_URANIUM);
-    Print("    INDUSTRY_EXCHANGE_TRADED_FUND: 	", INDUSTRY_EXCHANGE_TRADED_FUND);
-    Print("    INDUSTRY_ASSETS_MANAGEMENT: 	", INDUSTRY_ASSETS_MANAGEMENT);
-    Print("    INDUSTRY_BANKS_DIVERSIFIED: 	", INDUSTRY_BANKS_DIVERSIFIED);
-    Print("    INDUSTRY_BANKS_REGIONAL: 	", INDUSTRY_BANKS_REGIONAL);
-    Print("    INDUSTRY_CAPITAL_MARKETS: 	", INDUSTRY_CAPITAL_MARKETS);
-    Print("    INDUSTRY_CLOSE_END_FUND_DEBT: 	", INDUSTRY_CLOSE_END_FUND_DEBT);
-    Print("    INDUSTRY_CLOSE_END_FUND_EQUITY: 	", INDUSTRY_CLOSE_END_FUND_EQUITY);
-    Print("    INDUSTRY_CLOSE_END_FUND_FOREIGN: 	", INDUSTRY_CLOSE_END_FUND_FOREIGN);
-    Print("    INDUSTRY_CREDIT_SERVICES: 	", INDUSTRY_CREDIT_SERVICES);
-    Print("    INDUSTRY_FINANCIAL_CONGLOMERATE: 	", INDUSTRY_FINANCIAL_CONGLOMERATE);
-    Print("    INDUSTRY_FINANCIAL_DATA_EXCHANGE: 	", INDUSTRY_FINANCIAL_DATA_EXCHANGE);
-    Print("    INDUSTRY_INSURANCE_BROKERS: 	", INDUSTRY_INSURANCE_BROKERS);
-    Print("    INDUSTRY_INSURANCE_DIVERSIFIED: 	", INDUSTRY_INSURANCE_DIVERSIFIED);
-    Print("    INDUSTRY_INSURANCE_LIFE: 	", INDUSTRY_INSURANCE_LIFE);
-    Print("    INDUSTRY_INSURANCE_PROPERTY: 	", INDUSTRY_INSURANCE_PROPERTY);
-    Print("    INDUSTRY_INSURANCE_REINSURANCE: 	", INDUSTRY_INSURANCE_REINSURANCE);
-    Print("    INDUSTRY_INSURANCE_SPECIALTY: 	", INDUSTRY_INSURANCE_SPECIALTY);
-    Print("    INDUSTRY_MORTGAGE_FINANCE: 	", INDUSTRY_MORTGAGE_FINANCE);
-    Print("    INDUSTRY_SHELL_COMPANIES: 	", INDUSTRY_SHELL_COMPANIES);
-    Print("    INDUSTRY_BIOTECHNOLOGY: 	", INDUSTRY_BIOTECHNOLOGY);
-    Print("    INDUSTRY_DIAGNOSTICS_RESEARCH: 	", INDUSTRY_DIAGNOSTICS_RESEARCH);
-    Print("    INDUSTRY_DRUGS_MANUFACTURERS: 	", INDUSTRY_DRUGS_MANUFACTURERS);
-    Print("    INDUSTRY_DRUGS_MANUFACTURERS_SPEC: 	", INDUSTRY_DRUGS_MANUFACTURERS_SPEC);
-    Print("    INDUSTRY_HEALTHCARE_PLANS: 	", INDUSTRY_HEALTHCARE_PLANS);
-    Print("    INDUSTRY_HEALTH_INFORMATION: 	", INDUSTRY_HEALTH_INFORMATION);
-    Print("    INDUSTRY_MEDICAL_FACILITIES: 	", INDUSTRY_MEDICAL_FACILITIES);
-    Print("    INDUSTRY_MEDICAL_DEVICES: 	", INDUSTRY_MEDICAL_DEVICES);
-    Print("    INDUSTRY_MEDICAL_DISTRIBUTION: 	", INDUSTRY_MEDICAL_DISTRIBUTION);
-    Print("    INDUSTRY_MEDICAL_INSTRUMENTS: 	", INDUSTRY_MEDICAL_INSTRUMENTS);
-    Print("    INDUSTRY_PHARM_RETAILERS: 	", INDUSTRY_PHARM_RETAILERS);
-    Print("    INDUSTRY_AEROSPACE_DEFENSE: 	", INDUSTRY_AEROSPACE_DEFENSE);
-    Print("    INDUSTRY_AIRLINES: 	", INDUSTRY_AIRLINES);
-    Print("    INDUSTRY_AIRPORTS_SERVICES: 	", INDUSTRY_AIRPORTS_SERVICES);
-    Print("    INDUSTRY_BUILDING_PRODUCTS: 	", INDUSTRY_BUILDING_PRODUCTS);
-    Print("    INDUSTRY_BUSINESS_EQUIPMENT: 	", INDUSTRY_BUSINESS_EQUIPMENT);
-    Print("    INDUSTRY_CONGLOMERATES: 	", INDUSTRY_CONGLOMERATES);
-    Print("    INDUSTRY_CONSULTING_SERVICES: 	", INDUSTRY_CONSULTING_SERVICES);
-    Print("    INDUSTRY_ELECTRICAL_EQUIPMENT: 	", INDUSTRY_ELECTRICAL_EQUIPMENT);
-    Print("    INDUSTRY_ENGINEERING_CONSTRUCTION: 	", INDUSTRY_ENGINEERING_CONSTRUCTION);
-    Print("    INDUSTRY_FARM_HEAVY_MACHINERY: 	", INDUSTRY_FARM_HEAVY_MACHINERY);
-    Print("    INDUSTRY_INDUSTRIAL_DISTRIBUTION: 	", INDUSTRY_INDUSTRIAL_DISTRIBUTION);
-    Print("    INDUSTRY_INFRASTRUCTURE_OPERATIONS: 	", INDUSTRY_INFRASTRUCTURE_OPERATIONS);
-    Print("    INDUSTRY_FREIGHT_LOGISTICS: 	", INDUSTRY_FREIGHT_LOGISTICS);
-    Print("    INDUSTRY_MARINE_SHIPPING: 	", INDUSTRY_MARINE_SHIPPING);
-    Print("    INDUSTRY_METAL_FABRICATION: 	", INDUSTRY_METAL_FABRICATION);
-    Print("    INDUSTRY_POLLUTION_CONTROL: 	", INDUSTRY_POLLUTION_CONTROL);
-    Print("    INDUSTRY_RAILROADS: 	", INDUSTRY_RAILROADS);
-    Print("    INDUSTRY_RENTAL_LEASING: 	", INDUSTRY_RENTAL_LEASING);
-    Print("    INDUSTRY_SECURITY_PROTECTION: 	", INDUSTRY_SECURITY_PROTECTION);
-    Print("    INDUSTRY_SPEALITY_BUSINESS_SERVICES: 	", INDUSTRY_SPEALITY_BUSINESS_SERVICES);
-    Print("    INDUSTRY_SPEALITY_MACHINERY: 	", INDUSTRY_SPEALITY_MACHINERY);
-    Print("    INDUSTRY_STUFFING_EMPLOYMENT: 	", INDUSTRY_STUFFING_EMPLOYMENT);
-    Print("    INDUSTRY_TOOLS_ACCESSORIES: 	", INDUSTRY_TOOLS_ACCESSORIES);
-    Print("    INDUSTRY_TRUCKING: 	", INDUSTRY_TRUCKING);
-    Print("    INDUSTRY_WASTE_MANAGEMENT: 	", INDUSTRY_WASTE_MANAGEMENT);
-    Print("    INDUSTRY_REAL_ESTATE_DEVELOPMENT: 	", INDUSTRY_REAL_ESTATE_DEVELOPMENT);
-    Print("    INDUSTRY_REAL_ESTATE_DIVERSIFIED: 	", INDUSTRY_REAL_ESTATE_DIVERSIFIED);
-    Print("    INDUSTRY_REAL_ESTATE_SERVICES: 	", INDUSTRY_REAL_ESTATE_SERVICES);
-    Print("    INDUSTRY_REIT_DIVERSIFIED: 	", INDUSTRY_REIT_DIVERSIFIED);
-    Print("    INDUSTRY_REIT_HEALTCARE: 	", INDUSTRY_REIT_HEALTCARE);
-    Print("    INDUSTRY_REIT_HOTEL_MOTEL: 	", INDUSTRY_REIT_HOTEL_MOTEL);
-    Print("    INDUSTRY_REIT_INDUSTRIAL: 	", INDUSTRY_REIT_INDUSTRIAL);
-    Print("    INDUSTRY_REIT_MORTAGE: 	", INDUSTRY_REIT_MORTAGE);
-    Print("    INDUSTRY_REIT_OFFICE: 	", INDUSTRY_REIT_OFFICE);
-    Print("    INDUSTRY_REIT_RESIDENTAL: 	", INDUSTRY_REIT_RESIDENTAL);
-    Print("    INDUSTRY_REIT_RETAIL: 	", INDUSTRY_REIT_RETAIL);
-    Print("    INDUSTRY_REIT_SPECIALITY: 	", INDUSTRY_REIT_SPECIALITY);
-    Print("    INDUSTRY_COMMUNICATION_EQUIPMENT: 	", INDUSTRY_COMMUNICATION_EQUIPMENT);
-    Print("    INDUSTRY_COMPUTER_HARDWARE: 	", INDUSTRY_COMPUTER_HARDWARE);
-    Print("    INDUSTRY_CONSUMER_ELECTRONICS: 	", INDUSTRY_CONSUMER_ELECTRONICS);
-    Print("    INDUSTRY_ELECTRONIC_COMPONENTS: 	", INDUSTRY_ELECTRONIC_COMPONENTS);
-    Print("    INDUSTRY_ELECTRONIC_DISTRIBUTION: 	", INDUSTRY_ELECTRONIC_DISTRIBUTION);
-    Print("    INDUSTRY_IT_SERVICES: 	", INDUSTRY_IT_SERVICES);
-    Print("    INDUSTRY_SCIENTIFIC_INSTRUMENTS: 	", INDUSTRY_SCIENTIFIC_INSTRUMENTS);
-    Print("    INDUSTRY_SEMICONDUCTOR_EQUIPMENT: 	", INDUSTRY_SEMICONDUCTOR_EQUIPMENT);
-    Print("    INDUSTRY_SEMICONDUCTORS: 	", INDUSTRY_SEMICONDUCTORS);
-    Print("    INDUSTRY_SOFTWARE_APPLICATION: 	", INDUSTRY_SOFTWARE_APPLICATION);
-    Print("    INDUSTRY_SOFTWARE_INFRASTRUCTURE: 	", INDUSTRY_SOFTWARE_INFRASTRUCTURE);
-    Print("    INDUSTRY_SOLAR: 	", INDUSTRY_SOLAR);
-    Print("    INDUSTRY_UTILITIES_DIVERSIFIED: 	", INDUSTRY_UTILITIES_DIVERSIFIED);
-    Print("    INDUSTRY_UTILITIES_POWERPRODUCERS: 	", INDUSTRY_UTILITIES_POWERPRODUCERS);
-    Print("    INDUSTRY_UTILITIES_RENEWABLE: 	", INDUSTRY_UTILITIES_RENEWABLE);
-    Print("    INDUSTRY_UTILITIES_REGULATED_ELECTRIC: 	", INDUSTRY_UTILITIES_REGULATED_ELECTRIC);
-    Print("    INDUSTRY_UTILITIES_REGULATED_GAS: 	", INDUSTRY_UTILITIES_REGULATED_GAS);
-    Print("    INDUSTRY_UTILITIES_REGULATED_WATER: 	", INDUSTRY_UTILITIES_REGULATED_WATER);*/
-    
-    Print("ENUM_SYMBOL_CALC_MODE:");
-    Print("SYMBOL_CALC_MODE_FOREX: 	", SYMBOL_CALC_MODE_FOREX);
-    Print("SYMBOL_CALC_MODE_FOREX_NO_LEVERAGE: 	", SYMBOL_CALC_MODE_FOREX_NO_LEVERAGE);
-    Print("SYMBOL_CALC_MODE_FUTURES: 	", SYMBOL_CALC_MODE_FUTURES);
-    Print("SYMBOL_CALC_MODE_CFD: 	", SYMBOL_CALC_MODE_CFD);
-    Print("SYMBOL_CALC_MODE_CFDINDEX: 	", SYMBOL_CALC_MODE_CFDINDEX);
-    Print("SYMBOL_CALC_MODE_CFDLEVERAGE: 	", SYMBOL_CALC_MODE_CFDLEVERAGE);
-    Print("SYMBOL_CALC_MODE_EXCH_STOCKS: 	", SYMBOL_CALC_MODE_EXCH_STOCKS);
-    Print("SYMBOL_CALC_MODE_EXCH_FUTURES: 	", SYMBOL_CALC_MODE_EXCH_FUTURES);
-    Print("SYMBOL_CALC_MODE_EXCH_FUTURES_FORTS: 	", SYMBOL_CALC_MODE_EXCH_FUTURES_FORTS);
-    Print("SYMBOL_CALC_MODE_EXCH_BONDS: 	", SYMBOL_CALC_MODE_EXCH_BONDS);
-    Print("SYMBOL_CALC_MODE_EXCH_STOCKS_MOEX: 	", SYMBOL_CALC_MODE_EXCH_STOCKS_MOEX);
-    Print("SYMBOL_CALC_MODE_EXCH_BONDS_MOEX: 	", SYMBOL_CALC_MODE_EXCH_BONDS_MOEX);
-    Print("SYMBOL_CALC_MODE_SERV_COLLATERAL: 	", SYMBOL_CALC_MODE_SERV_COLLATERAL);
-   
 
 
     test_name = "Testing SymbolInfoBridge serialization...";
@@ -461,65 +277,114 @@ void OnStart() {
     test_report_symbol_info(observed, symbol_info_bridge);
     assert(observed, expected, test_name);
 
+
     test_name = "Testing AccountInfoBridge serialization...";
     AccountInfoBridge account_info_bridge;
-    account_info_bridge.account_balance = 0;
-    account_info_bridge.account_credit = 0;
-    account_info_bridge.account_profit = 0;
-    account_info_bridge.account_equity = 0;
-    account_info_bridge.account_margin = 0;
-    account_info_bridge.account_margin_free = 0;
-    account_info_bridge.account_margin_level = 0;
-    account_info_bridge.account_margin_so_call = 0;
-    account_info_bridge.account_margin_so_so = 0;
-    account_info_bridge.account_margin_initial = 0;
-    account_info_bridge.account_margin_maintenance = 0;
-    account_info_bridge.account_assets = 0;
-    account_info_bridge.account_liabilities = 0;
-    account_info_bridge.account_commission_blocked = 0;
-    account_info_bridge.account_login = 0;
-    account_info_bridge.account_leverage = 0;
-    account_info_bridge.account_name = 0;
-    account_info_bridge.account_server = 0;
-    account_info_bridge.account_currency = 0;
-    account_info_bridge.account_company = 0;
-    account_info_bridge.account_trade_mode = 0;
-    account_info_bridge.account_limit_orders = 0;
-    account_info_bridge.account_margin_so_mode = 0;
-    account_info_bridge.account_margin_mode = 0;
-    account_info_bridge.account_currency_digits = 0;
-    account_info_bridge.account_trade_allowed = 0;
-    account_info_bridge.account_trade_expert = 0;
-    account_info_bridge.account_fifo_close = 0;
-    account_info_bridge.account_hedge_allowed = 0;
-    expected = "AccountInfoBridge { // some values // }";
+    account_info_bridge.account_balance = 1.1;
+    account_info_bridge.account_credit = 2.2;
+    account_info_bridge.account_profit = 3.3;
+    account_info_bridge.account_equity = 4.4;
+    account_info_bridge.account_margin = 5.5;
+    account_info_bridge.account_margin_free = 6.6;
+    account_info_bridge.account_margin_level = 7.7;
+    account_info_bridge.account_margin_so_call = 8.8;
+    account_info_bridge.account_margin_so_so = 9.9;
+    account_info_bridge.account_margin_initial = 10.10;
+    account_info_bridge.account_margin_maintenance = 11.11;
+    account_info_bridge.account_assets = 12.12;
+    account_info_bridge.account_liabilities = 13.13;
+    account_info_bridge.account_commission_blocked = 14.14;
+    account_info_bridge.account_login = 15.15;
+    account_info_bridge.account_leverage = 16.16;
+    account_info_bridge.account_name = "17.17";
+    account_info_bridge.account_server = "18.18";
+    account_info_bridge.account_currency = "19.19";
+    account_info_bridge.account_company = "20.20";
+    account_info_bridge.account_trade_mode = ACCOUNT_TRADE_MODE_CONTEST;
+    account_info_bridge.account_limit_orders = 22;
+    account_info_bridge.account_margin_so_mode = ACCOUNT_STOPOUT_MODE_MONEY;
+    account_info_bridge.account_margin_mode = ACCOUNT_MARGIN_MODE_RETAIL_HEDGING;
+    account_info_bridge.account_currency_digits = 25;
+    account_info_bridge.account_trade_allowed = false;
+    account_info_bridge.account_trade_expert = true;
+    account_info_bridge.account_fifo_close = false;
+    account_info_bridge.account_hedge_allowed = true;
+    expected = "AccountInfoRust { " +
+    "account_balance: 1.1, " +
+    "account_credit: 2.2, " +
+    "account_profit: 3.3, " +
+    "account_equity: 4.4, " +
+    "account_margin: 5.5, " +
+    "account_margin_free: 6.6, " +
+    "account_margin_level: 7.7, " +
+    "account_margin_so_call: 8.8, " +
+    "account_margin_so_so: 9.9, " +
+    "account_margin_initial: 10.1, " +
+    "account_margin_maintenance: 11.11, " +
+    "account_assets: 12.12, " +
+    "account_liabilities: 13.13, " +
+    "account_commission_blocked: 14.14, " +
+    "account_login: 15, " +
+    "account_leverage: 16, " +
+    "account_name: \"17.17\", " +
+    "account_server: \"18.18\", " +
+    "account_currency: \"19.19\", " +
+    "account_company: \"20.20\", " +
+    "account_trade_mode: AccountTradeModeContest, " +
+    "account_limit_orders: 22, " +
+    "account_margin_so_mode: AccountStopoutModeMoney, " +
+    "account_margin_mode: AccountMarginModeRetailHedging, " +
+    "account_currency_digits: 25, " +
+    "account_trade_allowed: false, " +
+    "account_trade_expert: true, " +
+    "account_fifo_close: false, " +
+    "account_hedge_allowed: true }";
     test_report_account_info(observed, account_info_bridge);
     assert(observed, expected, test_name);
 
 
     test_name = "Testing DealPropertiesBridge serialization...";
     DealPropertiesBridge deal_properties_bridge;
-    deal_properties_bridge.deal_volume = 0;
-    deal_properties_bridge.deal_price = 0;
-    deal_properties_bridge.deal_commission = 0;
-    deal_properties_bridge.deal_swap = 0;
-    deal_properties_bridge.deal_profit = 0;
-    deal_properties_bridge.deal_fee = 0;
-    deal_properties_bridge.deal_sl = 0;
-    deal_properties_bridge.deal_tp = 0;
-    deal_properties_bridge.deal_symbol = 0;
-    deal_properties_bridge.deal_comment = 0;
-    deal_properties_bridge.deal_external_id = 0;
-    deal_properties_bridge.deal_ticket = 0;
-    deal_properties_bridge.deal_order = 0;
-    deal_properties_bridge.deal_time_msc = 0;
-    deal_properties_bridge.deal_magic = 0;
-    deal_properties_bridge.deal_position_id = 0;
-    deal_properties_bridge.deal_time = 0;
-    deal_properties_bridge.deal_type = 0;
-    deal_properties_bridge.deal_entry = 0;
-    deal_properties_bridge.deal_reason = 0;
-    expected = "DealPropertiesBridge { // some values // }";
+    deal_properties_bridge.deal_volume = 1.1;
+    deal_properties_bridge.deal_price = 2.2;
+    deal_properties_bridge.deal_commission = 3.3;
+    deal_properties_bridge.deal_swap = 4.4;
+    deal_properties_bridge.deal_profit = 5.5;
+    deal_properties_bridge.deal_fee = 6.6;
+    deal_properties_bridge.deal_sl = 7.7;
+    deal_properties_bridge.deal_tp = 8.8;
+    deal_properties_bridge.deal_symbol = "SyMbOl";
+    deal_properties_bridge.deal_comment = "cOmMeNt";
+    deal_properties_bridge.deal_external_id = "iD";
+    deal_properties_bridge.deal_ticket = 9;
+    deal_properties_bridge.deal_order = 10;
+    deal_properties_bridge.deal_time_msc = 11223344;
+    deal_properties_bridge.deal_magic = 55;
+    deal_properties_bridge.deal_position_id = 66;
+    deal_properties_bridge.deal_time = 11223;
+    deal_properties_bridge.deal_type = DEAL_TYPE_COMMISSION_AGENT_DAILY;
+    deal_properties_bridge.deal_entry = DEAL_ENTRY_OUT_BY;
+    deal_properties_bridge.deal_reason = DEAL_REASON_SO;
+    expected = "DealPropertiesRust { " +
+    "deal_volume: 1.1, " +
+    "deal_price: 2.2, " +
+    "deal_commission: 3.3, " +
+    "deal_swap: 4.4, " +
+    "deal_profit: 5.5, " +
+    "deal_fee: 6.6, " +
+    "deal_sl: 7.7, " +
+    "deal_tp: 8.8, " +
+    "deal_ticket: 9, " +
+    "deal_order: 10, " +
+    "deal_magic: 55, " +
+    "deal_position_id: 66, " +
+    "deal_time: 1970-01-01T03:07:03.344, " +
+    "deal_symbol: \"SyMbOl\", " +
+    "deal_comment: \"cOmMeNt\", " +
+    "deal_external_id: \"iD\", " +
+    "deal_type: DealTypeCommissionAgentDaily, " +
+    "deal_entry: DealEntryOutBy, " +
+    "deal_reason: DealReasonSo }";
     test_report_deal_properties(observed, deal_properties_bridge);
     assert(observed, expected, test_name);
 
@@ -633,6 +498,6 @@ void assert(string observed, string expected, string message) {
     } else {
         Print(message + " FAILED");
         Print("  observed ( "+observed.Length()+"chars): '"+observed+"'");
-        Print("  expected:( "+expected.Length()+"chars) '"+expected+"'");
+        Print("  expected ( "+expected.Length()+"chars): '"+expected+"'");
     }
 }
