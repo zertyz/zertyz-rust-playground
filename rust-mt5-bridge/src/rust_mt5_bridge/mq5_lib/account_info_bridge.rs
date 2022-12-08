@@ -115,7 +115,7 @@ impl AccountInfoBridge {
 	}
 }
 
-/// Rust version of the Metatrader 5 [AccountInfoBridge], with strings resolved and copied to Rust, so we may set them free for being freed in MT5
+/// Rust version of the Metatrader 5 [AccountInfoBridge], with correct alignment, redundant fields removed, strings and enums resolved and copied to Rust -- so the MQL reference may be freed as soon as possible in MT5
 #[derive(Debug)]
 pub struct AccountInfoRust {
 	/// Account balance in the deposit currency

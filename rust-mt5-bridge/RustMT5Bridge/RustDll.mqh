@@ -22,17 +22,20 @@ void   on_trade(int handle, int pending_orders_count, int open_positions_count);
 void   on_book(int handle, MqlBookInfo& book_info[], int array_len);
 void   on_trade_transaction(int handle, const MqlTradeTransaction& transaction, const MqlTradeRequest& request, const MqlTradeResult& result);
 
-// variants of the above functions to allow some sort of automated testing
-// (actually, we care only for structs, whose alignment considerations and field positions may yield devastatingly wrong results)
+// struct & constants dumping functions to allow some sort of automated testing
+// (struct's alignment considerations and field positions may yield devastatingly wrong results)
 // -- the test logic consists in the Rust side receiving the struct, serializing it and putting it back into 'buffer', so it can be
-//    compared on the MT5 side
-void test_on_tick(string& buffer, MqlTick& tick);
-void test_report_symbol_info(string& buffer, SymbolInfoBridge& symbol_info);
-void test_report_account_info(string& buffer, AccountInfoBridge& account_info);
-void test_report_deal_properties(string& buffer, DealPropertiesBridge& deal_properties);
-void test_on_book(string& buffer, MqlBookInfo& book_info[], int array_len);
-void test_on_trade_transaction(string& buffer, MqlTradeTransaction& transaction, MqlTradeRequest& request, MqlTradeResult& result);
-//void test_
+//    compared on the MT5 side. See `TesterScript.mq5`
+void dump_mql_tick_flag_constants(string& buffer);
+void dump_on_deinit_reasons(string& buffer);
+void dump_mql_tick(string& buffer, MqlTick& tick);
+void dump_symbol_info_bridge(string& buffer, SymbolInfoBridge& symbol_info);
+void dump_account_info_bridge(string& buffer, AccountInfoBridge& account_info);
+void dump_deal_properties_bridge(string& buffer, DealPropertiesBridge& deal_properties);
+void dump_mql_book_info(string& buffer, MqlBookInfo& book_info[], int array_len);
+void dump_mql_trade_transaction(string& buffer, MqlTradeTransaction& transaction);
+void dump_mql_trade_request(string& buffer, MqlTradeRequest& request);
+void dump_mql_trade_result(string& buffer, MqlTradeResult& result);
 
 
 /*void report_buyer_initiated_trade(int handle, long date_time, double price, int volume);

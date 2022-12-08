@@ -3,9 +3,13 @@
 
 use super::{
 	types::*,
-	super::mql_rust_enum::{MqlRustEnumDescriptor},
+	super::{
+		types::{ENUM_ORDER_TYPE, ENUM_ORDER_TYPE_TIME, EnumOrderType, EnumOrderTypeTime},
+		mql_rust_enum::{MqlRustEnumDescriptor}
+	},
 };
 use std::str::FromStr;
+use chrono::NaiveDateTime;
 use once_cell::sync::Lazy;
 use strum::{EnumString,FromRepr};
 
@@ -15,7 +19,7 @@ use strum::{EnumString,FromRepr};
 /// auto-generated from https://www.mql5.com/en/docs/constants/structures/mqltraderequest
 #[repr(C, packed(4))]
 #[derive(/*disable debug on this structure for production since it will cause a copy due to 'packed(4)' above*/Debug,Copy,Clone)]
-pub struct MqlTradeRequest {
+pub struct Mq5MqlTradeRequest {
 	/// Trade operation type
 	pub action: i32, // EnumTradeRequestActions,
 	/// Expert Advisor ID (magic number)
@@ -37,15 +41,83 @@ pub struct MqlTradeRequest {
 	/// Maximal possible deviation from the requested price
 	pub deviation: u64,
 	/// Order type
-	pub type_: i32, // EnumOrderType,
+	pub order_type: i32, // EnumOrderType,
 	/// Order execution type
-	pub type_filling: i32, // EnumOrderTypeFilling,
+	pub order_type_filling: i32, // EnumOrderTypeFilling,
 	/// Order expiration type
-	pub type_time: i32, // EnumOrderTypeTime,
+	pub order_type_time: i32, // EnumOrderTypeTime,
 	/// Order expiration time (for the orders of ORDER_TIME_SPECIFIED type)
 	pub expiration: MQ5DateTime,
 	/// Order comment
 	pub comment: MQ5String,
+	/// Position ticket
+	pub position: u64,
+	/// The ticket of an opposite position
+	pub position_by: u64,
+}
+impl Mq5MqlTradeRequest {
+
+	pub fn from_ptr_to_internal(mq5_mql_trade_transaction: *const Mq5MqlTradeRequest) -> MqlTradeRequest {
+
+		let mq5_mql_trade_transaction = unsafe { &*mq5_mql_trade_transaction };
+
+		log::debug!("on_trade_transaction(xx): _____: {:#?}", mq5_mql_trade_transaction);
+
+		MqlTradeRequest {
+			action: ENUM_TRADE_REQUEST_ACTIONS.resolve_rust_variant(mq5_mql_trade_transaction.action),
+			magic: mq5_mql_trade_transaction.magic,
+			order: mq5_mql_trade_transaction.order,
+			symbol: string_from_mql_string(&mq5_mql_trade_transaction.symbol),
+			volume: mq5_mql_trade_transaction.volume,
+			price: mq5_mql_trade_transaction.price,
+			stoplimit: mq5_mql_trade_transaction.stoplimit,
+			sl: mq5_mql_trade_transaction.sl,
+			tp: mq5_mql_trade_transaction.tp,
+			deviation: mq5_mql_trade_transaction.deviation,
+			order_type: ENUM_ORDER_TYPE.resolve_rust_variant(mq5_mql_trade_transaction.order_type),
+			order_type_filling: ENUM_ORDER_TYPE_FILLING.resolve_rust_variant(mq5_mql_trade_transaction.order_type_filling),
+			order_type_time: ENUM_ORDER_TYPE_TIME.resolve_rust_variant(mq5_mql_trade_transaction.order_type_time),
+			expiration: NaiveDateTime::from_timestamp(mq5_mql_trade_transaction.expiration as i64, 0),
+			comment: string_from_mql_string(&mq5_mql_trade_transaction.comment),
+			position: mq5_mql_trade_transaction.position,
+			position_by: mq5_mql_trade_transaction.position_by,
+		}
+	}
+}
+
+/// Rust version of the Metatrader 5 [Mq5MqlTradeRequest] structure, with correct alignment, redundant fields removed, dates, strings and enums resolved and copied to Rust -- so the MQL reference may be freed as soon as possible in MT5
+#[derive(Debug)]
+pub struct MqlTradeRequest {
+	/// Trade operation type
+	pub action: EnumTradeRequestActions,
+	/// Expert Advisor ID (magic number)
+	pub magic: u64,
+	/// Order ticket
+	pub order: u64,
+	/// Trade symbol
+	pub symbol: String,
+	/// Requested volume for a deal in lots
+	pub volume: f64,
+	/// Price
+	pub price: f64,
+	/// StopLimit level of the order
+	pub stoplimit: f64,
+	/// Stop Loss level of the order
+	pub sl: f64,
+	/// Take Profit level of the order
+	pub tp: f64,
+	/// Maximal possible deviation from the requested price
+	pub deviation: u64,
+	/// Order type
+	pub order_type: EnumOrderType,
+	/// Order execution type
+	pub order_type_filling: EnumOrderTypeFilling,
+	/// Order expiration type
+	pub order_type_time: EnumOrderTypeTime,
+	/// Order expiration time (for the orders of ORDER_TIME_SPECIFIED type)
+	pub expiration: NaiveDateTime,
+	/// Order comment
+	pub comment: String,
 	/// Position ticket
 	pub position: u64,
 	/// The ticket of an opposite position

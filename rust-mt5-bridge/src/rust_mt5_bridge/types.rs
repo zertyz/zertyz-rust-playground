@@ -130,6 +130,12 @@ const REASON_INITFAILED: u32 = 8;
 /// Terminal has been closed
 const REASON_CLOSE: u32 = 9;
 
+/// Dumps the Rust internal values of the constants used in `OnDeinit(reason)` event calls
+pub fn serialize_on_deinit_reasons() -> String {
+    format!("OnDeinit::reasons {{ REASON_PROGRAM: {REASON_PROGRAM}, REASON_REMOVE: {REASON_REMOVE}, REASON_RECOMPILE: {REASON_RECOMPILE}, REASON_CHARTCHANGE: {REASON_CHARTCHANGE}, REASON_CHARTCLOSE: {REASON_CHARTCLOSE}, REASON_PARAMETERS: {REASON_PARAMETERS}, REASON_ACCOUNT: {REASON_ACCOUNT}, REASON_TEMPLATE: {REASON_TEMPLATE}, REASON_INITFAILED: {REASON_INITFAILED}, REASON_CLOSE: {REASON_CLOSE} }}")
+}
+
+
 pub struct OptionNonZeroF64 {
     internal: f64,
 }

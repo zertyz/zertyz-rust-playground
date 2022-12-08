@@ -362,7 +362,7 @@ impl SymbolInfoBridge {
     }
 }
 
-/// Rust version of the Metatrader 5 [SymbolInfoBridge], with dates, colors and strings resolved and copied to Rust, so we may set them free for being freed in MT5
+/// Rust version of the Metatrader 5 [SymbolInfoBridge], with with correct alignment, redundant fields removed, dates, colors, strings & enums resolved and copied to Rust -- so the MQL reference may be freed as soon as possible in MT5
 #[derive(Debug)]
 pub struct SymbolInfoRust {
     /// The sector of the economy to which the asset belongs
@@ -370,7 +370,7 @@ pub struct SymbolInfoRust {
     /// The industry or the economy branch to which the symbol belongs
     pub symbol_industry: EnumSymbolIndustry,
     /// The color of the background used for the symbol in Market Watch (R, G, B)
-    pub symbol_background_color: (u8, u8, u8),
+    pub symbol_background_color: RGB,
     /// The price type used for generating symbols bars, i.e. Bid or Last
     pub symbol_chart_mode: EnumSymbolChartMode,
     /// Number of deals in the current session

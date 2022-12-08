@@ -7,8 +7,13 @@ use widestring::U16CString;
 /// useful with `let datetime = NaiveDateTime::from_timestamp(mq5_datetime as i64, 0);`
 pub type MQ5DateTime = u64;
 
-/// First byte is ignored -- remaining bytes are RGB
+/// The MQL5 representation of an RGB color: First byte is ignored -- remaining bytes are RGB.\
+/// ```
+/// let rgb:RGB  = (((mt5_color & 0x00FF0000) >> 16) as u8, ((mt5_color & 0x0000FF00) >> 8) as u8, (mt5_color & 0x000000FF) as u8)
 pub type MQ5Color = i32;
+
+/// A color, in (R, G, B) format
+pub type RGB = (u8, u8, u8);
 
 /// A reference to a Metatrader 'string' -- which is, actually, a reference to the string chars themselves, which are zero-terminated and are UTF-16 encoded./
 /// Remember that MQL5 uses string references as parameters for function calls -- but not for struct members./

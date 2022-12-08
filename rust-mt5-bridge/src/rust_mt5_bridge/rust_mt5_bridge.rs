@@ -35,15 +35,15 @@ static mut FATAL_ERROR: Option<String> = None;
 #[no_mangle]
 pub extern "system" fn DllMain(_: *const (), fdw_reason: u32, _: *const ()) -> u32 {
     match fdw_reason {
-        0 => info!("DllMain() called for reason 0: DLL_PROCESS_DETACH -- the DLL is being completely unloaded for the process is about to cleanly exit"),
+        0 => warn!("DllMain() called for reason 0: DLL_PROCESS_DETACH -- the DLL is being completely unloaded for the process is about to cleanly exit"),
         1 => {
             init(Some("rust_mt5_bridge.log"));
-            info!("'rust_mt5_bridge.dll' was loaded and started -- allowing up to {MAX_HANDLES} handles (Expert Advisors, Indicators, Testers, etc.) to be created -- removing them won't free resources (restarting Metatrader will)");
-            info!("DllMain() called for reason 1: DLL_PROCESS_ATTACH -- DLL was loaded!");
+            warn!("'rust_mt5_bridge.dll' was loaded and started -- allowing up to {MAX_HANDLES} handles (Expert Advisors, Indicators, Testers, etc.) to be created -- removing them won't free resources (restarting Metatrader will)");
+            warn!("DllMain() called for reason 1: DLL_PROCESS_ATTACH -- DLL was loaded!");
         },
-        2 => info!("DllMain() called for reason 2: DLL_THREAD_ATTACH -- host process just created another thread"),
-        3 => info!("DllMain() called for reason 3: DLL_THREAD_DETACH -- host process just ended one of its threads"),
-        n => info!("DllMain() called for unknown reason {n}"),
+        2 => debug!("DllMain() called for reason 2: DLL_THREAD_ATTACH -- host process just created another thread"),
+        3 => debug!("DllMain() called for reason 3: DLL_THREAD_DETACH -- host process just ended one of its threads"),
+        n => debug!("DllMain() called for unknown reason {n}"),
     }
     1   // = TRUE: the DLL is good with the reported event
 }
@@ -218,23 +218,22 @@ pub extern fn on_trade(handle_id:            i32,
 pub extern fn on_book(handle_id:           i32,
                       book_info_array_ptr: *const Mq5MqlBookInfo,
                       array_len:           i32) {
-
     let handle = unsafe { &mut HANDLES[handle_id as usize] };
     let book_info_array = unsafe { std::slice::from_raw_parts(book_info_array_ptr, array_len as usize) };
     // this should be logged
-debug!("OnBook({handle_id}): {}: {:?}", handle.symbol, book_info_array);
+    info!("OnBook({handle_id}): {}: {:?}", handle.symbol, book_info_array);
     let delta_events = compute_book_delta_events(&handle.books, book_info_array);
     // these will be enqueued for later processing
-    info!("OnBook({handle_id}): {}: {:?}", handle.symbol, delta_events);
+    debug!("OnBook({handle_id}): {}: {:?}", handle.symbol, delta_events);
     apply_book_delta_events(&mut handle.books, &delta_events);
-debug!("OnBook({handle_id}): {}: {:?}", handle.symbol, handle.books);
+    debug!("OnBook({handle_id}): {}: {:?}", handle.symbol, handle.books);
 }
 
 #[no_mangle]
 pub extern fn on_trade_transaction(handle_id:   i32,
-                                   transaction: *const MqlTradeTransaction,
-                                   request:     *const MqlTradeRequest,
-                                   result:      *const MqlTradeResult) {
+                                   transaction: *const Mq5MqlTradeTransaction,
+                                   request:     *const Mq5MqlTradeRequest,
+                                   result:      *const Mq5MqlTradeResult) {
 
     let handle = unsafe { &mut HANDLES[handle_id as usize] };
     let transaction = unsafe { &*transaction };
@@ -263,18 +262,6 @@ pub extern fn on_tester_pass(handle_id: u32) {
     info!("OnTester: handle_id: {handle_id}, symbol: '{symbol}'");
 }
 
-// additional events to consider implementing in the future:
-//
-//  * https://www.mql5.com/en/docs/basis/function/events
-//  * https://www.mql5.com/en/docs/event_handlers/ontradetransaction
-//    -- can be used to sync the states of executed orders, opened positions, etc
-// void  OnTradeTransaction()
-//    const MqlTradeTransaction&    trans,     // trade transaction structure
-//    const MqlTradeRequest&        request,   // request structure
-//    const MqlTradeResult&         result     // response structure
-//    );
-//
-
 
 // Automated testing functions
 //////////////////////////////
@@ -282,41 +269,62 @@ pub extern fn on_tester_pass(handle_id: u32) {
 // validate that structs shared between the languages are right: alignment, data types and field order
 // must match
 
-/// Tests the correct reading of the [Mq5MqlTick] structure
+/// Dumps the Rust internal values of the constants used in `MqlTick::flags` -- both to the log and
+/// back to the MQL program, via the pre-allocated MQL String `buffer`, so that the MQL Tester
+/// program may validate them
 #[no_mangle]
-pub extern fn test_on_tick(buffer: *mut u16, tick: *const Mq5MqlTick) {
+pub extern fn dump_mql_tick_flag_constants(buffer: *mut u16) {
+    let constants = serialize_mql_tick_flag_constants();
+    info!("dump_mql_tick_flag_constants(): {:?}", constants);
+    unchecked_convert_rust_to_mql5_string(constants, buffer);
+}
+
+#[no_mangle]
+pub extern fn dump_on_deinit_reasons(buffer: *mut u16) {
+    let constants = serialize_on_deinit_reasons();
+    info!("dump_on_deinit_reasons(): {:?}", constants);
+    unchecked_convert_rust_to_mql5_string(constants, buffer);
+}
+
+/// Dumps how Rust reads the [Mq5MqlTick] structure -- both to the log and
+/// back to the MQL program, via the pre-allocated MQL String `buffer`
+#[no_mangle]
+pub extern fn dump_mql_tick(buffer: *mut u16, tick: *const Mq5MqlTick) {
+    info!("dump_mql_tick(): {:?}", unsafe { &*tick });
     serialize_mql5_struct(buffer, tick);
 }
 
-/// Tests the correct reading of the [SymbolInfoBridge] structure
+/// Dumps how Rust reads the [SymbolInfoBridge] structure -- both to the log and
+/// back to the MQL program, via the pre-allocated MQL String `buffer`
 #[no_mangle]
-pub extern fn test_report_symbol_info(buffer: *mut u16, symbol_info: *const SymbolInfoBridge) {
-    let mql_symbol_info = unsafe { &*symbol_info };
-    let symbol_info = SymbolInfoBridge::from_ptr_to_internal(mql_symbol_info);
+pub extern fn dump_symbol_info_bridge(buffer: *mut u16, symbol_info: *const SymbolInfoBridge) {
+    let symbol_info = SymbolInfoBridge::from_ptr_to_internal(symbol_info);
+    info!("dump_symbol_info_bridge(): {:?}", symbol_info);
     serialize_mql5_struct(buffer, std::ptr::addr_of!(symbol_info));
 }
 
-/// Tests the correct reading of the [AccountInfoBridge] structure
+/// Dumps how Rust reads the [AccountInfoBridge] structure -- both to the log and
+/// back to the MQL program, via the pre-allocated MQL String `buffer`
 #[no_mangle]
-pub extern fn test_report_account_info(buffer: *mut u16, account_info: *const AccountInfoBridge) {
-    let account_info = unsafe { &*account_info };
+pub extern fn dump_account_info_bridge(buffer: *mut u16, account_info: *const AccountInfoBridge) {
     let account_info = AccountInfoBridge::from_ptr_to_internal(account_info);
-    debug!("{:?}", account_info);
+    info!("dump_account_info_bridge(): {:?}", account_info);
     serialize_mql5_struct(buffer, std::ptr::addr_of!(account_info));
 }
 
-/// Tests the correct reading of the [DealPropertiesBridge] structure
+/// Dumps how Rust reads the [DealPropertiesBridge] structure -- both to the log and
+/// back to the MQL program, via the pre-allocated MQL String `buffer`
 #[no_mangle]
-pub extern fn test_report_deal_properties(buffer: *mut u16, deal_properties: *const DealPropertiesBridge) {
-    let deal_properties = unsafe { &*deal_properties };
+pub extern fn dump_deal_properties_bridge(buffer: *mut u16, deal_properties: *const DealPropertiesBridge) {
     let deal_properties = DealPropertiesBridge::from_ptr_to_internal(deal_properties);
-    debug!("{:?}", deal_properties);
+    info!("dump_deal_properties_bridge(): {:?}", deal_properties);
     serialize_mql5_struct(buffer, std::ptr::addr_of!(deal_properties));
 }
 
-/// Tests the correct reading of the [Mq5MqlBookInfo] structure
+/// Dumps how Rust reads the [Mq5MqlBookInfo] structure -- both to the log and
+/// back to the MQL program, via the pre-allocated MQL String `buffer`
 #[no_mangle]
-pub extern fn test_on_book(buffer: *mut u16, book_info_array: *const Mq5MqlBookInfo, array_len: i32) {
+pub extern fn dump_mql_book_info(buffer: *mut u16, book_info_array: *const Mq5MqlBookInfo, array_len: i32) {
     let mut owned_book_info = Vec::with_capacity(array_len as usize);
     let mut book_info_cursor = book_info_array;
     for _ in 0..array_len as usize {
@@ -325,23 +333,38 @@ pub extern fn test_on_book(buffer: *mut u16, book_info_array: *const Mq5MqlBookI
         owned_book_info.push(rust_book_info);
         book_info_cursor = (book_info_cursor as usize + std::mem::size_of::<Mq5MqlBookInfo>()) as *mut Mq5MqlBookInfo;
     }
-    debug!("{:?}", owned_book_info);
+    info!("dump_mql_book_info(): {:?}", owned_book_info);
     serialize_mql5_array(buffer, owned_book_info);
 }
 
-/// Tests the correct reading of the [MqlTradeTransaction], [MqlTradeRequest] and [MqlTradeResult] structures
+/// Dumps how Rust reads the [Mq5MqlTradeTransaction] structure -- both to the log and
+/// back to the MQL program, via the pre-allocated MQL String `buffer`
 #[no_mangle]
-pub extern fn test_on_trade_transaction(buffer:      *mut u16,
-                                        transaction: *const MqlTradeTransaction,
-                                        request:     *const MqlTradeRequest,
-                                        result:      *const MqlTradeResult) {
+pub extern fn dump_mql_trade_transaction(buffer:      *mut u16,
+                                         transaction: *const Mq5MqlTradeTransaction) {
+    let transaction = Mq5MqlTradeTransaction::from_ptr_to_internal(transaction);
+    info!("dump_mql_trade_transaction(): {:?}", transaction);
+    serialize_mql5_struct(buffer, &transaction);
+}
 
-    let transaction = unsafe { &*transaction };
-    let request       = unsafe { &*request };
-    let result          = unsafe { &*result };
-    let rust_string = format!("{:?}; {:?}; {:?}", transaction, request, result);
-    debug!("{}", rust_string);
-    unchecked_convert_rust_to_mql5_string(rust_string, buffer);
+/// Dumps how Rust reads the [Mq5MqlTradeRequest] structure -- both to the log and
+/// back to the MQL program, via the pre-allocated MQL String `buffer`
+#[no_mangle]
+pub extern fn dump_mql_trade_request(buffer:  *mut u16,
+                                     request: *const Mq5MqlTradeRequest) {
+    let request = Mq5MqlTradeRequest::from_ptr_to_internal(request);
+    info!("dump_mql_trade_request(): {:?}", request);
+    serialize_mql5_struct(buffer, &request);
+}
+
+/// Dumps how Rust reads the [Mq5MqlTradeResult] structure -- both to the log and
+/// back to the MQL program, via the pre-allocated MQL String `buffer`
+#[no_mangle]
+pub extern fn dump_mql_trade_result(buffer: *mut u16,
+                                    result: *const Mq5MqlTradeResult) {
+    let result = Mq5MqlTradeResult::from_ptr_to_internal(result);
+    info!("dump_mql_trade_result(): {:?}", result);
+    serialize_mql5_struct(buffer, &result);
 }
 
 /// Converts & copies `rust_string` into `pre_allocated_mql5_string`./

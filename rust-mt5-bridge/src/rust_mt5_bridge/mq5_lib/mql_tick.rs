@@ -139,3 +139,9 @@ pub const TICK_FLAG_VOLUME: u32 = 16;
 pub const TICK_FLAG_BUY: u32 = 32;
 /// a tick is a result of a sell deal
 pub const TICK_FLAG_SELL: u32 = 64;
+
+
+/// Dumps the Rust internal values of the constants used in `MqlTick::flags`
+pub fn serialize_mql_tick_flag_constants() -> String {
+	format!("MqlTick::flags {{ TICK_FLAG_BID: {TICK_FLAG_BID}, TICK_FLAG_ASK: {TICK_FLAG_ASK}, TICK_FLAG_LAST: {TICK_FLAG_LAST}, TICK_FLAG_VOLUME: {TICK_FLAG_VOLUME}, TICK_FLAG_BUY: {TICK_FLAG_BUY}, TICK_FLAG_SELL: {TICK_FLAG_SELL} }}")
+}

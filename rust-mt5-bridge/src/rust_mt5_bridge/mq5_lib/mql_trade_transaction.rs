@@ -6,6 +6,7 @@ use super::{
 	super::mql_rust_enum::{MqlRustEnumDescriptor},
 };
 use std::str::FromStr;
+use chrono::NaiveDateTime;
 use once_cell::sync::Lazy;
 use strum::{EnumString,FromRepr};
 
@@ -15,7 +16,7 @@ use strum::{EnumString,FromRepr};
 /// auto-generated from https://www.mql5.com/en/docs/constants/structures/mqltradetransaction
 #[repr(C, packed(4))]
 #[derive(/*disable debug on this structure for production since it will cause a copy due to 'packed(4)' above*/Debug,Copy,Clone)]
-pub struct MqlTradeTransaction {
+pub struct Mq5MqlTradeTransaction {
 	/// Deal ticket
 	pub deal: u64,
 	/// Order ticket
@@ -35,6 +36,70 @@ pub struct MqlTradeTransaction {
 	/// Order expiration time
 	pub time_expiration: MQ5DateTime,
 	/// Price 
+	pub price: f64,
+	/// Stop limit order activation price
+	pub price_trigger: f64,
+	/// Stop Loss level
+	pub price_sl: f64,
+	/// Take Profit level
+	pub price_tp: f64,
+	/// Volume in lots
+	pub volume: f64,
+	/// Position ticket
+	pub position: u64,
+	/// Ticket of an opposite position
+	pub position_by: u64,
+}
+impl Mq5MqlTradeTransaction {
+
+	pub fn from_ptr_to_internal(mq5_mql_trade_transaction: *const Mq5MqlTradeTransaction) -> MqlTradeTransaction {
+		let mq5_mql_trade_transaction = unsafe { &*mq5_mql_trade_transaction };
+
+		log::debug!("on_trade_transaction(xx): _____: {:#?}", mq5_mql_trade_transaction);
+
+		MqlTradeTransaction {
+			deal: mq5_mql_trade_transaction.deal,
+			order: mq5_mql_trade_transaction.order,
+			symbol: string_from_mql_string(&mq5_mql_trade_transaction.symbol),
+			transaction_type: ENUM_TRADE_TRANSACTION_TYPE.resolve_rust_variant(mq5_mql_trade_transaction.transaction_type),
+			order_type: ENUM_ORDER_TYPE.resolve_rust_variant(mq5_mql_trade_transaction.order_type),
+			order_state: ENUM_ORDER_STATE.resolve_rust_variant(mq5_mql_trade_transaction.order_state),
+			deal_type: ENUM_DEAL_TYPE.resolve_rust_variant(mq5_mql_trade_transaction.deal_type),
+			time_type: ENUM_ORDER_TYPE_TIME.resolve_rust_variant(mq5_mql_trade_transaction.time_type),
+			time_expiration: NaiveDateTime::from_timestamp(mq5_mql_trade_transaction.time_expiration as i64, 0),
+			price: mq5_mql_trade_transaction.price,
+			price_trigger: mq5_mql_trade_transaction.price_trigger,
+			price_sl: mq5_mql_trade_transaction.price_sl,
+			price_tp: mq5_mql_trade_transaction.price_tp,
+			volume: mq5_mql_trade_transaction.volume,
+			position: mq5_mql_trade_transaction.position,
+			position_by: mq5_mql_trade_transaction.position_by,
+		}
+	}
+}
+
+/// Rust version of the Metatrader 5 [Mq5MqlTradeTransaction], with correct alignment, redundant fields removed, dates, strings and enums resolved and copied to Rust -- so the MQL reference may be freed as soon as possible in MT5
+#[derive(Debug)]
+pub struct MqlTradeTransaction {
+	/// Deal ticket
+	pub deal: u64,
+	/// Order ticket
+	pub order: u64,
+	/// Trade symbol name
+	pub symbol: String,
+	/// Trade transaction type
+	pub transaction_type: EnumTradeTransactionType,
+	/// Order type
+	pub order_type: EnumOrderType,
+	/// Order state
+	pub order_state: EnumOrderState,
+	/// Deal type
+	pub deal_type: EnumDealType,
+	/// Order type by action period
+	pub time_type: EnumOrderTypeTime,
+	/// Order expiration time
+	pub time_expiration: NaiveDateTime,
+	/// Price
 	pub price: f64,
 	/// Stop limit order activation price
 	pub price_trigger: f64,

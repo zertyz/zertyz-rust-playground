@@ -88,7 +88,7 @@ impl DealPropertiesBridge {
 	}
 }
 
-/// Rust version of the Metatrader 5 [DealPropertiesBridge], with dates & strings resolved and copied to Rust, so we may set them free for being freed in MT5
+/// Rust version of the Metatrader 5 [DealPropertiesBridge], with correct alignment, redundant fields removed, dates, strings & enums resolved and copied to Rust -- so the MQL reference may be freed as soon as possible in MT5
 #[derive(Debug)]
 pub struct DealPropertiesRust {
 	/// Deal volume
