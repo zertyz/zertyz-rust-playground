@@ -7,7 +7,6 @@ use super::{
 };
 use std::str::FromStr;
 use chrono::NaiveDateTime;
-use widestring::U16CString;
 use once_cell::sync::Lazy;
 use strum::{EnumString,FromRepr};
 

@@ -19,7 +19,7 @@ pub type RGB = (u8, u8, u8);
 /// Remember that MQL5 uses string references as parameters for function calls -- but not for struct members./
 /// Use it with:/
 /// ```
-/// // given that `param1` is of type `*const u16`
+/// // given that `param1` is of type `*const u16` -- MQ5StringRef:
 /// let param1 = unsafe { U16CString::from_ptr_str(param1) }
 ///     .to_string().unwrap_or(String::from("««Metatrader's UTF-16 to Rust's UTF-8 conversion FAILED for 'param1' »»"));
 pub type MQ5StringRef = *const u16;

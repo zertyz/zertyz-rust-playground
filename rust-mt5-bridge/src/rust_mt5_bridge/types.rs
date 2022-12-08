@@ -2,9 +2,7 @@ use std::collections::VecDeque;
 pub use super::mq5_lib::*;
 
 use std::fmt::{Debug, Formatter};
-use std::num::NonZeroU64;
 use chrono::NaiveDateTime;
-use widestring::U16CString;
 
 
 #[derive(Debug)]
@@ -101,10 +99,6 @@ pub enum TickEvent<'a> {
 ///////////////////////////
 
 
-/// Number of seconds since January 01, 1970
-type MT5DateTime = u64;
-
-
 // Reasons for the `reason` param from the `OnDeinit(reason)` event
 ///////////////////////////////////////////////////////////////////
 // https://www.mql5.com/en/docs/constants/namedconstants/uninit
@@ -136,21 +130,21 @@ pub fn serialize_on_deinit_reasons() -> String {
 }
 
 
-pub struct OptionNonZeroF64 {
+pub struct _OptionNonZeroF64 {
     internal: f64,
 }
-impl OptionNonZeroF64 {
-    pub fn Some(value: f64) -> Self {
+impl _OptionNonZeroF64 {
+    pub fn some(value: f64) -> Self {
         Self { internal: value }
     }
-    pub fn None() -> Self {
+    pub fn none() -> Self {
         Self { internal: 0.0 }
     }
     pub fn is_some_and(&self, f: impl FnOnce(f64) -> bool) -> bool {
         self.internal > 0.0 && f(self.internal)
     }
 }
-impl Debug for OptionNonZeroF64 {
+impl Debug for _OptionNonZeroF64 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if self.internal == 0.0 {
             write!(f, "None")

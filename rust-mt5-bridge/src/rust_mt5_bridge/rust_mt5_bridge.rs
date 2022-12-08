@@ -1,21 +1,19 @@
 use super::{
     types::*,
     mql_rust_enum,
+    mq5_lib::types::MQ5StringRef,
 };
 use std::collections::VecDeque;
-use std::ffi::{c_char, CStr, CString, OsStr, OsString};
 use std::fmt::Debug;
 use std::fs;
 use std::io::Write;
 use std::iter::Iterator;
-use std::mem::MaybeUninit;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering::Relaxed;
-use once_cell::sync::Lazy;
-use widestring::{U16CString, WideCStr, WideCString, WideString};
+use widestring::{U16CString};
 use parking_lot::RawMutex;
 use parking_lot::lock_api::RawMutex as _RawMutex;
-use log::{debug, info, warn, error, LevelFilter};
+use log::{debug, info, warn, error};
 
 
 const MAX_HANDLES: i32 = 1024;
@@ -54,7 +52,7 @@ pub extern "system" fn DllMain(_: *const (), fdw_reason: u32, _: *const ()) -> u
 /// -- for which the MQL Program should respond by quitting, as undefined behavior is likely
 /// to happen (See [has_fatal_error()])
 #[no_mangle]
-pub extern fn set_enum_variant_value(rust_enum_name: *const u16, rust_variant_name: *const u16, mql_variant_value: i32) {
+pub extern fn set_enum_variant_value(rust_enum_name: MQ5StringRef, rust_variant_name: MQ5StringRef, mql_variant_value: i32) {
     let rust_enum_name     = unsafe { U16CString::from_ptr_str(    rust_enum_name) }.to_string().unwrap_or(String::from("ERROR CONVERTING `rust_enum_name` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
     let rust_variant_name  = unsafe { U16CString::from_ptr_str( rust_variant_name) }.to_string().unwrap_or(String::from("ERROR CONVERTING `rust_variant_name` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
     match mql_rust_enum::set_enum_variant_value(&rust_enum_name, &rust_variant_name, mql_variant_value) {
@@ -93,7 +91,7 @@ pub extern fn has_fatal_error(handle_id: i32, pre_allocated_error_message_buffer
 /// to all the other functions here -- if negative, it indicates an error code and the
 /// loading of the MT5 script must be cancelled
 #[no_mangle]
-pub extern fn register_trading_expert_advisor_for_production(account_token: *const u16, algorithm: *const u16, symbol: *const u16) -> i32 {
+pub extern fn register_trading_expert_advisor_for_production(account_token: MQ5StringRef, algorithm: MQ5StringRef, symbol: MQ5StringRef) -> i32 {
     let account_token = unsafe { U16CString::from_ptr_str(account_token) }.to_string().unwrap_or(String::from("ERROR CONVERTING `account_token` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
     let algorithm = unsafe { U16CString::from_ptr_str(algorithm) }.to_string().unwrap_or(String::from("ERROR CONVERTING `algorithm` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
     let symbol = unsafe { U16CString::from_ptr_str(symbol) }.to_string().unwrap_or(String::from("ERROR CONVERTING `symbol` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
@@ -117,7 +115,7 @@ pub extern fn register_trading_expert_advisor_for_production(account_token: *con
 ///            As a consequence, MT5 must be restarted every day.\
 ///            (In the future, we may mark the slot as vacant and search for vacant ones when registering)
 #[no_mangle]
-pub extern fn unregister_trading_expert_advisor(handle_id: i32, reason_id: i32) {
+pub extern fn unregister_trading_expert_advisor(handle_id: i32, _reason_id: i32) {
     let handle = unsafe { &HANDLES[handle_id as usize] };
     info!("OnDeinit/OnTesterDeinit: unregistering trading expert advisor for `handle_id` #{handle_id}: {:?}", handle);
 }
@@ -127,7 +125,7 @@ pub extern fn unregister_trading_expert_advisor(handle_id: i32, reason_id: i32) 
 /// to all the other functions here -- if negative, it indicates an error code and the
 /// loading of the MT5 script must be cancelled
 #[no_mangle]
-pub extern fn register_trading_expert_advisor_for_testing(account_token: *const u16, algorithm: *const u16, symbol: *const u16) -> i32 {
+pub extern fn register_trading_expert_advisor_for_testing(account_token: MQ5StringRef, algorithm: MQ5StringRef, symbol: MQ5StringRef) -> i32 {
     let account_token = unsafe { U16CString::from_ptr_str(account_token) }.to_string().unwrap_or(String::from("ERROR CONVERTING `account_token` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
     let algorithm = unsafe { U16CString::from_ptr_str(algorithm) }.to_string().unwrap_or(String::from("ERROR CONVERTING `algorithm` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
     let symbol = unsafe { U16CString::from_ptr_str(symbol) }.to_string().unwrap_or(String::from("ERROR CONVERTING `symbol` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
@@ -413,7 +411,7 @@ fn init(log_file_path: Option<&str>) {
     simple_log::new(config.build())
         .expect("instantiating simplelog file writer");
     unsafe {
-        for i in 0..MAX_HANDLES {
+        for _i in 0..MAX_HANDLES {
             HANDLES.push(Handle {
                 client_type:   ClientType::ProductionExpertAdvisor,
                 account_token: "".to_string(),
@@ -503,7 +501,7 @@ fn apply_book_delta_events(rolling_books: &mut OrderBooks, delta_events: &[BookE
                 };
                 add(book_deque, MqlBookInfo { book_type: book.to_mt5_enum_book(), price: *price, volume: *quantity })
             },
-            BookEvents::Del    { book, price, quantity } => {
+            BookEvents::Del    { book, price, quantity: _quantity } => {
                 let book_deque = match book {
                     BookParties::Sellers => &mut rolling_books.sell_orders,
                     BookParties::Buyers => &mut rolling_books.buy_orders,
@@ -552,16 +550,16 @@ fn compute_book_delta_events(old_books: &OrderBooks, new_books: &[Mq5MqlBookInfo
         let mut peeked_new = new_books_iter.peek();
         // compute the book and price of interest and, possibly, postpone analysis on one of the books to the next iteration
         let book = match (peeked_old, peeked_new) {
-                                     (Some(old), Some(new)) if old.book_type == unsafe {ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type)} => old.book_type,
-                                     (Some(old), Some(new)) /* if they are != */                                                                           => if old.book_type.is_sell() {
-                                                                                                                                                                                              peeked_new = None;
-                                                                                                                                                                                              old.book_type
-                                                                                                                                                                                          } else {
-                                                                                                                                                                                              peeked_old = None;
-                                                                                                                                                                                              unsafe {ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type)}
-                                                                                                                                                                                          },
+                                     (Some(old), Some(new)) if old.book_type == ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type) => old.book_type,
+                                     (Some(old), Some(new)) /* if they are != */                                                                  => if old.book_type.is_sell() {
+                                                                                                                                                                                     peeked_new = None;
+                                                                                                                                                                                     old.book_type
+                                                                                                                                                                                 } else {
+                                                                                                                                                                                     peeked_old = None;
+                                                                                                                                                                                     ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type)
+                                                                                                                                                                                 },
                                      (Some(old), None)    => old.book_type,
-                                     (None, Some(new)) => unsafe {ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type)},
+                                     (None, Some(new)) => ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type),
                                      (None, None)                       => break,
                                  };
         let (price, quantity) = match (peeked_old, peeked_new) {
@@ -579,7 +577,7 @@ fn compute_book_delta_events(old_books: &OrderBooks, new_books: &[Mq5MqlBookInfo
 
         // compute the delta events
         if let (Some(old), Some(new)) = (peeked_old, peeked_new) {
-            if old.book_type == unsafe {ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type)} && old.price == new.price && old.volume != new.volume_real {
+            if old.book_type == ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type) && old.price == new.price && old.volume != new.volume_real {
                 delta_events.push(BookEvents::Update { book: BookParties::from_mt5_enum_book(book), price, quantity: new.volume_real });
             }
         }
@@ -589,7 +587,7 @@ fn compute_book_delta_events(old_books: &OrderBooks, new_books: &[Mq5MqlBookInfo
                 old_books_iter.next();
                 continue;
             } else if (book.is_sell() && price > old.price) || (book.is_buy() && price < old.price) {
-                if let Some(new) = peeked_new {
+                if let Some(_new) = peeked_new {
                     delta_events.push(BookEvents::Add { book: BookParties::from_mt5_enum_book(book), price, quantity });
                 }
             } else if book.is_sell() && peeked_new.is_some() {
@@ -632,7 +630,7 @@ const MAX_LOG_FILE_SIZE_MB: u64 = 2*1024;
 const MAX_LOG_FILES: u32        = 22;
 
 /// to be called when debugging logging issues
-fn internal_logger(path: &str, contents: &str) {
+fn _internal_logger(path: &str, contents: &str) {
     fs::File::options().create(true).append(true)
         .open(path).expect("open internal log file for appending")
         .write_all(contents.as_bytes()).expect("write to internal log file");
@@ -656,15 +654,15 @@ mod tests {
 
         ENUM_BOOK_TYPE.debug();
         mql_rust_enum::set_enum_variant_value("EnumBookType", "BookTypeBuy", BookTypeBuy as i32)
-            .expect("Setting the MQL variant value of a Rust-known variant for a previously registered enum");;
+            .expect("Setting the MQL variant value of a Rust-known variant for a previously registered enum");
         mql_rust_enum::set_enum_variant_value("EnumBookType", "BookTypeSell", BookTypeSell as i32)
-            .expect("Setting the MQL variant value of a Rust-known variant for a previously registered enum");;
+            .expect("Setting the MQL variant value of a Rust-known variant for a previously registered enum");
         mql_rust_enum::set_enum_variant_value("EnumBookType", "BookTypeBuyMarket", BookTypeBuyMarket as i32)
-            .expect("Setting the MQL variant value of a Rust-known variant for a previously registered enum");;
+            .expect("Setting the MQL variant value of a Rust-known variant for a previously registered enum");
         mql_rust_enum::set_enum_variant_value("EnumBookType", "BookTypeSellMarket", BookTypeSellMarket as i32)
-            .expect("Setting the MQL variant value of a Rust-known variant for a previously registered enum");;
+            .expect("Setting the MQL variant value of a Rust-known variant for a previously registered enum");
         let handle_id = register(format!("acnt_tkn"), format!("algo"), format!("SYMBL"));
-        let handle = unsafe { &HANDLES[handle_id as usize] };
+        let _handle = unsafe { &HANDLES[handle_id as usize] };
 
         // "original" book used for delta computation --
         // Metatrader, as production data shows as of 2022-11-24, will always yield books like this:

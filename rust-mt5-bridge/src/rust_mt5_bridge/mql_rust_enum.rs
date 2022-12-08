@@ -23,7 +23,7 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use std::str::FromStr;
 use once_cell::sync::{Lazy};
-use log::{warn,error};
+use log::{warn};
 
 /// Thread-unsafe repository for all registered enums mapped by this module
 /// (see [module](super::mql_rust_enum) docs for details)
@@ -155,7 +155,7 @@ pub fn set_enum_variant_value(rust_enum_name: &str, rust_variant_name: &str, mql
         }
     } else {
         let message = format!("Attempted to set the variant `{rust_variant_name} = mql_value {mql_variant_value}` for enum '{rust_enum_name}' -- but that enum isn't registered. FIX IT! Known ENUMs are: {:?}",
-                                     unsafe{MQL_RUST_ENUM_DESCRIPTORS.iter()}.map(|(k,v)| k).collect::<Vec<_>>());
+                                     unsafe{MQL_RUST_ENUM_DESCRIPTORS.iter()}.map(|(k, _v)| k).collect::<Vec<_>>());
         Err(message)
     }
 }
@@ -223,8 +223,6 @@ mod tests {
         // inputs
         let mql_soft: i32 = 8;
         let mql_hard: i32 = 80;
-        let rust_soft: i32 = MqlEnumMappedToRust::Soft.into();
-        let rust_hard: i32 = MqlEnumMappedToRust::Hard.into();
         // enum registration
         let mql_rust_enum_descriptor = MqlRustEnumDescriptor::new(enum_name, &MqlEnumMappedToRust::from_str);
         // mql variant values registration

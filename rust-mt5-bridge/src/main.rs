@@ -2,13 +2,11 @@ mod rust_mt5_bridge;
 
 use std::collections::HashMap;
 use std::error::Error;
-use rust_mt5_bridge::types::MqlTick;
 
-use std::ffi::{c_char, CStr, CString};
 use std::io;
 use std::io::{BufRead, Write};
-use std::process::{ExitCode, Termination};
-use widestring::{U16CString, WideCString, WideString};
+use std::process::{ExitCode};
+use widestring::{U16CString};
 use regex::Regex;
 use rust_mt5_bridge::mq5_lib::EnumBookType;
 use rust_mt5_bridge::types::Mq5MqlBookInfo;
