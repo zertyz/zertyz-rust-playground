@@ -521,113 +521,56 @@ fn apply_book_delta_events(rolling_books: &mut OrderBooks, delta_events: &[BookE
 
 /// returns the delta events that would turn `old_books` into `new_books`, where:
 ///   - `new_books` is the Metatrader array received by the `OnBook()` event
-///   - `old_books` is our internally kept structure to allow us to compute the event deltas./
-/// [apply_book_delta_events()] should be used to advance the book
+///   - `old_books` is our internally kept structure to allow us to compute the event deltas.\
+/// [apply_book_delta_events()] should be used to advance the book.
 fn compute_book_delta_events(old_books: &OrderBooks, new_books: &[Mq5MqlBookInfo]) -> Vec<BookEvents> {
-
-    // returns the max `price` (and corresponding `quantity`) or, in case the prices are the same, returns the price and the new quantity
-    fn max_price(old_price: f64, old_quantity: f64, new_price: f64, new_quantity: f64) -> (f64, f64) {
-        if old_price > new_price {
-            (old_price, old_quantity)
-        } else {
-            (new_price, new_quantity)
-        }
-    }
-    // returns the min `price` (and corresponding `quantity`) or, in case the prices are the same, returns the price and the new quantity
-    fn min_price(old_price: f64, old_quantity: f64, new_price: f64, new_quantity: f64) -> (f64, f64) {
-        if old_price < new_price {
-            (old_price, old_quantity)
-        } else {
-            (new_price, new_quantity)
-        }
-    }
-
     let mut delta_events = Vec::<BookEvents>::with_capacity(new_books.len());
     let mut old_books_iter = old_books.iter().peekable();
     let mut new_books_iter = new_books.iter().peekable();
-    loop {
+    // The two iterators want to walk together, building the 'delta_events' whatever one lags behind the other
+    'next: loop {
         let mut peeked_old = old_books_iter.peek();
         let mut peeked_new = new_books_iter.peek();
-        // compute the book and price of interest and, possibly, postpone analysis on one of the books to the next iteration
-        let book = match (peeked_old, peeked_new) {
-                                     (Some(old), Some(new)) if old.book_type == ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type) => old.book_type,
-                                     (Some(old), Some(new)) /* if they are != */                                                                  => if old.book_type.is_sell() {
-                                                                                                                                                                                     peeked_new = None;
-                                                                                                                                                                                     old.book_type
-                                                                                                                                                                                 } else {
-                                                                                                                                                                                     peeked_old = None;
-                                                                                                                                                                                     ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type)
-                                                                                                                                                                                 },
-                                     (Some(old), None)    => old.book_type,
-                                     (None, Some(new)) => ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type),
-                                     (None, None)                       => break,
-                                 };
-        let (price, quantity) = match (peeked_old, peeked_new) {
-                                               (Some(old), Some(new)) if book.is_sell() => max_price(old.price, old.volume, new.price, new.volume_real),
-                                               (Some(old), Some(new)) /* if .is_buy */  => min_price(old.price, old.volume, new.price, new.volume_real),
-                                               (Some(old), None) => (old.price, old.volume),
-                                               (None, Some(new)) => (new.price, new.volume_real),
-                                               (None, None) => break,
-                                           };
-
-// when debugging...
-// info!("Book: old: {:?}", peeked_old);
-// info!("Book: new: {:?}", peeked_new);
-// info!("Book: book: {:?}, price: {price}, quantity: {quantity}", book);
-
-        // compute the delta events
-        if let (Some(old), Some(new)) = (peeked_old, peeked_new) {
-            if old.book_type == ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type) && old.price == new.price && old.volume != new.volume_real {
-                let delta = BookEvents::Update { book: BookParties::from_mt5_enum_book(book), price, quantity: new.volume_real };
-// info!("@@Delta: {:?}", delta);
-                delta_events.push(delta);
+        're_evaluate: loop {
+            match (peeked_old, peeked_new) {
+                (Some(old), Some(new)) => {
+                    if old.book_type != ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type) {
+                        if old.book_type.is_sell() {
+                            peeked_new = None;
+                            continue 're_evaluate
+                        } else {
+                            peeked_old = None;
+                            continue 're_evaluate
+                        }
+                    }
+                    if old.price < new.price {
+                        delta_events.push(BookEvents::Add { book: BookParties::from_mt5_enum_book(ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type)), price: new.price, quantity: new.volume_real });
+                        peeked_old = None;
+                    } else if old.price > new.price {
+                        delta_events.push(BookEvents::Del { book: BookParties::from_mt5_enum_book(old.book_type), price: old.price, quantity: old.volume });
+                        peeked_new = None;
+                    } else if old.volume != new.volume_real {
+                        delta_events.push(BookEvents::Update { book: BookParties::from_mt5_enum_book(old.book_type), price: new.price, quantity: new.volume_real });
+                    }
+                },
+                (Some(old), None) => {
+                    delta_events.push(BookEvents::Del { book: BookParties::from_mt5_enum_book(old.book_type), price: old.price, quantity: old.volume });
+                },
+                (None, Some(new)) => {
+                    delta_events.push(BookEvents::Add { book: BookParties::from_mt5_enum_book(ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type)), price: new.price, quantity: new.volume_real });
+                },
+                (None, None) => break 'next,
             }
+            break 're_evaluate
         }
-        if let Some(old) = peeked_old {
-            if peeked_new.is_none() || (book.is_buy() && old.price > price) {
-                let delta = BookEvents::Del { book: BookParties::from_mt5_enum_book(old.book_type), price: old.price, quantity: old.volume };
-// info!("##Delta: {:?}", delta);
-                delta_events.push(delta);
-                old_books_iter.next();
-                continue;
-            } else if (book.is_sell() && price > old.price) || (book.is_buy() && price < old.price) {
-                if let Some(_new) = peeked_new {
-                    let delta = BookEvents::Add { book: BookParties::from_mt5_enum_book(book), price, quantity };
-// info!("!!Delta: {:?}", delta);
-                    delta_events.push(delta);
-                }
-            } else if let Some(new) = peeked_new {
-                if book.is_sell() && price > new.price {
-                    let delta = BookEvents::Del { book: BookParties::from_mt5_enum_book(book), price, quantity };
-// info!("$$Delta: {:?}", delta);
-                    delta_events.push(delta);
-                } else if book.is_buy() && price < new.price {
-                    let delta = BookEvents::Add { book: BookParties::from_mt5_enum_book(book), price: new.price, quantity: new.volume_real };
-// info!("%%Delta: {:?}", delta);
-                    delta_events.push(delta);
-                    new_books_iter.next();
-                    continue;
-                }
-            }
-        } else if peeked_new.is_some() {
-            let delta = BookEvents::Add { book: BookParties::from_mt5_enum_book(book), price, quantity };
-// info!("&&Delta: {:?}", delta);
-            delta_events.push(delta);
-        }
-
         // advance cursors
-        if let Some(old) = peeked_old {
-            if price == old.price {
-                old_books_iter.next();
-            }
+        if let Some(_old) = peeked_old {
+            old_books_iter.next();
         }
-        if let Some(new) = peeked_new {
-            if price == new.price {
-                new_books_iter.next();
-            }
+        if let Some(_new) = peeked_new {
+            new_books_iter.next();
         }
     }
-
     delta_events
 }
 
