@@ -34,8 +34,8 @@ impl OrderBooks {
 pub enum BookEvents {
     Add    { book: BookParties, price: f64, quantity: f64 },
     Del    { book: BookParties, price: f64, quantity: f64 },
-    /// Contains the delta `quantity` -- how much to add to the old book to turn that into the new one
-    Update { book: BookParties, price: f64, quantity: f64 },
+    /// `delta_quantity`: new-old -- how much to add to the old book to turn that into the new one
+    Update { book: BookParties, price: f64, delta_quantity: f64 },
 }
 
 #[derive(Debug,PartialEq)]

@@ -482,9 +482,9 @@ fn apply_book_delta_events(rolling_books: &mut OrderBooks, delta_events: &[BookE
         let i = search(book, price);
         book.remove(i as usize);
     };
-    let update = |book: &mut VecDeque<MqlBookInfo>, price: f64, quantity: f64| {
+    let update = |book: &mut VecDeque<MqlBookInfo>, price: f64, delta_quantity: f64| {
         let i = search(book, price);
-        book[i as usize].volume = quantity;
+        book[i as usize].volume += delta_quantity;
     };
     let add = |book: &mut VecDeque<MqlBookInfo>, new_book_order: MqlBookInfo| {
         // whatever the book, they are always sorted descendingly by price
@@ -508,13 +508,13 @@ fn apply_book_delta_events(rolling_books: &mut OrderBooks, delta_events: &[BookE
                 };
                 del(book_deque, *price)
             },
-            BookEvents::Update { book, price, quantity } => {
+            BookEvents::Update { book, price, delta_quantity } => {
                 let book_deque = match book {
                     BookParties::Sellers => &mut rolling_books.sell_orders,
                     BookParties::Buyers => &mut rolling_books.buy_orders,
                 };
-                update(book_deque, *price, *quantity)
-            },
+                update(book_deque, *price, *delta_quantity)
+            }
         }
     }
 }
@@ -550,7 +550,7 @@ fn compute_book_delta_events(old_books: &OrderBooks, new_books: &[Mq5MqlBookInfo
                         delta_events.push(BookEvents::Del { book: BookParties::from_mt5_enum_book(old.book_type), price: old.price, quantity: old.volume });
                         peeked_new = None;
                     } else if old.volume != new.volume_real {
-                        delta_events.push(BookEvents::Update { book: BookParties::from_mt5_enum_book(old.book_type), price: new.price, quantity: new.volume_real });
+                        delta_events.push(BookEvents::Update { book: BookParties::from_mt5_enum_book(old.book_type), price: new.price, delta_quantity: new.volume_real-old.volume });
                     }
                 },
                 (Some(old), None) => {
@@ -779,8 +779,8 @@ mod tests {
                    .collect::<Vec<_>>(),
                base_books_generator().iter()
                    .map(|mql_book_info| match mql_book_info.book_type {
-                       BookTypeSell | BookTypeSellMarket => BookEvents::Update { book: BookParties::Sellers, price: mql_book_info.price, quantity: mql_book_info.volume + 100.0 },
-                       BookTypeBuy  | BookTypeBuyMarket  => BookEvents::Update { book: BookParties::Buyers,  price: mql_book_info.price, quantity: mql_book_info.volume + 100.0 },
+                       BookTypeSell | BookTypeSellMarket => BookEvents::Update { book: BookParties::Sellers, price: mql_book_info.price, delta_quantity: 100.0 },
+                       BookTypeBuy  | BookTypeBuyMarket  => BookEvents::Update { book: BookParties::Buyers,  price: mql_book_info.price, delta_quantity: 100.0 },
                        _ => panic!("Unknown book_type '{:?}'", mql_book_info.book_type),
                    })
                    .collect::<Vec<_>>());
@@ -820,7 +820,7 @@ mod tests {
                        MqlBookInfo { book_type: BookTypeSell, price: 23.72, volume: 10700.0 }
                    ]), buy_orders: VecDeque::from([
                        MqlBookInfo { book_type: BookTypeBuy, price: 23.71, volume: 9100.0 },
-                       MqlBookInfo { book_type: BookTypeBuy, price: 23.7, volume: 267800.0 },
+                       MqlBookInfo { book_type: BookTypeBuy, price: 23.70, volume: 267800.0 },
                        MqlBookInfo { book_type: BookTypeBuy, price: 23.69, volume: 29300.0 },
                        MqlBookInfo { book_type: BookTypeBuy, price: 23.68, volume: 50700.0 },
                        MqlBookInfo { book_type: BookTypeBuy, price: 23.67, volume: 31600.0 }
@@ -840,18 +840,18 @@ mod tests {
                ],
                vec![
                    BookEvents::Del { book: BookParties::Sellers, price: 23.76, quantity: 39500.0 },
-                   BookEvents::Update { book: BookParties::Sellers, price: 23.75, quantity: 34600.0 },
-                   BookEvents::Update { book: BookParties::Sellers, price: 23.74, quantity: 33000.0 },
-                   BookEvents::Update { book: BookParties::Sellers, price: 23.73, quantity: 29700.0 },
-                   BookEvents::Update { book: BookParties::Sellers, price: 23.72, quantity: 28200.0 },
-                   BookEvents::Add { book: BookParties::Sellers, price: 23.71, quantity: 9900.0 },
-                   BookEvents::Del { book: BookParties::Buyers, price: 23.71, quantity: 9100.0 },
-                   BookEvents::Del { book: BookParties::Buyers, price: 23.7, quantity: 267800.0 },
-                   BookEvents::Update { book: BookParties::Buyers, price: 23.69, quantity: 14900.0 },
-                   BookEvents::Update { book: BookParties::Buyers, price: 23.68, quantity: 30700.0 },
-                   BookEvents::Update { book: BookParties::Buyers, price: 23.67, quantity: 15100.0 },
-                   BookEvents::Add { book: BookParties::Buyers, price: 23.66, quantity: 24500.0 },
-                   BookEvents::Add { book: BookParties::Buyers, price: 23.65, quantity: 89500.0 }
+                   BookEvents::Update { book: BookParties::Sellers, price: 23.75, delta_quantity: -100.0 },
+                   BookEvents::Update { book: BookParties::Sellers, price: 23.74, delta_quantity: 800.0 },
+                   BookEvents::Update { book: BookParties::Sellers, price: 23.73, delta_quantity: 2300.0 },
+                   BookEvents::Update { book: BookParties::Sellers, price: 23.72, delta_quantity: 17500.0 },
+                   BookEvents::Add    { book: BookParties::Sellers, price: 23.71, quantity: 9900.0 },
+                   BookEvents::Del    { book: BookParties::Buyers, price: 23.71, quantity: 9100.0 },
+                   BookEvents::Del    { book: BookParties::Buyers, price: 23.7, quantity: 267800.0 },
+                   BookEvents::Update { book: BookParties::Buyers, price: 23.69, delta_quantity: -14400.0 },
+                   BookEvents::Update { book: BookParties::Buyers, price: 23.68, delta_quantity: -20000.0 },
+                   BookEvents::Update { book: BookParties::Buyers, price: 23.67, delta_quantity: -16500.0 },
+                   BookEvents::Add    { book: BookParties::Buyers, price: 23.66, quantity: 24500.0 },
+                   BookEvents::Add    { book: BookParties::Buyers, price: 23.65, quantity: 89500.0 }
                ]);
 
         assert("Production case 2 (double entries, in the buyers book, for the same price point)",
@@ -884,14 +884,14 @@ mod tests {
                ],
                vec![
                    BookEvents::Add    { book: BookParties::Sellers, price: 45.91, quantity: 800.0 },
-                   BookEvents::Update { book: BookParties::Sellers, price: 45.9, quantity: 2800.0 },
-                   BookEvents::Update { book: BookParties::Sellers, price: 45.89, quantity: 400.0 },
-                   BookEvents::Update { book: BookParties::Sellers, price: 45.88, quantity: 700.0 },
+                   BookEvents::Update { book: BookParties::Sellers, price: 45.9, delta_quantity: 200.0 },
+                   BookEvents::Update { book: BookParties::Sellers, price: 45.89, delta_quantity: -100.0 },
+                   BookEvents::Update { book: BookParties::Sellers, price: 45.88, delta_quantity: -400.0 },
                    BookEvents::Del    { book: BookParties::Sellers, price: 45.86, quantity: 500.0 },
                    BookEvents::Add    { book: BookParties::Buyers, price: 45.85, quantity: 500.0 },
-                   BookEvents::Update { book: BookParties::Buyers, price: 45.84, quantity: 500.0 },
-                   BookEvents::Update { book: BookParties::Buyers, price: 45.83, quantity: 700.0 },
-                   BookEvents::Update { book: BookParties::Buyers, price: 45.81, quantity: 1600.0 },
+                   BookEvents::Update { book: BookParties::Buyers, price: 45.84, delta_quantity: 100.0 },
+                   BookEvents::Update { book: BookParties::Buyers, price: 45.83, delta_quantity: 100.0 },
+                   BookEvents::Update { book: BookParties::Buyers, price: 45.81, delta_quantity: 400.0 },
                    BookEvents::Del    { book: BookParties::Buyers, price: 45.80, quantity: 1600.0 },
                ]);
 
