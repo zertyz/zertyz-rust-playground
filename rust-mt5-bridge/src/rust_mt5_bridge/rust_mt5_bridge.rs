@@ -578,27 +578,41 @@ fn compute_book_delta_events(old_books: &OrderBooks, new_books: &[Mq5MqlBookInfo
         // compute the delta events
         if let (Some(old), Some(new)) = (peeked_old, peeked_new) {
             if old.book_type == ENUM_BOOK_TYPE.resolve_rust_variant(new.book_type) && old.price == new.price && old.volume != new.volume_real {
-                delta_events.push(BookEvents::Update { book: BookParties::from_mt5_enum_book(book), price, quantity: new.volume_real });
+                let delta = BookEvents::Update { book: BookParties::from_mt5_enum_book(book), price, quantity: new.volume_real };
+// info!("@@Delta: {:?}", delta);
+                delta_events.push(delta);
             }
         }
         if let Some(old) = peeked_old {
             if peeked_new.is_none() || (book.is_buy() && old.price > price) {
-                delta_events.push(BookEvents::Del { book: BookParties::from_mt5_enum_book(old.book_type), price: old.price, quantity: old.volume });
+                let delta = BookEvents::Del { book: BookParties::from_mt5_enum_book(old.book_type), price: old.price, quantity: old.volume };
+// info!("##Delta: {:?}", delta);
+                delta_events.push(delta);
                 old_books_iter.next();
                 continue;
             } else if (book.is_sell() && price > old.price) || (book.is_buy() && price < old.price) {
                 if let Some(_new) = peeked_new {
-                    delta_events.push(BookEvents::Add { book: BookParties::from_mt5_enum_book(book), price, quantity });
+                    let delta = BookEvents::Add { book: BookParties::from_mt5_enum_book(book), price, quantity };
+// info!("!!Delta: {:?}", delta);
+                    delta_events.push(delta);
                 }
-            } else if book.is_sell() && peeked_new.is_some() {
-                if let Some(new) = peeked_new {
-                    if price > new.price {
-                        delta_events.push(BookEvents::Del { book: BookParties::from_mt5_enum_book(book), price, quantity });
-                    }
+            } else if let Some(new) = peeked_new {
+                if book.is_sell() && price > new.price {
+                    let delta = BookEvents::Del { book: BookParties::from_mt5_enum_book(book), price, quantity };
+// info!("$$Delta: {:?}", delta);
+                    delta_events.push(delta);
+                } else if book.is_buy() && price < new.price {
+                    let delta = BookEvents::Add { book: BookParties::from_mt5_enum_book(book), price: new.price, quantity: new.volume_real };
+// info!("%%Delta: {:?}", delta);
+                    delta_events.push(delta);
+                    new_books_iter.next();
+                    continue;
                 }
             }
         } else if peeked_new.is_some() {
-            delta_events.push(BookEvents::Add { book: BookParties::from_mt5_enum_book(book), price, quantity });
+            let delta = BookEvents::Add { book: BookParties::from_mt5_enum_book(book), price, quantity };
+// info!("&&Delta: {:?}", delta);
+            delta_events.push(delta);
         }
 
         // advance cursors
@@ -851,6 +865,7 @@ mod tests {
 
         // production cases
         ///////////////////
+        // (that had issues at some point)
 
         assert("Production case 1 (a Buying price point moves to Selling)",
                OrderBooks {
@@ -894,6 +909,47 @@ mod tests {
                    BookEvents::Update { book: BookParties::Buyers, price: 23.67, quantity: 15100.0 },
                    BookEvents::Add { book: BookParties::Buyers, price: 23.66, quantity: 24500.0 },
                    BookEvents::Add { book: BookParties::Buyers, price: 23.65, quantity: 89500.0 }
+               ]);
+
+        assert("Production case 2 (double entries, in the buyers book, for the same price point)",
+               OrderBooks {
+                   sell_orders: VecDeque::from([
+                       MqlBookInfo { book_type: BookTypeSell, price: 45.9, volume: 2600.0 },
+                       MqlBookInfo { book_type: BookTypeSell, price: 45.89, volume: 500.0 },
+                       MqlBookInfo { book_type: BookTypeSell, price: 45.88, volume: 1100.0 },
+                       MqlBookInfo { book_type: BookTypeSell, price: 45.87, volume: 400.0 },
+                       MqlBookInfo { book_type: BookTypeSell, price: 45.86, volume: 500.0 }
+                   ]), buy_orders: VecDeque::from([
+                       MqlBookInfo { book_type: BookTypeBuy, price: 45.84, volume: 400.0 },
+                       MqlBookInfo { book_type: BookTypeBuy, price: 45.83, volume: 600.0 },
+                       MqlBookInfo { book_type: BookTypeBuy, price: 45.82, volume: 800.0 },
+                       MqlBookInfo { book_type: BookTypeBuy, price: 45.81, volume: 1200.0 },
+                       MqlBookInfo { book_type: BookTypeBuy, price: 45.8, volume: 1600.0 }
+                   ])
+               },
+               vec![
+                   Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 45.91, volume: 800, volume_real: 800.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 45.9, volume: 2800, volume_real: 2800.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 45.89, volume: 400, volume_real: 400.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 45.88, volume: 700, volume_real: 700.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeSell as i32, price: 45.87, volume: 400, volume_real: 400.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 45.85, volume: 500, volume_real: 500.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 45.84, volume: 500, volume_real: 500.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 45.83, volume: 700, volume_real: 700.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 45.82, volume: 800, volume_real: 800.0 },
+                   Mq5MqlBookInfo { book_type: BookTypeBuy as i32,  price: 45.81, volume: 1600, volume_real: 1600.0 }
+               ],
+               vec![
+                   BookEvents::Add    { book: BookParties::Sellers, price: 45.91, quantity: 800.0 },
+                   BookEvents::Update { book: BookParties::Sellers, price: 45.9, quantity: 2800.0 },
+                   BookEvents::Update { book: BookParties::Sellers, price: 45.89, quantity: 400.0 },
+                   BookEvents::Update { book: BookParties::Sellers, price: 45.88, quantity: 700.0 },
+                   BookEvents::Del    { book: BookParties::Sellers, price: 45.86, quantity: 500.0 },
+                   BookEvents::Add    { book: BookParties::Buyers, price: 45.85, quantity: 500.0 },
+                   BookEvents::Update { book: BookParties::Buyers, price: 45.84, quantity: 500.0 },
+                   BookEvents::Update { book: BookParties::Buyers, price: 45.83, quantity: 700.0 },
+                   BookEvents::Update { book: BookParties::Buyers, price: 45.81, quantity: 1600.0 },
+                   BookEvents::Del    { book: BookParties::Buyers, price: 45.80, quantity: 1600.0 },
                ]);
 
     }
