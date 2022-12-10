@@ -23,7 +23,7 @@ struct DealPropertiesBridge {
 	              ENUM_DEAL_REASON                       deal_reason;      // The reason or source for deal execution
 };
 
-DealPropertiesBridge InstantiateDealPropertiesBridge(ulong ticket_number) {
+DealPropertiesBridge instantiate_deal_properties_bridge(ulong ticket_number) {
 	DealPropertiesBridge instance;
 	instance.deal_volume                       = HistoryDealGetDouble(ticket_number, DEAL_VOLUME);
 	instance.deal_price                        = HistoryDealGetDouble(ticket_number, DEAL_PRICE);
@@ -70,4 +70,19 @@ DealPropertiesBridge InstantiateDealPropertiesBridge(ulong ticket_number) {
 */
 
 	return instance;
+}
+
+
+// reports all deals since time immemorial
+void collect_and_report_all_deals_properties(int rust_handle) {
+   HistorySelect(0, TimeCurrent());
+   for (uint i=0; i<HistoryDealsTotal(); i++) {
+       long ticket_number = HistoryDealGetTicket(i);
+       if (ticket_number > 0) {
+           DealPropertiesBridge deal_properties = instantiate_deal_properties_bridge(ticket_number);
+           //Print(StringFormat("RustMtBridge(%d): '%s': Reporting deal properties...", rust_handle, _Symbol));
+           report_deal_properties(rust_handle, deal_properties);
+       }
+   }
+
 }

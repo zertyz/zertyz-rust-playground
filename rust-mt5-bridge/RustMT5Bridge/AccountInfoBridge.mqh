@@ -32,7 +32,7 @@ struct AccountInfoBridge {
 	                          bool             account_hedge_allowed;      // Allowed opposite positions on a single symbol
 };
 
-AccountInfoBridge InstantiateAccountInfoBridge() {
+AccountInfoBridge instantiate_account_info_bridge() {
 	AccountInfoBridge instance;
 	instance.account_balance                   = AccountInfoDouble(ACCOUNT_BALANCE);
 	instance.account_credit                    = AccountInfoDouble(ACCOUNT_CREDIT);
@@ -99,3 +99,8 @@ AccountInfoBridge InstantiateAccountInfoBridge() {
 	return instance;
 }
 
+void collect_and_report_account_info(int rust_handle) {
+   AccountInfoBridge account_info = instantiate_account_info_bridge();
+   //Print(StringFormat("RustMtBridge(%d): '%s': Reporting account info...", rust_handle, _Symbol));
+   report_account_info(rust_handle, account_info);
+}

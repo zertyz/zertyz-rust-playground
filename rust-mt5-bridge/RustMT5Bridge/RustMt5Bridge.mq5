@@ -11,6 +11,8 @@ input double wakeup_spread     = 0.03;  // The spread between the last lower pri
 input double wakeup_grace_secs = 1.0;   // After the wakeup_spread has been reached, prices must not go down for (at least) that many seconds before a purchase can be done
 
 #include "RustDll.mqh"
+#include "RustToMQLMethodCall.mqh"
+
 
 // some possibly useful properties available for the program:
 //   * https://www.mql5.com/en/docs/constants/environment_state/mql5_programm_info
@@ -24,35 +26,23 @@ datetime testing_start;                                                         
 string   report;
 
 int OnInit() {
+    init_rust_to_mql_method_calling_interface();
     rust_handle = register_trading_expert_advisor_for_production(account_token, rust_algorithm, _Symbol);
     if (rust_handle >= 0) {
         Print(StringFormat("RustMtBridge: PRODUCTION trading EA for symbol '%s' was successfully registered with rust_handle=%d for using Rust algorithm '%s' and account token '%s'",
                            _Symbol, rust_handle, rust_algorithm, account_token));
-        SymbolInfoBridge symbol_info = InstantiateSymbolInfoBridge(_Symbol);
         // per-session information (reported only by the first expert advisor to start)
         if (rust_handle == 0) {
             #include "EnumReporter.mqh"
-            AccountInfoBridge account_info = InstantiateAccountInfoBridge();
-            //Print(StringFormat("RustMtBridge(%d): '%s': Reporting account info...", rust_handle, _Symbol));
-            report_account_info(rust_handle, account_info);
-            // report all deals since time immemorial
-            HistorySelect(0, TimeCurrent());
-            for (uint i=0; i<HistoryDealsTotal(); i++) {
-                long ticket_number = HistoryDealGetTicket(i);
-                if (ticket_number > 0) {
-                    DealPropertiesBridge deal_properties = InstantiateDealPropertiesBridge(ticket_number);
-                    //Print(StringFormat("RustMtBridge(%d): '%s': Reporting deal properties...", rust_handle, _Symbol));
-                    report_deal_properties(rust_handle, deal_properties);
-                }
-            }
+            collect_and_report_account_info(rust_handle);
+            collect_and_report_all_deals_properties(rust_handle);
         }
-        //Print(StringFormat("RustMtBridge(%d): '%s': Reporting symbol info...", rust_handle, _Symbol));
-        report_symbol_info(rust_handle, symbol_info);
+        collect_and_report_symbol_info(rust_handle);
         //Print(StringFormat("RustMtBridge(%d): '%s': Initialization completed", rust_handle, _Symbol));
         MarketBookAdd(_Symbol);
         // check any DLL errors that could prevent this EA from running well
         string error_message; // pre-allocated buffer for any error messages
-        StringReserve(error_message, 16384);
+        StringReserve(error_message, 4096);
         if (has_fatal_error(rust_handle, error_message)) {
             Print("QUITTING DUE TO ERROR: " + error_message);
             return INIT_FAILED;
@@ -138,6 +128,7 @@ void OnBookEvent(const string&  symbol) {
     MarketBookGet(symbol, book_info);
     // the Rust part will compute deltas to issue book additions / editions / removal events to subscribers
     on_book(rust_handle, book_info, ArraySize(book_info));
+    execute_pending_functions(rust_handle);
 }
 
 // Called when an order issue by us gets processed by the exchange

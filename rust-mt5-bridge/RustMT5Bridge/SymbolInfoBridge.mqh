@@ -116,7 +116,7 @@ struct SymbolInfoBridge {
 	                          bool      symbol_margin_hedged_use_leg;      // Calculating hedging margin using the larger leg (Buy or Sell)
 };
 
-SymbolInfoBridge InstantiateSymbolInfoBridge(string symbol) {
+SymbolInfoBridge instantiate_symbol_info_bridge(string symbol) {
    SymbolInfoBridge instance;
    // set the alignment markers with easy to spot values -- 08080808 hex
    instance._1                                = 252645135;
@@ -350,3 +350,8 @@ SymbolInfoBridge InstantiateSymbolInfoBridge(string symbol) {
 	return instance;
 }
 
+void collect_and_report_symbol_info(int rust_handle) {
+   SymbolInfoBridge symbol_info = instantiate_symbol_info_bridge(_Symbol);
+   //Print(StringFormat("RustMtBridge(%d): '%s': Reporting symbol info...", rust_handle, _Symbol));
+   report_symbol_info(rust_handle, symbol_info);
+}

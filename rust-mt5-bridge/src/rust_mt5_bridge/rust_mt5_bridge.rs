@@ -86,6 +86,19 @@ pub extern fn has_fatal_error(handle_id: i32, pre_allocated_error_message_buffer
     }
 }
 
+/// Causes this DLL to, as soon as possible, cease its operations and quit all MQL5 programs using it due to an
+/// unrecoverable error prone to cause undefined behavior -- stopping the operations, then, is imposed to avoid disaster
+#[no_mangle]
+pub extern fn report_fatal_error(handle_id: i32, error_message: MQ5StringRef) {
+    let error_message = unsafe { U16CString::from_ptr_str(error_message) }.to_string().unwrap_or(String::from("ERROR CONVERTING `error_message` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
+    let handle = unsafe { &HANDLES[handle_id as usize] };
+    let symbol = &handle.symbol;
+    error!("report_fatal_error({handle_id}): {symbol}: a FATAL error was reported: '{error_message}' -- all MQL5 programs using this DLL should quit as soon as possible!");
+    unsafe {
+        FATAL_ERROR = Some(error_message);
+    }
+}
+
 /// Called by the `OnInit()` to inform the market data for the symbol being considered
 /// (as well the session information for operation) and to get the `handle` to be passed
 /// to all the other functions here -- if negative, it indicates an error code and the
@@ -260,12 +273,40 @@ pub extern fn on_tester_pass(handle_id: u32) {
     info!("OnTester: handle_id: {handle_id}, symbol: '{symbol}'");
 }
 
+/// If the returned value >= 0, places (in the pre-allocated `buffer`) the JSON function call descriptor that Rust wants MQL5 to do.\
+/// The JSON in the form `{"fn_to_call": "MqlFunction", "params": [10, "yes!", 9]}` -- see `RustToMQLMethodCall.mqh`
+#[no_mangle]
+pub extern fn next_mql5_function_to_call(handle_id: i32, buffer: *mut u16) -> i32 {
+    let next_function_call = consume_next_mql5_function_call(handle_id);
+    if let Some(next_function_call) = next_function_call {
+        let handle = unsafe { &HANDLES[handle_id as usize] };
+        let symbol = &handle.symbol;
+        debug!("ExecuteMQL5Function({handle_id}): {symbol}: {next_function_call}");
+        unchecked_convert_rust_to_mql5_string(next_function_call, buffer);
+        1
+    } else {
+        -1
+    }
+}
+
+/// Called after a Rust triggered MQL5 function call was completed -- `function_called_json_descriptor` is a JSON with calling results in the form:
+/// `{"fn_called": "MqlFunction", "returns": [1, "done!", 2]}`
+#[no_mangle]
+pub extern fn report_mql5_function_called(handle_id: i32, function_called_json_descriptor: *mut u16) {
+    let function_called_json_descriptor = unsafe { U16CString::from_ptr_str(    function_called_json_descriptor) }.to_string().unwrap_or(String::from("ERROR CONVERTING `function_called_json_descriptor` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
+    let handle = unsafe { &HANDLES[handle_id as usize] };
+    let symbol = &handle.symbol;
+    debug!("ExecutedMQL5Function({handle_id}): {symbol}: {function_called_json_descriptor}");
+}
+
 
 // Automated testing functions
 //////////////////////////////
-// the following functions are for tests executed on the MT5 side, whose purpose are to
+// the following functions are for tests executed on the MT5 side, whose main purpose is to
 // validate that structs shared between the languages are right: alignment, data types and field order
-// must match
+// must match...
+// ... but other checks are done as well, such as scheduling MQL function executions (which is normally
+// triggered by Rust logic)
 
 /// Dumps the Rust internal values of the constants used in `MqlTick::flags` -- both to the log and
 /// back to the MQL program, via the pre-allocated MQL String `buffer`, so that the MQL Tester
@@ -365,6 +406,13 @@ pub extern fn dump_mql_trade_result(buffer: *mut u16,
     serialize_mql5_struct(buffer, &result);
 }
 
+/// calls [schedule_mql5_function_call()] for testing purposes
+#[no_mangle]
+pub extern fn test_schedule_mql5_function_call(executing_handle_id: i32, function_call_descriptor: MQ5StringRef) -> u32 {
+    let function_call_descriptor = unsafe { U16CString::from_ptr_str(    function_call_descriptor) }.to_string().unwrap_or(String::from("ERROR CONVERTING `function_call_descriptor` -- a supposedly UTF-16 Metatrader 5 String reference to a UTF-8 Rust String"));
+    schedule_mql5_function_call(executing_handle_id, function_call_descriptor)
+}
+
 /// Converts & copies `rust_string` into `pre_allocated_mql5_string`./
 /// `pre_allocated_mql5_string` should have enough space to hold the data + \0, or else
 /// Undefined Behavior will happen due to the corruption to the Metatrader heap
@@ -412,15 +460,17 @@ fn init(log_file_path: Option<&str>) {
         .expect("instantiating simplelog file writer");
     unsafe {
         for _i in 0..MAX_HANDLES {
+            // place holders -- see `register()` for the real data to be put in `HANDLES`
             HANDLES.push(Handle {
-                client_type:   ClientType::ProductionExpertAdvisor,
-                account_token: "".to_string(),
-                algorithm:     "".to_string(),
-                symbol:        "".to_string(),
-                books:         OrderBooks {
-                    sell_orders: VecDeque::new(),
-                    buy_orders: VecDeque::new(),
-                },
+                client_type:           ClientType::ProductionExpertAdvisor,
+                account_token:         "".to_string(),
+                algorithm:             "".to_string(),
+                symbol:                "".to_string(),
+                books:                 OrderBooks {
+                                           sell_orders: VecDeque::with_capacity(0),
+                                           buy_orders: VecDeque::with_capacity(0),
+                                       },
+                mql_functions_to_call: VecDeque::with_capacity(0)
             });
         }
     }
@@ -437,15 +487,17 @@ fn init(log_file_path: Option<&str>) {
 /// `handle_id` may be used to access the handle as in `let handle = unsafe { &HANDLES[handle_id as usize] };`
 fn register(account_token: String, algorithm: String, symbol: String) -> i32 {
     let books = OrderBooks {
-        sell_orders: VecDeque::new(),
-        buy_orders:  VecDeque::new(),
+        sell_orders: VecDeque::with_capacity(5),
+        buy_orders:  VecDeque::with_capacity(5),
     };
+    let mql_functions_to_call = VecDeque::with_capacity(16);
     let handle = Handle {
         client_type: ClientType::ProductionExpertAdvisor,
         account_token,
         algorithm,
         symbol,
         books,
+        mql_functions_to_call,
     };
     let handle_id = HANDLE_COUNT.fetch_add(1, Relaxed);
     if handle_id >= MAX_HANDLES {
@@ -563,7 +615,7 @@ fn compute_book_delta_events(old_books: &OrderBooks, new_books: &[Mq5MqlBookInfo
             }
             break 're_evaluate
         }
-        // advance cursors
+        // advance the cursors
         if let Some(_old) = peeked_old {
             old_books_iter.next();
         }
@@ -572,6 +624,36 @@ fn compute_book_delta_events(old_books: &OrderBooks, new_books: &[Mq5MqlBookInfo
         }
     }
     delta_events
+}
+
+
+/// Schedules a function to be executed by one of the MQL5 programs.\
+/// `function_call` is a JSON in the form `{"fn_to_call": "MqlFunction", "params": [10, "yes!", 9]}` -- see `RustToMQLMethodCall.mqh`.\
+/// Returns the number of pending functions to call after the scheduling is done
+fn schedule_mql5_function_call(executing_handle_id: i32, function_call: String) -> u32 {
+    unsafe {
+        let mut mql_functions_to_call = &mut HANDLES[executing_handle_id as usize].mql_functions_to_call;
+        HANDLES_GUARD.lock();
+        mql_functions_to_call.push_back(function_call);
+        HANDLES_GUARD.unlock();
+        mql_functions_to_call.len() as u32
+    }
+}
+
+/// Consumes any next MQL5 function to be called for the given `handle_id`.\
+/// Returns the JSON call descriptor -- see [schedule_mql5_function_execution()]\
+/// Implementation note: occasional false negatives are acceptable for the sake of execution speed (.len() check is out of the mutex section)
+fn consume_next_mql5_function_call(handle_id: i32) -> Option<String> {
+    unsafe {
+        if HANDLES[handle_id as usize].mql_functions_to_call.len() > 0 {
+            HANDLES_GUARD.lock();
+            let function_call = HANDLES[handle_id as usize].mql_functions_to_call.pop_front();
+            HANDLES_GUARD.unlock();
+            function_call
+        } else {
+            None
+        }
+    }
 }
 
 /// are we compiled in DEBUG or RELEASE mode?

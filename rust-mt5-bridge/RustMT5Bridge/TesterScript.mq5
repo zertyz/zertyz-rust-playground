@@ -6,6 +6,7 @@
 #property strict
 
 #include "RustDll.mqh"
+#include "RustToMQLMethodCall.mqh"
 
 
 void OnStart() {
@@ -13,9 +14,9 @@ void OnStart() {
     string test_name;
     string expected;
     string observed;
-    StringReserve(observed, 16384);  // this will contain the Rust ==> MT5 test results. The `string` should have enough capacity, since it cannot be allocated on the Rust side
-                                     // -- unfortunately, if not enough size is provided, memory corruption will happen, since Rust don't receive the buffer size when strings
-                                     //    are passed as function parameters (just the pointer to the buffer is passed)
+    StringInit(observed, 1024, 0);  // this will contain the Rust ==> MT5 test results. The `string` should have enough capacity, since it cannot be allocated on the Rust side
+                                    // -- unfortunately, if not enough size is provided, memory corruption will happen, since Rust don't receive the buffer size when strings
+                                    //    are passed as function parameters (just the pointer to the buffer is passed)
 
     // Makes all MQL Enum variant values known to Rust, so they may be converted properly (MQL Variants are not ordered nor sequential, unfortunately)
     #include "EnumReporter.mqh"
@@ -25,18 +26,21 @@ void OnStart() {
     }
 
 
+    Print("");
     test_name = "Testing Mt5MqlTick::flags constants...";
     expected = "MqlTick::flags { TICK_FLAG_BID: "+TICK_FLAG_BID+", TICK_FLAG_ASK: "+TICK_FLAG_ASK+", TICK_FLAG_LAST: "+TICK_FLAG_LAST+", TICK_FLAG_VOLUME: "+TICK_FLAG_VOLUME+", TICK_FLAG_BUY: "+TICK_FLAG_BUY+", TICK_FLAG_SELL: "+TICK_FLAG_SELL+" }";
     dump_mql_tick_flag_constants(observed);
     assert(observed, expected, test_name);
     
     
+    Print("");
     test_name = "Testing OnDeinit(reason) codes...";
     expected = "OnDeinit::reasons { REASON_PROGRAM: "+REASON_PROGRAM+", REASON_REMOVE: "+REASON_REMOVE+", REASON_RECOMPILE: "+REASON_RECOMPILE+", REASON_CHARTCHANGE: "+REASON_CHARTCHANGE+", REASON_CHARTCLOSE: "+REASON_CHARTCLOSE+", REASON_PARAMETERS: "+REASON_PARAMETERS+", REASON_ACCOUNT: "+REASON_ACCOUNT+", REASON_TEMPLATE: "+REASON_TEMPLATE+", REASON_INITFAILED: "+REASON_INITFAILED+", REASON_CLOSE: "+REASON_CLOSE+" }";
     dump_on_deinit_reasons(observed);
     assert(observed, expected, test_name);
 
 
+    Print("");
     test_name = "Testing MqlTick serialization...";
     MqlTick mql_tick;
     mql_tick.time        = 12344321;
@@ -52,6 +56,7 @@ void OnStart() {
     assert(observed, expected, test_name);
 
 
+    Print("");
     test_name = "Testing SymbolInfoBridge serialization...";
     SymbolInfoBridge symbol_info_bridge;
     symbol_info_bridge.symbol_sector = SECTOR_HEALTHCARE;
@@ -280,6 +285,7 @@ void OnStart() {
     assert(observed, expected, test_name);
 
 
+    Print("");
     test_name = "Testing AccountInfoBridge serialization...";
     AccountInfoBridge account_info_bridge;
     account_info_bridge.account_balance = 1.1;
@@ -345,6 +351,7 @@ void OnStart() {
     assert(observed, expected, test_name);
 
 
+    Print("");
     test_name = "Testing DealPropertiesBridge serialization...";
     DealPropertiesBridge deal_properties_bridge;
     deal_properties_bridge.deal_volume = 1.1;
@@ -391,17 +398,23 @@ void OnStart() {
     assert(observed, expected, test_name);
 
 
+    Print("");
     test_name = "Testing 'MqlBookInfo' serialization...";
-    MarketBookAdd(_Symbol);
-    Sleep(1500);
-    MqlBookInfo  book_info[];
-    MarketBookGet(_Symbol, book_info);
-Print("book_info len is " + ArraySize(book_info));
+    MqlBookInfo  book_info[2];
+    book_info[0].price       = 1.1;
+    book_info[0].type        = BOOK_TYPE_BUY_MARKET;
+    book_info[0].volume      = 3;
+    book_info[0].volume_real = 4.4;
+    book_info[1].price       = 5.5;
+    book_info[1].type        = BOOK_TYPE_SELL_MARKET;
+    book_info[1].volume      = 7;
+    book_info[1].volume_real = 8.8;
     dump_mql_book_info(observed, book_info, ArraySize(book_info));
-    expected = "MqlBookInfo { --put-fields-here-- }";
+    expected = "[MqlBookInfo { book_type: BookTypeBuyMarket, price: 1.1, volume: 4.4 }, MqlBookInfo { book_type: BookTypeSellMarket, price: 5.5, volume: 8.8 }]";
     assert(observed, expected, test_name);
 
     
+    Print("");
     test_name = "Testing 'MqlTradeTransaction' serialization for OnTradeTransaction()...";
     MqlTradeTransaction trade_transaction;
     trade_transaction.deal = 1;
@@ -441,6 +454,7 @@ Print("book_info len is " + ArraySize(book_info));
     assert(observed, expected, test_name);
 
     
+    Print("");
     test_name = "Testing 'MqlTradeRequest' serialization for OnTradeTransaction()...";
     MqlTradeRequest trade_request;
     trade_request.action = TRADE_ACTION_DEAL;
@@ -482,6 +496,7 @@ Print("book_info len is " + ArraySize(book_info));
     assert(observed, expected, test_name);
     
 
+    Print("");
     test_name = "Testing 'MqlTradeResult' serialization for OnTradeTransaction()...";
     MqlTradeResult trade_result;
     trade_result.retcode = 1;
@@ -507,12 +522,67 @@ Print("book_info len is " + ArraySize(book_info));
     "retcode_external: 10 }";
     dump_mql_trade_result(observed, trade_result);
     assert(observed, expected, test_name);
+    
+    
+    Print("");
+    init_rust_to_mql_method_calling_interface();
+    Print("Testing 'RustToMQLMethodCall':");
 
+    test_name = "    Alert(msg)";
+    expected = "{\"fn_to_call\": \"Alert\", \"params\": [\"Please, show this message to the user\"]}";
+    test_schedule_mql5_function_call(0, expected);
+    next_mql5_function_to_call(0, observed);
+    assert(observed, expected,test_name);
+    test_schedule_mql5_function_call(0, expected);
+    execute_pending_functions(0);
 
+    test_name = "    Alert(msg)";
+    expected = "{\"fn_to_call\": \"Alert\", \"params\": [\"Please, show this message to the user\"]}";
+    test_schedule_mql5_function_call(0, expected);
+    next_mql5_function_to_call(0, observed);
+    assert(observed, expected,test_name);
+    test_schedule_mql5_function_call(0, expected);
+    execute_pending_functions(0);
+    
+    test_name = "    Print(msg)";
+    expected = "{\"fn_to_call\": \"Print\", \"params\": [\"Please, print this message on the MT5 Terminal\"]}";
+    test_schedule_mql5_function_call(0, expected);
+    next_mql5_function_to_call(0, observed);
+    assert(observed, expected,test_name);
+    test_schedule_mql5_function_call(0, expected);
+    execute_pending_functions(0);
+    
+    test_name = "    collect_and_report_account_info()";
+    expected = "{\"fn_to_call\": \"collect_and_report_account_info\", \"params\": []}";
+    test_schedule_mql5_function_call(0, expected);
+    next_mql5_function_to_call(0, observed);
+    assert(observed, expected,test_name);
+    test_schedule_mql5_function_call(0, expected);
+    execute_pending_functions(0);
+    
+    test_name = "    collect_and_report_symbol_info()";
+    expected = "{\"fn_to_call\": \"collect_and_report_symbol_info\", \"params\": []}";
+    test_schedule_mql5_function_call(0, expected);
+    next_mql5_function_to_call(0, observed);
+    assert(observed, expected,test_name);
+    test_schedule_mql5_function_call(0, expected);
+    execute_pending_functions(0);
+
+    test_name = "    collect_and_report_all_deals_properties()";
+    expected = "{\"fn_to_call\": \"collect_and_report_all_deals_properties\", \"params\": []}";
+    test_schedule_mql5_function_call(0, expected);
+    next_mql5_function_to_call(0, observed);
+    assert(observed, expected,test_name);
+    test_schedule_mql5_function_call(0, expected);
+    execute_pending_functions(0);
+
+    
+
+   //StringSetLength(observed, 0);  // would free the string, but don't...
+   //StringInit(observed, 0, 0);    // not even this resolves the "1 leaked strings left" / "4096 bytes of leaked memory" messages... MQL5 bug on scripts? EAs don't suffer from this
 }
 
 void assert(string observed, string expected, string message) {
-    Print("");
     if (observed == expected) {
         Print(message + " OK -- "+observed.Length()+" chars");
     } else {

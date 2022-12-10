@@ -7,14 +7,14 @@ use chrono::NaiveDateTime;
 
 #[derive(Debug)]
 pub struct Handle {
-    pub client_type:   ClientType,
-    pub account_token: String,
-    pub algorithm:     String,  // this should be parsed
-    pub symbol:        String,
-    pub books:         OrderBooks,
+    pub client_type:           ClientType,
+    pub account_token:         String,
+    pub algorithm:             String,  // this should be parsed
+    pub symbol:                String,
+    pub books:                 OrderBooks,
+    pub mql_functions_to_call: VecDeque<String>,
     // what else should I keep here or just on the server? open positions, symbol information, book, trades, etc...
 }
-
 
 #[derive(Debug)]
 pub struct OrderBooks {
