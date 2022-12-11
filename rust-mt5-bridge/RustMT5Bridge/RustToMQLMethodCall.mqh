@@ -58,13 +58,47 @@ CJAVal call_mql_function(int rust_handle, string function_name, CJAVal& params) 
    // trading functions https://www.mql5.com/en/docs/trading/ordercalcmargin
    } else if (function_name == "OrderCalcMargin") {
       double margin = -1.0;
-      bool result = OrderCalcMargin((ENUM_ORDER_TYPE)params["enum_order_type_action"].ToInt(),
+      bool status = OrderCalcMargin((ENUM_ORDER_TYPE)params["enum_order_type_action"].ToInt(),
                                     params["symbol"].ToStr(),
                                     params["volume"].ToDbl(),
                                     params["price"].ToDbl(),
                                     margin);
-      returns["mt5_error_code"]  = result ? 0 : GetLastError();
+      returns["mt5_error_code"]  = status ? 0 : GetLastError();
       returns["margin"]          = margin;
+      
+   } else if (function_name == "OrderCheck") {
+      MqlTradeRequest request;
+      CJAVal jrequest = params["request"];
+      request.action       = (ENUM_TRADE_REQUEST_ACTIONS)jrequest["action"].ToInt();
+      request.magic        = jrequest["magic"].ToInt();
+      request.order        = jrequest["order"].ToInt();
+      request.symbol       = jrequest["symbol"].ToStr();
+      request.volume       = jrequest["volume"].ToDbl();
+      request.price        = jrequest["price"].ToDbl();
+      request.stoplimit    = jrequest["stoplimit"].ToDbl();
+      request.sl           = jrequest["sl"].ToDbl();
+      request.tp           = jrequest["tp"].ToDbl();
+      request.deviation    = jrequest["deviation"].ToInt();
+      request.type         = (ENUM_ORDER_TYPE)jrequest["type"].ToInt();
+      request.type_filling = (ENUM_ORDER_TYPE_FILLING)jrequest["type_filling"].ToInt();
+      request.type_time    = (ENUM_ORDER_TYPE_TIME)jrequest["type_time"].ToInt();
+      request.expiration   = (datetime)jrequest["expiration"].ToInt();
+      request.comment      = jrequest["comment"].ToStr();
+      request.position     = jrequest["position"].ToInt();
+      request.position_by  = jrequest["position_by"].ToInt();
+      MqlTradeCheckResult result;
+      CJAVal jresult;
+      bool status = OrderCheck(request, result);
+      jresult["retcode"]      = (int)result.retcode;
+      jresult["balance"]      = result.balance;
+      jresult["equity"]       = result.equity;
+      jresult["profit"]       = result.profit;
+      jresult["margin"]       = result.margin;
+      jresult["margin_free"]  = result.margin_free;
+      jresult["margin_level"] = result.margin_level;
+      jresult["comment"]      = result.comment;
+      returns["mt5_error_code"]  = status ? 0 : GetLastError();
+      returns["result"]          = jresult;
       
    // our internally defined functions
    } else if (function_name == "collect_and_report_account_info") {

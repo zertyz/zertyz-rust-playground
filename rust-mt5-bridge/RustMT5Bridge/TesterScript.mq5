@@ -552,14 +552,6 @@ void OnStart() {
     test_schedule_mql5_function_call(0, expected);
     execute_pending_functions(0);
     
-    test_name = "    OrderCalcMargin(...)";
-    expected = "{\"fn_to_call\": \"OrderCalcMargin\", \"params\": [\"enum_order_type_action\": "+TRADE_ACTION_DEAL+", \"symbol\": \"PETR4\", \"volume\": 100, \"price\": 32.02]}";
-    test_schedule_mql5_function_call(0, expected);
-    next_mql5_function_to_call(0, observed);
-    assert(observed, expected,test_name);
-    test_schedule_mql5_function_call(0, expected);
-    execute_pending_functions(0);
-    
     test_name = "    collect_and_report_account_info()";
     expected = "{\"fn_to_call\": \"collect_and_report_account_info\", \"params\": []}";
     test_schedule_mql5_function_call(0, expected);
@@ -584,9 +576,44 @@ void OnStart() {
     test_schedule_mql5_function_call(0, expected);
     execute_pending_functions(0);
 
+    test_name = "    OrderCalcMargin(...)";
+    expected = "{\"fn_to_call\": \"OrderCalcMargin\", \"params\": [\"enum_order_type_action\": "+TRADE_ACTION_DEAL+", \"symbol\": \"PETR4\", \"volume\": 100, \"price\": 32.02]}";
+    test_schedule_mql5_function_call(0, expected);
+    next_mql5_function_to_call(0, observed);
+    assert(observed, expected,test_name);
+    test_schedule_mql5_function_call(0, expected);
+    execute_pending_functions(0);
+    
+    test_name = "    OrderCheck(...)";
+    expected = "{\"fn_to_call\": \"OrderCheck\", \"params\": {\"request\": {" +
+      "  \"action\": "       + TRADE_ACTION_DEAL +
+      ", \"magic\":            9758" +
+      ", \"order\":            0" +
+      ", \"symbol\":           \""+Symbol()+"\"" +
+      ", \"volume\":           100" +
+      ", \"price\":            32.32" +
+      ", \"stoplimit\":        0.00" +
+      ", \"sl\":               0.00" +
+      ", \"tp\":               0.00" +
+      ", \"deviation\":        5" +
+      ", \"type\": "         + ORDER_TYPE_BUY +
+      ", \"type_filling\": " + ORDER_FILLING_FOK +
+      ", \"type_time\": "    + ORDER_TIME_DAY +
+      ", \"expiration\":       0" +
+      ", \"comment\":          \"Robot wanted to buy it because it wanted\"" +
+      ", \"position\":         0" +
+      ", \"position_by\":      0" +
+    "}}}";
+    test_schedule_mql5_function_call(0, expected);
+    next_mql5_function_to_call(0, observed);
+    assert(observed, expected,test_name);
+    test_schedule_mql5_function_call(0, expected);
+    execute_pending_functions(0);
+    
     
    //StringSetLength(observed, 0);  // would free the string, but don't...
    //StringInit(observed, 0, 0);    // not even this resolves the "1 leaked strings left" / "4096 bytes of leaked memory" messages... MQL5 bug on scripts? EAs don't suffer from this
+
 }
 
 void assert(string observed, string expected, string message) {
