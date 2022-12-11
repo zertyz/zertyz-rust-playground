@@ -536,16 +536,16 @@ void OnStart() {
     test_schedule_mql5_function_call(0, expected);
     execute_pending_functions(0);
 
-    test_name = "    Alert(msg)";
-    expected = "{\"fn_to_call\": \"Alert\", \"params\": [\"Please, show this message to the user\"]}";
+    test_name = "    Print(msg)";
+    expected = "{\"fn_to_call\": \"Print\", \"params\": [\"Please, print this message on the MT5 Terminal\"]}";
     test_schedule_mql5_function_call(0, expected);
     next_mql5_function_to_call(0, observed);
     assert(observed, expected,test_name);
     test_schedule_mql5_function_call(0, expected);
     execute_pending_functions(0);
     
-    test_name = "    Print(msg)";
-    expected = "{\"fn_to_call\": \"Print\", \"params\": [\"Please, print this message on the MT5 Terminal\"]}";
+    test_name = "    Comment(msg)";
+    expected = "{\"fn_to_call\": \"Comment\", \"params\": [\"Are on the Symbol's Graph Top-Left corner??\"]}";
     test_schedule_mql5_function_call(0, expected);
     next_mql5_function_to_call(0, observed);
     assert(observed, expected,test_name);
@@ -577,7 +577,6 @@ void OnStart() {
     execute_pending_functions(0);
 
     
-
    //StringSetLength(observed, 0);  // would free the string, but don't...
    //StringInit(observed, 0, 0);    // not even this resolves the "1 leaked strings left" / "4096 bytes of leaked memory" messages... MQL5 bug on scripts? EAs don't suffer from this
 }

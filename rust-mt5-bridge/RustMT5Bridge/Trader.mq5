@@ -1,14 +1,10 @@
 ﻿#property copyright   "Copyright 2022, OgreRobot.com"
 #property link        "https://OgreRobot.com"
 #property version     "1.00"
-#property description "Bridge to Rust, allowing implementing trading & market data providers Expert Advisors there."
-#property description "The parameters present here are for a fictitious trading algorithm"
-#property description "that takes into account the last minimum (for its buying decisions)"
-#property description "and the minimum acceptable profit, for its selling ones."
-#property description "Exposing parameters to Metatrader is interesting because we can use its testing facilities."
-input double min_profit        = 0.03;  // The minimum profit at which the decision maker is allowed to close a position -- $0.03 starts protecting you from delays in the execution
-input double wakeup_spread     = 0.03;  // The spread between the last lower price and now that, when reached
-input double wakeup_grace_secs = 1.0;   // After the wakeup_spread has been reached, prices must not go down for (at least) that many seconds before a purchase can be done
+#property description "Trading Bridge to Rust, informing Market Data and allowing Trades to happen."
+#property description "Notice, however, that the Market Data reporting done here has a lower priority than"
+#property description "the reports done by the dedicated `MarketDataProvider` EA, if available."
+input string rust_algorithm = "{\"algorithm\": \"NaiveTrader\", \"stop_win\": 0.02}";  // Rust algorithm and parameters
 
 #include "RustDll.mqh"
 #include "RustToMQLMethodCall.mqh"
@@ -19,8 +15,6 @@ input double wakeup_grace_secs = 1.0;   // After the wakeup_spread has been reac
 //   * https://www.mql5.com/en/docs/marketinformation/symbolinfosessiontrade
 
 string   account_token  = "SjDud7s53Hvx7643Gtta7352Jdgx7453Hfzt635";                // The account for the one attempting to run the algorithm
-string   rust_algorithm = StringFormat("Fictitious(min_profit: %G, wakeup_spread: %G, wakeup_grace_secs: )",
-                                     min_profit, wakeup_spread, wakeup_grace_secs); // Which Algorithm to run on the Rust side
 int      rust_handle   = -1;                                                        // The handler to identify this instance on the Rust side -- to be passed to almost all Rust functions
 datetime testing_start;                                                             // If testing was started, remembers when
 string   report;
@@ -29,7 +23,7 @@ int OnInit() {
     init_rust_to_mql_method_calling_interface();
     rust_handle = register_trading_expert_advisor_for_production(account_token, rust_algorithm, _Symbol);
     if (rust_handle >= 0) {
-        Print(StringFormat("RustMtBridge: PRODUCTION trading EA for symbol '%s' was successfully registered with rust_handle=%d for using Rust algorithm '%s' and account token '%s'",
+        Print(StringFormat("Trader: PRODUCTION trading EA for symbol '%s' was successfully registered with rust_handle=%d for using Rust algorithm '%s' and account token '%s'",
                            _Symbol, rust_handle, rust_algorithm, account_token));
         // per-session information (reported only by the first expert advisor to start)
         if (rust_handle == 0) {
@@ -47,18 +41,20 @@ int OnInit() {
             Print("QUITTING DUE TO ERROR: " + error_message);
             return INIT_FAILED;
         } else {
+            EventSetMillisecondTimer(500);
             return INIT_SUCCEEDED;
         }
     } else {
-        Print(StringFormat("RustMtBridge: FAILED registering PRODUCTION trading EA for symbol '%s' with Error Code #%d -- attempted Rust algorithm was '%s' and account token '%s'",
+        Print(StringFormat("Trader: FAILED registering PRODUCTION trading EA for symbol '%s' with Error Code #%d -- attempted Rust algorithm was '%s' and account token '%s'",
                            _Symbol, rust_handle, rust_algorithm, account_token));
         return INIT_FAILED;
     }
 }
 
 void OnDeinit(const int reason) {
+    EventKillTimer();
     unregister_trading_expert_advisor(rust_handle, reason);
-    Print(StringFormat("RustMtBridge: PRODUCTION trading EA for symbol '%s' (rust_handle=%d; rust_algorithm='%s'; account_token='%s') was unregistered due to MT5 request: reason #%d",
+    Print(StringFormat("Trader: PRODUCTION trading EA for symbol '%s' (rust_handle=%d; rust_algorithm='%s'; account_token='%s') was unregistered due to MT5 request: reason #%d",
                        _Symbol, rust_handle, rust_algorithm, account_token, reason));
 }
 
@@ -66,11 +62,11 @@ void OnDeinit(const int reason) {
 int OnTesterInit() {
     rust_handle = register_trading_expert_advisor_for_testing(account_token, rust_algorithm, _Symbol);
     if (rust_handle >= 0) {
-        Print(StringFormat("RustMtBridge: TESTING trading EA for symbol '%s' was successfully registered with rust_handle=%d for using Rust algorithm '%s' and account token '%s'",
+        Print(StringFormat("Trader: TESTING trading EA for symbol '%s' was successfully registered with rust_handle=%d for using Rust algorithm '%s' and account token '%s'",
                            _Symbol, rust_handle, rust_algorithm, account_token));
         return INIT_SUCCEEDED;
     } else {
-        Print(StringFormat("RustMtBridge: FAILED registering TESTING trading EA for symbol '%s' with Error Code #%d -- attempted Rust algorithm was '%s' and account token '%s'",
+        Print(StringFormat("Trader: FAILED registering TESTING trading EA for symbol '%s' with Error Code #%d -- attempted Rust algorithm was '%s' and account token '%s'",
                            _Symbol, rust_handle, rust_algorithm, account_token));
         return INIT_FAILED;
     }
@@ -83,7 +79,7 @@ int OnTesterInit() {
 
 void OnTesterDeinit() {
     unregister_trading_expert_advisor(rust_handle, 0);
-    Print(StringFormat("RustMtBridge: TESTING trading EA for symbol '%s' (rust_handle=%d; rust_algorithm='%s'; account_token='%s') was unregistered due to MT5 request",
+    Print(StringFormat("Trader: TESTING trading EA for symbol '%s' (rust_handle=%d; rust_algorithm='%s'; account_token='%s') was unregistered due to MT5 request",
                        _Symbol, rust_handle, rust_algorithm, account_token));
 
 //    string log_message = StringFormat("%s: optimization took %d seconds",
@@ -101,29 +97,24 @@ void OnTesterPass() {
 // TODO: learn more from https://www.mql5.com/en/docs/event_handlers/ontester
 double OnTester() {
     double ignored_ret_for_now = on_tester(rust_handle);
-    return wakeup_spread * (min_profit - 1);
+    return 1;
 }
 
-// any further tricks to get from https://www.mql5.com/en/docs/event_handlers/ontick ?
 void OnTick() {
-   MqlTick last_tick;
-   SymbolInfoTick(_Symbol, last_tick);
-   on_tick(rust_handle, last_tick);
+    MqlTick last_tick;
+    SymbolInfoTick(_Symbol, last_tick);
+    on_tick(rust_handle, last_tick);
+    execute_pending_functions(rust_handle);
 }
 
-// Events bellow this line are likely to be moved to other EAs, so not to interfere with the `OnTick()` events
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// any further tricks to get from https://www.mql5.com/en/docs/event_handlers/ontrade ?
 void OnTrade() {
     on_trade(rust_handle,
              OrdersTotal(),
              PositionsTotal());
+    execute_pending_functions(rust_handle);
 }
 
-// A single EA may receive those events (for different symbols), without losing any one, as they are enqueued.
-// Subscribe with 'MarketBookAdd()'
-MqlBookInfo  book_info[];    // kept global to optimize allocations
+MqlBookInfo  book_info[];
 void OnBookEvent(const string&  symbol) {
     MarketBookGet(symbol, book_info);
     // the Rust part will compute deltas to issue book additions / editions / removal events to subscribers
@@ -134,4 +125,9 @@ void OnBookEvent(const string&  symbol) {
 // Called when an order issue by us gets processed by the exchange
 void OnTradeTransaction(const MqlTradeTransaction& transaction, const MqlTradeRequest&  request, const MqlTradeResult& result) {
     on_trade_transaction(rust_handle, transaction, request, result);
+    execute_pending_functions(rust_handle);
+}
+
+void OnTimer() {
+   execute_pending_functions(rust_handle);
 }
