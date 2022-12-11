@@ -23,3 +23,6 @@ pub use mql_trade_request::*;
 
 pub mod mql_trade_result;
 pub use mql_trade_result::*;
+
+pub mod mt5_codes;
+pub use mt5_codes::*;

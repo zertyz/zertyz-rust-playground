@@ -47,14 +47,25 @@ bool execute_pending_functions(int rust_handle) {
 CJAVal call_mql_function(int rust_handle, string function_name, CJAVal& params) {
    CJAVal returns;
 
-   // https://www.mql5.com/en/docs/common/comment
+   // UI functions https://www.mql5.com/en/docs/common/comment
    if (function_name == "Alert") {
       Alert(params[0].ToStr());
    } else if (function_name == "Print") {
       Print(params[0].ToStr());
    } else if (function_name == "Comment") {
       Comment(params[0].ToStr());
-
+      
+   // trading functions https://www.mql5.com/en/docs/trading/ordercalcmargin
+   } else if (function_name == "OrderCalcMargin") {
+      double margin = -1.0;
+      bool result = OrderCalcMargin((ENUM_ORDER_TYPE)params["enum_order_type_action"].ToInt(),
+                                    params["symbol"].ToStr(),
+                                    params["volume"].ToDbl(),
+                                    params["price"].ToDbl(),
+                                    margin);
+      returns["mt5_error_code"]  = result ? 0 : GetLastError();
+      returns["margin"]          = margin;
+      
    // our internally defined functions
    } else if (function_name == "collect_and_report_account_info") {
       collect_and_report_account_info(rust_handle);

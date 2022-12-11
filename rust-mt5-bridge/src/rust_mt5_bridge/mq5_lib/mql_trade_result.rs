@@ -3,6 +3,7 @@
 
 use super::{
 	types::*,
+	mt5_codes::Mt5TradeServerReturnCodes,
 };
 
 
@@ -42,7 +43,7 @@ impl Mq5MqlTradeResult {
 		log::debug!("on_trade_transaction(xx): _____: {:#?}", mq5_mql_trade_result);
 
 		MqlTradeResult {
-			retcode: mq5_mql_trade_result.retcode,
+			retcode: Mt5TradeServerReturnCodes::from(mq5_mql_trade_result.retcode),
 			deal: mq5_mql_trade_result.deal,
 			order: mq5_mql_trade_result.order,
 			volume: mq5_mql_trade_result.volume,
@@ -61,7 +62,7 @@ impl Mq5MqlTradeResult {
 #[derive(Debug)]
 pub struct MqlTradeResult {
 	/// Operation return code
-	pub retcode: u32,	// make an enum out of those values -- https://www.mql5.com/en/docs/constants/errorswarnings/enum_trade_return_codes
+	pub retcode: Mt5TradeServerReturnCodes,
 	/// Deal ticket, if it is performed
 	pub deal: u64,
 	/// Order ticket, if it is placed

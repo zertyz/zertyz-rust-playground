@@ -14,9 +14,9 @@ input string rust_algorithm = "{\"algorithm\": \"NaiveTrader\", \"stop_win\": 0.
 //   * https://www.mql5.com/en/docs/constants/environment_state/mql5_programm_info
 //   * https://www.mql5.com/en/docs/marketinformation/symbolinfosessiontrade
 
-string   account_token  = "SjDud7s53Hvx7643Gtta7352Jdgx7453Hfzt635";                // The account for the one attempting to run the algorithm
-int      rust_handle   = -1;                                                        // The handler to identify this instance on the Rust side -- to be passed to almost all Rust functions
-datetime testing_start;                                                             // If testing was started, remembers when
+string   account_token  = "SjDud7s53Hvx7643Gtta7352Jdgx7453Hfzt635";    // The account for the one attempting to run the algorithm
+int      rust_handle   = -1;                                            // The handler to identify this instance on the Rust side -- to be passed to almost all Rust functions
+datetime testing_start;                                                 // If testing was started, remembers when
 string   report;
 
 int OnInit() {

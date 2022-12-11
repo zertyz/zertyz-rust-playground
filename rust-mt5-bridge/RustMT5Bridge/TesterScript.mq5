@@ -499,7 +499,7 @@ void OnStart() {
     Print("");
     test_name = "Testing 'MqlTradeResult' serialization for OnTradeTransaction()...";
     MqlTradeResult trade_result;
-    trade_result.retcode = 1;
+    trade_result.retcode = 10039;
     trade_result.deal = 2;
     trade_result.order = 3;
     trade_result.volume = 4.4;
@@ -510,7 +510,7 @@ void OnStart() {
     trade_result.request_id = 9;
     trade_result.retcode_external = 10;
     expected = "MqlTradeResult { " +
-    "retcode: 1, " +
+    "retcode: TradeRetcodeCloseOrderExist, " +
     "deal: 2, " +
     "order: 3, " +
     "volume: 4.4, " +
@@ -546,6 +546,14 @@ void OnStart() {
     
     test_name = "    Comment(msg)";
     expected = "{\"fn_to_call\": \"Comment\", \"params\": [\"Are on the Symbol's Graph Top-Left corner??\"]}";
+    test_schedule_mql5_function_call(0, expected);
+    next_mql5_function_to_call(0, observed);
+    assert(observed, expected,test_name);
+    test_schedule_mql5_function_call(0, expected);
+    execute_pending_functions(0);
+    
+    test_name = "    OrderCalcMargin(...)";
+    expected = "{\"fn_to_call\": \"OrderCalcMargin\", \"params\": [\"enum_order_type_action\": "+TRADE_ACTION_DEAL+", \"symbol\": \"PETR4\", \"volume\": 100, \"price\": 32.02]}";
     test_schedule_mql5_function_call(0, expected);
     next_mql5_function_to_call(0, observed);
     assert(observed, expected,test_name);
