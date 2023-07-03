@@ -1,0 +1,29 @@
+# RELEASE BUILDING:
+# RUSTFLAGS="-C target-cpu=native" cargo build --release
+
+[package]
+name = "neat-date-time-lib"
+version = "0.1.0"
+edition = "2021"
+default-run = "neat-date-time-lib"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "neat-date-time-lib"
+path = "src/neat-date-time-lib.rs"
+
+[dependencies]
+neat-date-time = "0.1"
+
+
+# see https://deterministic.space/high-performance-rust.html
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"     # disables stack traces / stack unwiding
+#rustflags = ["-C", "target-cpu=native"]    # this seems not to work
+#overflow-checks = true     # might help debug release-only bugs
+
+#[release-dependencies]
+#jemallocator = "0.3.2"
