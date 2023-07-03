@@ -16,7 +16,7 @@ use parking_lot::lock_api::RawMutex as _RawMutex;
 use log::{debug, info, warn, error};
 
 
-const MAX_HANDLES: i32 = 1024;
+const MAX_HANDLES: i32 = 128;
 
 // Runtime (static) data
 ////////////////////////
@@ -456,6 +456,7 @@ fn init(log_file_path: Option<&str>) {
         .time_format("%H:%M:%S.%f")
         .level(LOG_LEVEL);
 
+    // TODO 2023-02-28: this causes MT5 to crash (without any output) if the file cannot be opened
     simple_log::new(config.build())
         .expect("instantiating simplelog file writer");
     unsafe {
@@ -632,7 +633,7 @@ fn compute_book_delta_events(old_books: &OrderBooks, new_books: &[Mq5MqlBookInfo
 /// Returns the number of pending functions to call after the scheduling is done
 fn schedule_mql5_function_call(executing_handle_id: i32, function_call: String) -> u32 {
     unsafe {
-        let mut mql_functions_to_call = &mut HANDLES[executing_handle_id as usize].mql_functions_to_call;
+        let mql_functions_to_call = &mut HANDLES[executing_handle_id as usize].mql_functions_to_call;
         HANDLES_GUARD.lock();
         mql_functions_to_call.push_back(function_call);
         HANDLES_GUARD.unlock();
@@ -665,7 +666,7 @@ pub const DEBUG: bool = false;
 /// Keep those levels in sync with Cargo.toml's `log` crate levels defined in features.
 /// Example: features = ["max_level_debug", "release_max_level_info"]
 const LOG_LEVEL: &str           = if DEBUG { "debug" } else { "info" };
-const MAX_LOG_FILE_SIZE_MB: u64 = 2*1024;
+const MAX_LOG_FILE_SIZE_MB: u64 = 20*1024;
 const MAX_LOG_FILES: u32        = 22;
 
 /// to be called when debugging logging issues

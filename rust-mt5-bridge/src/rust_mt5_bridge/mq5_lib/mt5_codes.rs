@@ -7,474 +7,474 @@ use strum::{EnumString,FromRepr};
 #[derive(Debug,PartialEq,EnumString,FromRepr,Clone,Copy)]
 pub enum Mt5ErrorCodes {
     /// The operation completed successfully
-    errSuccess = 0,
-    /// Unexpected internal error
-    errInternalError = 4001,
+    ErrSuccess = 0,
+    /// Unexpected internal Error
+    ErrInternalError = 4001,
     /// Wrong parameter in the inner call of the client terminal function
-    errWrongInternalParameter = 4002,
+    ErrWrongInternalParameter = 4002,
     /// Wrong parameter when calling the system function
-    errInvalidParameter = 4003,
+    ErrInvalidParameter = 4003,
     /// Not enough memory to perform the system function
-    errNotEnoughMemory = 4004,
+    ErrNotEnoughMemory = 4004,
     /// The structure contains objects of strings and/or dynamic arrays and/or structure of such objects and/or classes
-    errStructWithobjectsOrclass = 4005,
+    ErrStructWithobjectsOrclass = 4005,
     /// Array of a wrong type, wrong size, or a damaged object of a dynamic array
-    errInvalidArray = 4006,
+    ErrInvalidArray = 4006,
     /// Not enough memory for the relocation of an array, or an attempt to change the size of a static array
-    errArrayResizeError = 4007,
+    ErrArrayResizeError = 4007,
     /// Not enough memory for the relocation of string
-    errStringResizeError = 4008,
+    ErrStringResizeError = 4008,
     /// Not initialized string
-    errNotinitializedString = 4009,
+    ErrNotinitializedString = 4009,
     /// Invalid date and/or time
-    errInvalidDatetime = 4010,
+    ErrInvalidDatetime = 4010,
     /// Total amount of elements in the array cannot exceed 2147483647
-    errArrayBadSize = 4011,
+    ErrArrayBadSize = 4011,
     /// Wrong pointer
-    errInvalidPointer = 4012,
+    ErrInvalidPointer = 4012,
     /// Wrong type of pointer
-    errInvalidPointerType = 4013,
+    ErrInvalidPointerType = 4013,
     /// Function is not allowed for call
-    errFunctionNotAllowed = 4014,
+    ErrFunctionNotAllowed = 4014,
     /// The names of the dynamic and the static resource match
-    errResourceNameDuplicated = 4015,
+    ErrResourceNameDuplicated = 4015,
     /// Resource with this name has not been found in ex5
-    errResourceNotFound = 4016,
+    ErrResourceNotFound = 4016,
     /// Unsupported resource type or its size exceeds 16 Mb
-    errResourceUnsuppotedType = 4017,
+    ErrResourceUnsuppotedType = 4017,
     /// The resource name exceeds 63 characters
-    errResourceNameIsTooLong = 4018,
+    ErrResourceNameIsTooLong = 4018,
     /// Overflow occurred when calculating math function
-    errMathOverflow = 4019,
+    ErrMathOverflow = 4019,
     /// Out of test end date after calling Sleep()
-    errSleepError = 4020,
+    ErrSleepError = 4020,
     /// Test forcibly stopped from the outside. For example, optimization interrupted, visual testing window closed or testing agent stopped
-    errProgramStopped = 4022,
+    ErrProgramStopped = 4022,
     /// Wrong chart id
-    errChartWrongId = 4101,
+    ErrChartWrongId = 4101,
     /// Chart does not respond
-    errChartNoReply = 4102,
+    ErrChartNoReply = 4102,
     /// Chart not found
-    errChartNotFound = 4103,
+    ErrChartNotFound = 4103,
     /// No Expert Advisor in the chart that could handle the event
-    errChartNoExpert = 4104,
-    /// Chart opening error
-    errChartCannotOpen = 4105,
+    ErrChartNoExpert = 4104,
+    /// Chart opening Error
+    ErrChartCannotOpen = 4105,
     /// Failed to change chart symbol and period
-    errChartCannotChange = 4106,
+    ErrChartCannotChange = 4106,
     /// Error value of the parameter for the function of working with charts
-    errChartWrongParameter = 4107,
+    ErrChartWrongParameter = 4107,
     /// Failed to create timer
-    errChartCannotCreateTimer = 4108,
+    ErrChartCannotCreateTimer = 4108,
     /// Wrong chart property id
-    errChartWrongProperty = 4109,
+    ErrChartWrongProperty = 4109,
     /// Error creating screenshots
-    errChartScreenshotFailed = 4110,
+    ErrChartScreenshotFailed = 4110,
     /// Error navigating through chart
-    errChartNavigateFailed = 4111,
+    ErrChartNavigateFailed = 4111,
     /// Error applying template
-    errChartTemplateFailed = 4112,
+    ErrChartTemplateFailed = 4112,
     /// Subwindow containing the indicator was not found
-    errChartWindowNotFound = 4113,
+    ErrChartWindowNotFound = 4113,
     /// Error adding an indicator to chart
-    errChartIndicatorCannotAdd = 4114,
+    ErrChartIndicatorCannotAdd = 4114,
     /// Error deleting an indicator from the chart
-    errChartIndicatorCannotDel = 4115,
+    ErrChartIndicatorCannotDel = 4115,
     /// Indicator not found on the specified chart
-    errChartIndicatorNotFound = 4116,
+    ErrChartIndicatorNotFound = 4116,
     /// Error working with a graphical object
-    errObjectError = 4201,
+    ErrObjectError = 4201,
     /// Graphical object was not found
-    errObjectNotFound = 4202,
+    ErrObjectNotFound = 4202,
     /// Wrong id of a graphical object property
-    errObjectWrongProperty = 4203,
+    ErrObjectWrongProperty = 4203,
     /// Unable to get date corresponding to the value
-    errObjectGetdateFailed = 4204,
+    ErrObjectGetdateFailed = 4204,
     /// Unable to get value corresponding to the date
-    errObjectGetvalueFailed = 4205,
+    ErrObjectGetvalueFailed = 4205,
     /// Unknown symbol
-    errMarketUnknownSymbol = 4301,
+    ErrMarketUnknownSymbol = 4301,
     /// Symbol is not selected in MarketWatch
-    errMarketNotSelected = 4302,
+    ErrMarketNotSelected = 4302,
     /// Wrong identifier of a symbol property
-    errMarketWrongProperty = 4303,
+    ErrMarketWrongProperty = 4303,
     /// Time of the last tick is not known (no ticks)
-    errMarketLasttimeUnknown = 4304,
+    ErrMarketLasttimeUnknown = 4304,
     /// Error adding or deleting a symbol in MarketWatch
-    errMarketSelectError = 4305,
+    ErrMarketSelectError = 4305,
     /// Requested history not found
-    errHistoryNotFound = 4401,
+    ErrHistoryNotFound = 4401,
     /// Wrong id of the history property
-    errHistoryWrongProperty = 4402,
+    ErrHistoryWrongProperty = 4402,
     /// Exceeded history request timeout
-    errHistoryTimeout = 4403,
+    ErrHistoryTimeout = 4403,
     /// Number of requested bars limited by terminal settings
-    errHistoryBarsLimit = 4404,
-    /// Multiple errors when loading history
-    errHistoryLoadErrors = 4405,
+    ErrHistoryBarsLimit = 4404,
+    /// Multiple Errors when loading history
+    ErrHistoryLoadErrors = 4405,
     /// Receiving array is too small to store all requested data
-    errHistorySmallBuffer = 4407,
+    ErrHistorySmallBuffer = 4407,
     /// Global variable of the client terminal is not found
-    errGlobalvariableNotFound = 4501,
+    ErrGlobalvariableNotFound = 4501,
     /// Global variable of the client terminal with the same name already exists
-    errGlobalvariableExists = 4502,
+    ErrGlobalvariableExists = 4502,
     /// Global variables were not modified
-    errGlobalvariableNotModified = 4503,
+    ErrGlobalvariableNotModified = 4503,
     /// Cannot read file with global variable values
-    errGlobalvariableCannotread = 4504,
+    ErrGlobalvariableCannotread = 4504,
     /// Cannot write file with global variable values
-    errGlobalvariableCannotwrite = 4505,
+    ErrGlobalvariableCannotwrite = 4505,
     /// Email sending failed
-    errMailSendFailed = 4510,
+    ErrMailSendFailed = 4510,
     /// Sound playing failed
-    errPlaySoundFailed = 4511,
+    ErrPlaySoundFailed = 4511,
     /// Wrong identifier of the program property
-    errMql5WrongProperty = 4512,
+    ErrMql5WrongProperty = 4512,
     /// Wrong identifier of the terminal property
-    errTerminalWrongProperty = 4513,
+    ErrTerminalWrongProperty = 4513,
     /// File sending via ftp failed
-    errFtpSendFailed = 4514,
+    ErrFtpSendFailed = 4514,
     /// Failed to send a notification
-    errNotificationSendFailed = 4515,
+    ErrNotificationSendFailed = 4515,
     /// Invalid parameter for sending a notification – an empty string or null has been passed to the SendNotification() function
-    errNotificationWrongParameter = 4516,
+    ErrNotificationWrongParameter = 4516,
     /// Wrong settings of notifications in the terminal (id is not specified or permission is not set)
-    errNotificationWrongSettings = 4517,
+    ErrNotificationWrongSettings = 4517,
     /// Too frequent sending of notifications
-    errNotificationTooFrequent = 4518,
+    ErrNotificationTooFrequent = 4518,
     /// ftp server is not specified
-    errFtpNoserver = 4519,
+    ErrFtpNoserver = 4519,
     /// ftp login is not specified
-    errFtpNologin = 4520,
+    ErrFtpNologin = 4520,
     /// File not found in the mql5\Files directory to send on ftp server
-    errFtpFileError = 4521,
+    ErrFtpFileError = 4521,
     /// ftp connection failed
-    errFtpConnectFailed = 4522,
+    ErrFtpConnectFailed = 4522,
     /// ftp path not found on server
-    errFtpChangedir = 4523,
+    ErrFtpChangedir = 4523,
     /// ftp connection closed
-    errFtpClosed = 4524,
+    ErrFtpClosed = 4524,
     /// Not enough memory for the distribution of indicator buffers
-    errBuffersNoMemory = 4601,
+    ErrBuffersNoMemory = 4601,
     /// Wrong indicator buffer index
-    errBuffersWrongIndex = 4602,
+    ErrBuffersWrongIndex = 4602,
     /// Wrong id of the custom indicator property
-    errCustomWrongProperty = 4603,
+    ErrCustomWrongProperty = 4603,
     /// Wrong account property id
-    errAccountWrongProperty = 4701,
+    ErrAccountWrongProperty = 4701,
     /// Wrong trade property id
-    errTradeWrongProperty = 4751,
+    ErrTradeWrongProperty = 4751,
     /// Trading by Expert Advisors prohibited
-    errTradeDisabled = 4752,
+    ErrTradeDisabled = 4752,
     /// Position not found
-    errTradePositionNotFound = 4753,
+    ErrTradePositionNotFound = 4753,
     /// Order not found
-    errTradeOrderNotFound = 4754,
+    ErrTradeOrderNotFound = 4754,
     /// Deal not found
-    errTradeDealNotFound = 4755,
+    ErrTradeDealNotFound = 4755,
     /// Trade request sending failed
-    errTradeSendFailed = 4756,
+    ErrTradeSendFailed = 4756,
     /// Failed to calculate profit or margin
-    errTradeCalcFailed = 4758,
+    ErrTradeCalcFailed = 4758,
     /// Unknown symbol
-    errIndicatorUnknownSymbol = 4801,
+    ErrIndicatorUnknownSymbol = 4801,
     /// Indicator cannot be created
-    errIndicatorCannotCreate = 4802,
+    ErrIndicatorCannotCreate = 4802,
     /// Not enough memory to add the indicator
-    errIndicatorNoMemory = 4803,
+    ErrIndicatorNoMemory = 4803,
     /// The indicator cannot be applied to another indicator
-    errIndicatorCannotApply = 4804,
+    ErrIndicatorCannotApply = 4804,
     /// Error applying an indicator to chart
-    errIndicatorCannotAdd = 4805,
+    ErrIndicatorCannotAdd = 4805,
     /// Requested data not found
-    errIndicatorDataNotFound = 4806,
+    ErrIndicatorDataNotFound = 4806,
     /// Wrong indicator handle
-    errIndicatorWrongHandle = 4807,
+    ErrIndicatorWrongHandle = 4807,
     /// Wrong number of parameters when creating an indicator
-    errIndicatorWrongParameters = 4808,
+    ErrIndicatorWrongParameters = 4808,
     /// No parameters when creating an indicator
-    errIndicatorParametersMissing = 4809,
+    ErrIndicatorParametersMissing = 4809,
     /// The first parameter in the array must be the name of the custom indicator
-    errIndicatorCustomName = 4810,
+    ErrIndicatorCustomName = 4810,
     /// Invalid parameter type in the array when creating an indicator
-    errIndicatorParameterType = 4811,
+    ErrIndicatorParameterType = 4811,
     /// Wrong index of the requested indicator buffer
-    errIndicatorWrongIndex = 4812,
+    ErrIndicatorWrongIndex = 4812,
     /// Depth Of Market can not be added
-    errBooksCannotAdd = 4901,
+    ErrBooksCannotAdd = 4901,
     /// Depth Of Market can not be removed
-    errBooksCannotDelete = 4902,
+    ErrBooksCannotDelete = 4902,
     /// The data from Depth Of Market can not be obtained
-    errBooksCannotGet = 4903,
+    ErrBooksCannotGet = 4903,
     /// Error in subscribing to receive new data from Depth Of Market
-    errBooksCannotSubscribe = 4904,
+    ErrBooksCannotSubscribe = 4904,
     /// More than 64 files cannot be opened at the same time
-    errTooManyFiles = 5001,
+    ErrTooManyFiles = 5001,
     /// Invalid file name
-    errWrongFilename = 5002,
+    ErrWrongFilename = 5002,
     /// Too long file name
-    errTooLongFilename = 5003,
-    /// File opening error
-    errCannotOpenFile = 5004,
+    ErrTooLongFilename = 5003,
+    /// File opening Error
+    ErrCannotOpenFile = 5004,
     /// Not enough memory for cache to read
-    errFileCachebufferError = 5005,
-    /// File deleting error
-    errCannotDeleteFile = 5006,
+    ErrFileCachebufferError = 5005,
+    /// File deleting Error
+    ErrCannotDeleteFile = 5006,
     /// A file with this handle was closed, or was not opening at all
-    errInvalidFilehandle = 5007,
+    ErrInvalidFilehandle = 5007,
     /// Wrong file handle
-    errWrongFilehandle = 5008,
+    ErrWrongFilehandle = 5008,
     /// The file must be opened for writing
-    errFileNottowrite = 5009,
+    ErrFileNottowrite = 5009,
     /// The file must be opened for reading
-    errFileNottoread = 5010,
+    ErrFileNottoread = 5010,
     /// The file must be opened as a binary one
-    errFileNotbin = 5011,
+    ErrFileNotbin = 5011,
     /// The file must be opened as a text
-    errFileNottxt = 5012,
+    ErrFileNottxt = 5012,
     /// The file must be opened as a text or csv
-    errFileNottxtorcsv = 5013,
+    ErrFileNottxtorcsv = 5013,
     /// The file must be opened as csv
-    errFileNotcsv = 5014,
-    /// File reading error
-    errFileReaderror = 5015,
+    ErrFileNotcsv = 5014,
+    /// File reading Error
+    ErrFileReaderror = 5015,
     /// String size must be specified, because the file is opened as binary
-    errFileBinstringsize = 5016,
+    ErrFileBinstringsize = 5016,
     /// A text file must be for string arrays, for other arrays - binary
-    errIncompatibleFile = 5017,
+    ErrIncompatibleFile = 5017,
     /// This is not a file, this is a directory
-    errFileIsDirectory = 5018,
+    ErrFileIsDirectory = 5018,
     /// File does not exist
-    errFileNotExist = 5019,
+    ErrFileNotExist = 5019,
     /// File can not be rewritten
-    errFileCannotRewrite = 5020,
+    ErrFileCannotRewrite = 5020,
     /// Wrong directory name
-    errWrongDirectoryname = 5021,
+    ErrWrongDirectoryname = 5021,
     /// Directory does not exist
-    errDirectoryNotExist = 5022,
+    ErrDirectoryNotExist = 5022,
     /// This is a file, not a directory
-    errFileIsnotDirectory = 5023,
+    ErrFileIsnotDirectory = 5023,
     /// The directory cannot be removed
-    errCannotDeleteDirectory = 5024,
+    ErrCannotDeleteDirectory = 5024,
     /// Failed to clear the directory (probably one or more files are blocked and removal operation failed)
-    errCannotCleanDirectory = 5025,
+    ErrCannotCleanDirectory = 5025,
     /// Failed to write a resource to a file
-    errFileWriteerror = 5026,
+    ErrFileWriteerror = 5026,
     /// Unable to read the next piece of data from a csv file (FileReadString, FileReadNumber, FileReadDatetime, FileReadBool), since the end of file is reached
-    errFileEndoffile = 5027,
+    ErrFileEndoffile = 5027,
     /// No date in the string
-    errNoStringDate = 5030,
+    ErrNoStringDate = 5030,
     /// Wrong date in the string
-    errWrongStringDate = 5031,
+    ErrWrongStringDate = 5031,
     /// Wrong time in the string
-    errWrongStringTime = 5032,
+    ErrWrongStringTime = 5032,
     /// Error converting string to date
-    errStringTimeError = 5033,
+    ErrStringTimeError = 5033,
     /// Not enough memory for the string
-    errStringOutOfMemory = 5034,
+    ErrStringOutOfMemory = 5034,
     /// The string length is less than expected
-    errStringSmallLen = 5035,
+    ErrStringSmallLen = 5035,
     /// Too large number, more than ulongMax
-    errStringTooBignumber = 5036,
+    ErrStringTooBignumber = 5036,
     /// Invalid format string
-    errWrongFormatstring = 5037,
+    ErrWrongFormatstring = 5037,
     /// Amount of format specifiers more than the parameters
-    errTooManyFormatters = 5038,
+    ErrTooManyFormatters = 5038,
     /// Amount of parameters more than the format specifiers
-    errTooManyParameters = 5039,
+    ErrTooManyParameters = 5039,
     /// Damaged parameter of string type
-    errWrongStringParameter = 5040,
+    ErrWrongStringParameter = 5040,
     /// Position outside the string
-    errStringposOutofrange = 5041,
+    ErrStringposOutofrange = 5041,
     /// 0 added to the string end, a useless operation
-    errStringZeroadded = 5042,
+    ErrStringZeroadded = 5042,
     /// Unknown data type when converting to a string
-    errStringUnknowntype = 5043,
+    ErrStringUnknowntype = 5043,
     /// Damaged string object
-    errWrongStringObject = 5044,
+    ErrWrongStringObject = 5044,
     /// Copying incompatible arrays. String array can be copied only to a string array, and a numeric array - in numeric array only
-    errIncompatibleArrays = 5050,
+    ErrIncompatibleArrays = 5050,
     /// The receiving array is declared as asSeries, and it is of insufficient size
-    errSmallAsseriesArray = 5051,
+    ErrSmallAsseriesArray = 5051,
     /// Too small array, the starting position is outside the array
-    errSmallArray = 5052,
+    ErrSmallArray = 5052,
     /// An array of zero length
-    errZerosizeArray = 5053,
+    ErrZerosizeArray = 5053,
     /// Must be a numeric array
-    errNumberArraysOnly = 5054,
+    ErrNumberArraysOnly = 5054,
     /// Must be a one-dimensional array
-    errOnedimArraysOnly = 5055,
+    ErrOnedimArraysOnly = 5055,
     /// Timeseries cannot be used
-    errSeriesArray = 5056,
+    ErrSeriesArray = 5056,
     /// Must be an array of type double
-    errDoubleArrayOnly = 5057,
+    ErrDoubleArrayOnly = 5057,
     /// Must be an array of type float
-    errFloatArrayOnly = 5058,
+    ErrFloatArrayOnly = 5058,
     /// Must be an array of type long
-    errLongArrayOnly = 5059,
+    ErrLongArrayOnly = 5059,
     /// Must be an array of type int
-    errIntArrayOnly = 5060,
+    ErrIntArrayOnly = 5060,
     /// Must be an array of type short
-    errShortArrayOnly = 5061,
+    ErrShortArrayOnly = 5061,
     /// Must be an array of type char
-    errCharArrayOnly = 5062,
+    ErrCharArrayOnly = 5062,
     /// String array only
-    errStringArrayOnly = 5063,
+    ErrStringArrayOnly = 5063,
     /// Opencl functions are not supported on this computer
-    errOpenclNotSupported = 5100,
-    /// Internal error occurred when running Opencl
-    errOpenclInternal = 5101,
+    ErrOpenclNotSupported = 5100,
+    /// Internal Error occurred when running Opencl
+    ErrOpenclInternal = 5101,
     /// Invalid Opencl handle
-    errOpenclInvalidHandle = 5102,
+    ErrOpenclInvalidHandle = 5102,
     /// Error creating the Opencl context
-    errOpenclContextCreate = 5103,
+    ErrOpenclContextCreate = 5103,
     /// Failed to create a run queue in Opencl
-    errOpenclQueueCreate = 5104,
+    ErrOpenclQueueCreate = 5104,
     /// Error occurred when compiling an Opencl program
-    errOpenclProgramCreate = 5105,
+    ErrOpenclProgramCreate = 5105,
     /// Too long kernel name (Opencl kernel)
-    errOpenclTooLongKernelName = 5106,
+    ErrOpenclTooLongKernelName = 5106,
     /// Error creating an Opencl kernel
-    errOpenclKernelCreate = 5107,
+    ErrOpenclKernelCreate = 5107,
     /// Error occurred when setting parameters for the Opencl kernel
-    errOpenclSetKernelParameter = 5108,
-    /// Opencl program runtime error
-    errOpenclExecute = 5109,
+    ErrOpenclSetKernelParameter = 5108,
+    /// Opencl program runtime Error
+    ErrOpenclExecute = 5109,
     /// Invalid size of the Opencl buffer
-    errOpenclWrongBufferSize = 5110,
+    ErrOpenclWrongBufferSize = 5110,
     /// Invalid offset in the Opencl buffer
-    errOpenclWrongBufferOffset = 5111,
+    ErrOpenclWrongBufferOffset = 5111,
     /// Failed to create an Opencl buffer
-    errOpenclBufferCreate = 5112,
+    ErrOpenclBufferCreate = 5112,
     /// Too many Opencl objects
-    errOpenclTooManyObjects = 5113,
-    /// Opencl device selection error
-    errOpenclSelectdevice = 5114,
-    /// Internal database error
-    errDatabaseInternal = 5120,
+    ErrOpenclTooManyObjects = 5113,
+    /// Opencl device selection Error
+    ErrOpenclSelectdevice = 5114,
+    /// Internal database Error
+    ErrDatabaseInternal = 5120,
     /// Invalid database handle
-    errDatabaseInvalidHandle = 5121,
+    ErrDatabaseInvalidHandle = 5121,
     /// Exceeded the maximum acceptable number of Database objects
-    errDatabaseTooManyObjects = 5122,
-    /// Database connection error
-    errDatabaseConnect = 5123,
-    /// Request execution error
-    errDatabaseExecute = 5124,
-    /// Request generation error
-    errDatabasePrepare = 5125,
+    ErrDatabaseTooManyObjects = 5122,
+    /// Database connection Error
+    ErrDatabaseConnect = 5123,
+    /// Request execution Error
+    ErrDatabaseExecute = 5124,
+    /// Request generation Error
+    ErrDatabasePrepare = 5125,
     /// No more data to read
-    errDatabaseNoMoreData = 5126,
+    ErrDatabaseNoMoreData = 5126,
     /// Failed to move to the next request entry
-    errDatabaseStep = 5127,
+    ErrDatabaseStep = 5127,
     /// Data for reading request results are not ready yet
-    errDatabaseNotReady = 5128,
+    ErrDatabaseNotReady = 5128,
     /// Failed to auto substitute parameters to an sql request
-    errDatabaseBindParameters = 5129,
+    ErrDatabaseBindParameters = 5129,
     /// Invalid url
-    errWebrequestInvalidAddress = 5200,
+    ErrWebrequestInvalidAddress = 5200,
     /// Failed to connect to specified url
-    errWebrequestConnectFailed = 5201,
+    ErrWebrequestConnectFailed = 5201,
     /// Timeout exceeded
-    errWebrequestTimeout = 5202,
+    ErrWebrequestTimeout = 5202,
     /// http request failed
-    errWebrequestRequestFailed = 5203,
+    ErrWebrequestRequestFailed = 5203,
     /// Invalid socket handle passed to function
-    errNetsocketInvalidhandle = 5270,
+    ErrNetsocketInvalidhandle = 5270,
     /// Too many open sockets (max 128)
-    errNetsocketTooManyOpened = 5271,
+    ErrNetsocketTooManyOpened = 5271,
     /// Failed to connect to remote host
-    errNetsocketCannotConnect = 5272,
+    ErrNetsocketCannotConnect = 5272,
     /// Failed to send/receive data from socket
-    errNetsocketIoError = 5273,
+    ErrNetsocketIoError = 5273,
     /// Failed to establish secure connection (tls Handshake)
-    errNetsocketHandshakeFailed = 5274,
+    ErrNetsocketHandshakeFailed = 5274,
     /// No data on certificate protecting the connection
-    errNetsocketNoCertificate = 5275,
+    ErrNetsocketNoCertificate = 5275,
     /// A custom symbol must be specified
-    errNotCustomSymbol = 5300,
+    ErrNotCustomSymbol = 5300,
     /// The name of the custom symbol is invalid. The symbol name can only contain Latin letters without punctuation, spaces or special characters (may only contain ".", "_", "&" and "#").\n    It is not recommended to use characters <, >, :, ", /,\, |, ?, *.
-    errCustomSymbolWrongName = 5301,
+    ErrCustomSymbolWrongName = 5301,
     /// The name of the custom symbol is too long. The length of the symbol name must not exceed 32 characters including the ending 0 character
-    errCustomSymbolNameLong = 5302,
+    ErrCustomSymbolNameLong = 5302,
     /// The path of the custom symbol is too long. The path length should not exceed 128 characters including "Custom\\", the symbol name, group separators and the ending 0
-    errCustomSymbolPathLong = 5303,
+    ErrCustomSymbolPathLong = 5303,
     /// A custom symbol with the same name already exists
-    errCustomSymbolExist = 5304,
+    ErrCustomSymbolExist = 5304,
     /// Error occurred while creating, deleting or changing the custom symbol
-    errCustomSymbolError = 5305,
+    ErrCustomSymbolError = 5305,
     /// You are trying to delete a custom symbol selected in Market Watch
-    errCustomSymbolSelected = 5306,
+    ErrCustomSymbolSelected = 5306,
     /// An invalid custom symbol property
-    errCustomSymbolPropertyWrong = 5307,
+    ErrCustomSymbolPropertyWrong = 5307,
     /// A wrong parameter while setting the property of a custom symbol
-    errCustomSymbolParameterError = 5308,
+    ErrCustomSymbolParameterError = 5308,
     /// A too long string parameter while setting the property of a custom symbol
-    errCustomSymbolParameterLong = 5309,
+    ErrCustomSymbolParameterLong = 5309,
     /// Ticks in the array are not arranged in the order of time
-    errCustomTicksWrongOrder = 5310,
+    ErrCustomTicksWrongOrder = 5310,
     /// Array size is insufficient for receiving descriptions of all values
-    errCalendarMoreData = 5400,
+    ErrCalendarMoreData = 5400,
     /// Request time limit exceeded
-    errCalendarTimeout = 5401,
+    ErrCalendarTimeout = 5401,
     /// Country is not found
-    errCalendarNoData = 5402,
-    /// Generic error
-    errDatabaseError   = 5601,
-    /// sqlite internal logic error
-    errSqLiteDatabaseInternal = 5602,
+    ErrCalendarNoData = 5402,
+    /// Generic Error
+    ErrDatabaseError   = 5601,
+    /// sqlite internal logic Error
+    ErrSqLiteDatabaseInternal = 5602,
     /// Access denied
-    errDatabasePerm = 5603,
+    ErrDatabasePerm = 5603,
     /// Callback routine requested abort
-    errDatabaseAbort = 5604,
+    ErrDatabaseAbort = 5604,
     /// Database file locked
-    errDatabaseBusy = 5605,
+    ErrDatabaseBusy = 5605,
     /// Database table locked
-    errDatabaseLocked = 5606,
+    ErrDatabaseLocked = 5606,
     /// Insufficient memory for completing operation
-    errDatabaseNomem = 5607,
+    ErrDatabaseNomem = 5607,
     /// Attempt to write to readonly database
-    errDatabaseReadonly = 5608,
+    ErrDatabaseReadonly = 5608,
     /// Operation terminated by sqlite3_interrupt()
-    errDatabaseInterrupt = 5609,
-    /// Disk I/O error
-    errDatabaseIoerr = 5610,
+    ErrDatabaseInterrupt = 5609,
+    /// Disk I/O Error
+    ErrDatabaseIoerr = 5610,
     /// Database disk image corrupted
-    errDatabaseCorrupt = 5611,
+    ErrDatabaseCorrupt = 5611,
     /// Unknown operation code in sqlite3_file_control()
-    errDatabaseNotfound = 5612,
+    ErrDatabaseNotfound = 5612,
     /// Insertion failed because database is full
-    errDatabaseFull = 5613,
+    ErrDatabaseFull = 5613,
     /// Unable to open the database file
-    errDatabaseCantopen = 5614,
-    /// Database lock protocol error
-    errDatabaseProtocol = 5615,
+    ErrDatabaseCantopen = 5614,
+    /// Database lock protocol Error
+    ErrDatabaseProtocol = 5615,
     /// Internal use only
-    errDatabaseEmpty = 5616,
+    ErrDatabaseEmpty = 5616,
     /// Database schema changed
-    errDatabaseSchema = 5617,
+    ErrDatabaseSchema = 5617,
     /// String or blob exceeds size limit
-    errDatabaseToobig = 5618,
+    ErrDatabaseToobig = 5618,
     /// Abort due to constraint violation
-    errDatabaseConstraint = 5619,
+    ErrDatabaseConstraint = 5619,
     /// Data type mismatch
-    errDatabaseMismatch = 5620,
+    ErrDatabaseMismatch = 5620,
     /// Library used incorrectly
-    errDatabaseMisuse = 5621,
+    ErrDatabaseMisuse = 5621,
     /// Uses os features not supported on host
-    errDatabaseNolfs = 5622,
+    ErrDatabaseNolfs = 5622,
     /// Authorization denied
-    errDatabaseAuth = 5623,
+    ErrDatabaseAuth = 5623,
     /// Not used
-    errDatabaseFormat = 5624,
-    /// Bind parameter error, incorrect index
-    errDatabaseRange = 5625,
+    ErrDatabaseFormat = 5624,
+    /// Bind parameter Error, incorrect index
+    ErrDatabaseRange = 5625,
     /// File opened that is not database file
-    errDatabaseNotadb = 5626,
-    /// User defined errors start with this code
-    errUserErrorFirst = 65536,
+    ErrDatabaseNotadb = 5626,
+    /// User defined Errors start with this code
+    ErrUserErrorFirst = 65536,
 
     /// [super::MqlTradeResult]'s `retcode` had an unknown number. See the MQL5 site for an update
-    UnknownErrorcode = u32::MAX,
+    UnknownErrorCode = u32::MAX,
 }
 impl Into<u32> for Mt5ErrorCodes {
     fn into(self) -> u32 {
@@ -486,7 +486,7 @@ impl From<u32> for Mt5ErrorCodes {
         if let Some(variant) = Self::from_repr(variant_value) {
             return variant;
         }
-        Self::UnknownErrorcode
+        Self::UnknownErrorCode
     }
 }
 
@@ -508,7 +508,7 @@ pub enum Mt5TradeServerReturnCodes {
     TradeRetcodeDone = 10009,
     /// Only part of the request was completed
     TradeRetcodeDonePartial = 10010,
-    /// Request processing error
+    /// Request processing Error
     TradeRetcodeError = 10011,
     /// Request canceled by timeout
     TradeRetcodeTimeout = 10012,
@@ -566,7 +566,7 @@ pub enum Mt5TradeServerReturnCodes {
     ///   - when attempting to close a position with an opposite one, while close orders for the position already exist
     ///   - when attempting to fully or partially close a position if the total volume of the already present close orders and the newly placed one exceeds the current position volume
     TradeRetcodeCloseOrderExist = 10039,
-    /// The number of open positions simultaneously present on an account can be limited by the server settings. After a limit is reached, the server returns the TradeRetcodeLimitPositions error when attempting to place an order.
+    /// The number of open positions simultaneously present on an account can be limited by the server settings. After a limit is reached, the server returns the TradeRetcodeLimitPositions Error when attempting to place an order.
     /// The limitation operates differently depending on the position accounting type:
     ///   - Netting — number of open positions is considered. When a limit is reached, the platform does not let placing new orders whose execution may increase the number of open positions. In fact, the platform allows placing
     ///     orders only for the symbolsthat already have open positions. The current pending orders are not considered since their execution may lead to changes in the current positions but it cannot increase their number.
