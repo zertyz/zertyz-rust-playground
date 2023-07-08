@@ -2,6 +2,7 @@ use super::{
     types::*,
     mql_rust_enum,
     mq5_lib::types::MQ5StringRef,
+    comms,
 };
 use std::collections::VecDeque;
 use std::fmt::Debug;
@@ -21,9 +22,9 @@ const MAX_HANDLES: i32 = 128;
 // Runtime (static) data
 ////////////////////////
 
-static HANDLE_COUNT: AtomicI32 = AtomicI32::new(0);
+pub static HANDLE_COUNT: AtomicI32 = AtomicI32::new(0);
 /// Keeps track of `handle_id`s conceived to clients (MT5 scripts)
-static mut HANDLES: Vec<Handle> = Vec::new();
+pub static mut HANDLES: Vec<Handle> = Vec::new();
 /// Guard for writes to HANDLES (reads are unguarded)
 static HANDLES_GUARD: RawMutex = RawMutex::INIT;
 /// If present, indicates any fatal errors that should cause MQL Programs to quit in order to avoid undefined behavior
@@ -33,11 +34,15 @@ static mut FATAL_ERROR: Option<String> = None;
 #[no_mangle]
 pub extern "system" fn DllMain(_: *const (), fdw_reason: u32, _: *const ()) -> u32 {
     match fdw_reason {
-        0 => warn!("DllMain() called for reason 0: DLL_PROCESS_DETACH -- the DLL is being completely unloaded for the process is about to cleanly exit"),
+        0 => {
+            warn!("DllMain() called for reason 0: DLL_PROCESS_DETACH -- the DLL is being completely unloaded for the process is about to cleanly exit");
+            comms::shutdown_external_connector_server();
+        },
         1 => {
             init(Some("rust_mt5_bridge.log"));
             warn!("'rust_mt5_bridge.dll' was loaded and started -- allowing up to {MAX_HANDLES} handles (Expert Advisors, Indicators, Testers, etc.) to be created -- removing them won't free resources (restarting Metatrader will)");
             warn!("DllMain() called for reason 1: DLL_PROCESS_ATTACH -- DLL was loaded!");
+            comms::start_external_connector_server();
         },
         2 => debug!("DllMain() called for reason 2: DLL_THREAD_ATTACH -- host process just created another thread"),
         3 => debug!("DllMain() called for reason 3: DLL_THREAD_DETACH -- host process just ended one of its threads"),
